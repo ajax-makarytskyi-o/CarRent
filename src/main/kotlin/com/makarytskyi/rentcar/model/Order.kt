@@ -3,14 +3,14 @@ package com.makarytskyi.rentcar.model
 import com.makarytskyi.rentcar.dto.order.OrderResponse
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.Date
 
 data class Order(
-    val id: String?,
+    val id: String? = null,
     val carId: String?,
     val userId: String?,
     val from: Date?,
-    val to: Date?
+    val to: Date?,
 ) {
 
     fun toResponse(carPrice: Int?): OrderResponse {
@@ -22,12 +22,12 @@ data class Order(
         val calculatedPrice = carPrice?.let { daysBetween.times(it) } ?: 0
 
         return OrderResponse(
-            id,
-            carId ?: throw IllegalArgumentException("Car in order is null"),
-            userId ?: throw IllegalArgumentException("User in order is null"),
-            from ?: throw IllegalArgumentException("Start time in order is null"),
-            to ?: throw IllegalArgumentException("End time in order is null"),
-            price = calculatedPrice
+            id ?: "none",
+            carId ?: "none",
+            userId ?: "none",
+            from,
+            to,
+            price = calculatedPrice,
         )
     }
 }

@@ -1,8 +1,11 @@
 package com.makarytskyi.rentcar.dto.order
 
-import java.util.*
+import jakarta.validation.constraints.NotNull
+import java.util.Date
 
 data class UpdateOrderRequest(
-    val from: Date?,
-    val to: Date?
+    @field:NotNull
+    val from: Date,
+    @field:NotNull
+    val to: Date,
 )

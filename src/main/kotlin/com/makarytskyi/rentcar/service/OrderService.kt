@@ -1,6 +1,6 @@
-package com.makarytskyi.rentcar.service.impl
+package com.makarytskyi.rentcar.service
 
-import com.makarytskyi.rentcar.dto.order.OrderRequest
+import com.makarytskyi.rentcar.dto.order.CreateOrderRequest
 import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
 import com.makarytskyi.rentcar.exception.OrderNotFoundException
@@ -12,57 +12,55 @@ import org.springframework.stereotype.Service
 
 @Service
 class OrderService(
-    val orderRepository: OrderRepository,
-    val carRepository: CarRepository,
-    val userRepository: UserRepository
+    private val orderRepository: OrderRepository,
+    private val carRepository: CarRepository,
+    private val userRepository: UserRepository
 ) {
 
-    fun findById(id: String?): OrderResponse {
-        val order = orderRepository.findById(id)
+    fun findById(id: String): OrderResponse =
+        orderRepository.findById(id)
+            ?.let { order -> order.toResponse(order.carId?.let { carRepository.findById(it)?.price }) }
             ?: throw OrderNotFoundException("Order with id $id is not found")
 
-        return order.toResponse(carRepository.findById(order.carId)?.price)
-    }
+    fun findAll(): List<OrderResponse> =
+        orderRepository.findAll().map { it.toResponse(it.carId?.let { carId -> carRepository.findById(carId)?.price }) }
+            .toList()
 
-    fun findAll(): List<OrderResponse> {
-        val orders = orderRepository.findAll()
-        return orders.map { it.toResponse(carRepository.findById(it.carId)?.price) }.toList()
-    }
+    fun save(createOrderRequest: CreateOrderRequest): OrderResponse {
+        if (!createOrderRequest.to.after(createOrderRequest.from))
+            throw IllegalArgumentException("Start date must be before end date")
 
-    fun save(orderRequest: OrderRequest): OrderResponse {
-        val order: Order = orderRequest.toEntity()
+        userRepository.findById(createOrderRequest.userId)
+            ?: throw IllegalArgumentException("User with id ${createOrderRequest.userId} is not found")
 
-        if (userRepository.findById(order.userId) == null)
-            throw IllegalArgumentException("User with id ${order.userId} is not found")
+        carRepository.findById(createOrderRequest.carId)
+            ?: throw IllegalArgumentException("Car with id ${createOrderRequest.carId} is not found")
 
-        if (carRepository.findById(order.carId) == null)
-            throw IllegalArgumentException("Car with id ${order.carId} is not found")
+        val carOrders: List<Order> = orderRepository.findByCarId(createOrderRequest.carId)
 
-        val carOrders: List<Order> = order.carId?.let { orderRepository.findByCarId(it) }
-            ?: throw IllegalArgumentException("Car in order must be set")
-
-        if (carOrders.any { it.from?.before(it.to) == true && it.to?.after(it.from) == true })
+        if (carOrders.any { it.from?.before(createOrderRequest.to) == true && it.to?.after(createOrderRequest.from) == true })
             throw IllegalArgumentException("Order on these dates is already exist")
 
-        val carPrice = carRepository.findById(order.carId)?.price ?: 0
+        val carPrice = carRepository.findById(createOrderRequest.carId)?.price
 
-        return orderRepository.save(order).toResponse(carPrice)
+        return orderRepository.save(createOrderRequest.toEntity()).toResponse(carPrice)
     }
 
-    fun deleteById(id: String) {
-        if (orderRepository.findById(id) != null)
-            orderRepository.deleteById(id)
-        else
-            throw OrderNotFoundException("Order with id $id is not found")
+    fun deleteById(id: String) = orderRepository.findById(id)?.let { orderRepository.deleteById(id) }
+        ?: throw OrderNotFoundException("Order with id $id is not found")
+
+
+    fun findByUserId(userId: String): List<OrderResponse> = orderRepository.findByUserId(userId).map {
+        it.toResponse(it.carId?.let { carId -> carRepository.findById(carId)?.price })
     }
 
-    fun findByUserId(userId: String): List<OrderResponse> = orderRepository.findByUserId(userId).map { it.toResponse(carRepository.findById(it.carId)?.price) }
-
-    fun findByCarId(carId: String): List<OrderResponse> = orderRepository.findByCarId(carId).map { it.toResponse(carRepository.findById(it.carId)?.price) }
+    fun findByCarId(carId: String): List<OrderResponse> = orderRepository.findByCarId(carId).map {
+        it.toResponse(it.carId?.let { carId -> carRepository.findById(carId)?.price })
+    }
 
     fun update(id: String, orderRequest: UpdateOrderRequest): OrderResponse {
-        if (orderRequest.to?.after(orderRequest.from) == false)
-            throw IllegalArgumentException("Dates must be non-null. Start date must be before end date")
+        if (!orderRequest.to.after(orderRequest.from))
+            throw IllegalArgumentException("Start date must be before end date")
 
         val order: Order = orderRepository.findById(id) ?: throw OrderNotFoundException("Order with $id is not found")
 
@@ -72,8 +70,9 @@ class OrderService(
         if (carOrders.any { it.from?.before(orderRequest.to) == true && it.to?.after(orderRequest.from) == true })
             throw IllegalArgumentException("Order on these dates is already exist")
 
-        val carPrice = carRepository.findById(order.carId)?.price ?: 0
+        val carPrice = carRepository.findById(order.carId)?.price
 
-        return orderRepository.updateDates(id, orderRequest.from, orderRequest.to)?.toResponse(carPrice) ?: throw OrderNotFoundException("Order with $id is not found")
+        return orderRepository.updateDates(id, orderRequest.from, orderRequest.to)?.toResponse(carPrice)
+            ?: throw OrderNotFoundException("Order with $id is not found")
     }
 }

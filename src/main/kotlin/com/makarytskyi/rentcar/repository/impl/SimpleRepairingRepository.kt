@@ -1,14 +1,10 @@
 package com.makarytskyi.rentcar.repository.impl
 
-import com.makarytskyi.rentcar.model.Car
 import com.makarytskyi.rentcar.model.Repairing
 import com.makarytskyi.rentcar.model.Repairing.RepairingStatus
 import com.makarytskyi.rentcar.repository.RepairingRepository
 import org.bson.types.ObjectId
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
-import java.util.*
-import kotlin.collections.HashMap
 
 @Repository
 class SimpleRepairingRepository: RepairingRepository {
@@ -16,14 +12,7 @@ class SimpleRepairingRepository: RepairingRepository {
 
     override fun save(repairing: Repairing): Repairing {
         val id = ObjectId().toString()
-        val savedRepairing = Repairing(
-            id,
-            repairing.carId,
-            repairing.date,
-            repairing.price,
-            repairing.status
-        )
-
+        val savedRepairing = repairing.copy(id = id)
         map[id] = savedRepairing
         return savedRepairing
     }
@@ -32,21 +21,15 @@ class SimpleRepairingRepository: RepairingRepository {
 
     override fun findAll(): List<Repairing> = map.values.toList()
 
-    override fun deleteById(id: String) = map.remove(id)
+    override fun deleteById(id: String) {
+        map.remove(id)
+    }
 
     override fun update(id: String, repairing: Repairing): Repairing? {
         val oldRepairing: Repairing? = findById(id)
 
-        if (oldRepairing == null) {
-            return null
-        } else {
-            val updatedCar: Repairing = Repairing(
-                id,
-                carId = repairing.carId ?: oldRepairing.carId,
-                date = repairing.date ?: oldRepairing.date,
-                price = repairing.price ?: oldRepairing.price,
-                status = repairing.status ?: oldRepairing.status
-            )
+        return oldRepairing?.let {
+            val updatedCar = oldRepairing.copy(price = repairing.price, status = repairing.status)
             map[id] = updatedCar
             return updatedCar
         }
@@ -59,16 +42,8 @@ class SimpleRepairingRepository: RepairingRepository {
     override fun updatePrice(id: String, price: Int): Repairing? {
         val oldRepairing: Repairing? = findById(id)
 
-        if (oldRepairing == null) {
-            return null
-        } else {
-            val updatedRepairing = Repairing(
-                id,
-                oldRepairing.carId,
-                oldRepairing.date,
-                price,
-                oldRepairing.status
-            )
+        return oldRepairing?.let {
+            val updatedRepairing = oldRepairing.copy(price = price)
             map[id] = updatedRepairing
             return updatedRepairing
         }
@@ -77,16 +52,8 @@ class SimpleRepairingRepository: RepairingRepository {
     override fun updateStatus(id: String, status: RepairingStatus): Repairing? {
         val oldRepairing: Repairing? = findById(id)
 
-        if (oldRepairing == null) {
-            return null
-        } else {
-            val updatedRepairing = Repairing(
-                id,
-                oldRepairing.carId,
-                oldRepairing.date,
-                oldRepairing.price,
-                status
-            )
+        return oldRepairing?.let {
+            val updatedRepairing = oldRepairing.copy(status = status)
             map[id] = updatedRepairing
             return updatedRepairing
         }

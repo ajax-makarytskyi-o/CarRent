@@ -12,7 +12,7 @@ interface RepairingRepository {
 
     fun findAll(): List<Repairing>
 
-    fun deleteById(id: String): Repairing?
+    fun deleteById(id: String)
 
     fun update(id: String, repairing: Repairing): Repairing?
 

@@ -6,11 +6,11 @@ import org.springframework.stereotype.Repository
 @Repository
 interface CarRepository {
 
-    fun findById(id: String?): Car?
+    fun findById(id: String): Car?
 
     fun save(car: Car): Car
 
-    fun deleteById(id: String): Car?
+    fun deleteById(id: String)
 
     fun findAll(): List<Car>
 
@@ -22,7 +22,5 @@ interface CarRepository {
 
     fun findByPlate(plate: String?): Car?
 
-    fun updatePrice(id: String, price: Int): Car?
-
-    fun updateColor(id: String, color: Car.CarColor): Car?
+    fun update(id: String, price: Int, color: Car.CarColor): Car?
 }

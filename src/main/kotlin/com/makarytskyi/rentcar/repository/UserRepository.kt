@@ -8,11 +8,11 @@ interface UserRepository {
 
     fun save(user: User): User?
 
-    fun findById(id: String?): User?
+    fun findById(id: String): User?
 
     fun findAll(): List<User>
 
-    fun deleteById(id: String): User?
+    fun deleteById(id: String)
 
     fun update(id: String, user: User): User?
 

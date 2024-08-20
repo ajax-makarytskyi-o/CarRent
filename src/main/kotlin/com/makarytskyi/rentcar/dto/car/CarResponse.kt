@@ -4,7 +4,7 @@ import com.makarytskyi.rentcar.model.Car
 
 data class CarResponse(
     val id: String,
-    val mark: String,
+    val brand: String,
     val model: String,
     val price: Int,
     val year: Int?,

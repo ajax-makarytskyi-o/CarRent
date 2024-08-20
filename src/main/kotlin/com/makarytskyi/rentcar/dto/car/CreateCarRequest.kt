@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size
 data class CreateCarRequest(
     @field:NotBlank
     @field:Size(max = 30)
-    val mark: String,
+    val brand: String,
     @field:NotBlank
     @field:Size(max = 30)
     val model: String?,
@@ -25,7 +25,7 @@ data class CreateCarRequest(
 
     companion object {
         fun toEntity(carRequest: CreateCarRequest): Car = Car(
-            mark = carRequest.mark,
+            brand = carRequest.brand,
             model = carRequest.model,
             price = carRequest.price,
             year = carRequest.year,

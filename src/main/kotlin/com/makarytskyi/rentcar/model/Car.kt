@@ -4,7 +4,7 @@ import com.makarytskyi.rentcar.dto.car.CarResponse
 
 data class Car(
     val id: String? = null,
-    val mark: String?,
+    val brand: String?,
     val model: String?,
     val price: Int?,
     val year: Int?,
@@ -19,7 +19,7 @@ data class Car(
     companion object {
         fun toResponse(car: Car): CarResponse = CarResponse(
             car.id!!,
-            car.mark ?: "none",
+            car.brand ?: "none",
             car.model ?: "none",
             car.price ?: 0,
             car.year,

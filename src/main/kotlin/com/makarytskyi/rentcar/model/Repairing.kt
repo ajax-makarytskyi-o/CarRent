@@ -15,11 +15,13 @@ data class Repairing(
         PENDING, IN_PROGRESS, COMPLETED;
     }
 
-    fun toResponse(): RepairingResponse = RepairingResponse(
-        id ?: "none",
-        carId ?: "none",
-        date,
-        price,
-        status,
-    )
+    companion object {
+        fun toResponse(repairing: Repairing): RepairingResponse = RepairingResponse(
+            repairing.id!!,
+            repairing.carId ?: "none",
+            repairing.date,
+            repairing.price,
+            repairing.status,
+        )
+    }
 }

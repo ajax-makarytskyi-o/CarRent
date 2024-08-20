@@ -23,12 +23,14 @@ data class CreateCarRequest(
     val color: Car.CarColor?,
 ) {
 
-    fun toEntity(): Car = Car(
-        mark = mark,
-        model = model,
-        price = price,
-        year = year,
-        plate = plate,
-        color = color,
-    )
+    companion object {
+        fun toEntity(carRequest: CreateCarRequest): Car = Car(
+            mark = carRequest.mark,
+            model = carRequest.model,
+            price = carRequest.price,
+            year = carRequest.year,
+            plate = carRequest.plate,
+            color = carRequest.color,
+        )
+    }
 }

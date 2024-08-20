@@ -13,10 +13,12 @@ data class UpdateRepairingRequest(
     val status: RepairingStatus,
 ) {
 
-    fun toEntity(): Repairing = Repairing(
-        carId = null,
-        date = null,
-        price = price,
-        status = status,
-    )
+    companion object {
+        fun toEntity(repairingRequest: UpdateRepairingRequest): Repairing = Repairing(
+            carId = null,
+            date = null,
+            price = repairingRequest.price,
+            status = repairingRequest.status,
+        )
+    }
 }

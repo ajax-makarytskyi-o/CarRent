@@ -16,13 +16,15 @@ data class Car(
         RED, GREEN, BLUE, BLACK, WHITE, GREY, YELLOW;
     }
 
-    fun toResponse(): CarResponse = CarResponse(
-        id ?: "none",
-        mark ?: "none",
-        model ?: "none",
-        price ?: 0,
-        year,
-        plate ?: "none",
-        color,
-    )
+    companion object {
+        fun toResponse(car: Car): CarResponse = CarResponse(
+            car.id!!,
+            car.mark ?: "none",
+            car.model ?: "none",
+            car.price ?: 0,
+            car.year,
+            car.plate ?: "none",
+            car.color,
+        )
+    }
 }

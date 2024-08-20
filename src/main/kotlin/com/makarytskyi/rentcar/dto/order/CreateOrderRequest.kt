@@ -16,10 +16,12 @@ data class CreateOrderRequest(
     val to: Date,
 ) {
 
-    fun toEntity() = Order(
-        carId = carId,
-        userId = userId,
-        from = from,
-        to = to,
-    )
+    companion object {
+        fun toEntity(orderRequest: CreateOrderRequest) = Order(
+            carId = orderRequest.carId,
+            userId = orderRequest.userId,
+            from = orderRequest.from,
+            to = orderRequest.to,
+        )
+    }
 }

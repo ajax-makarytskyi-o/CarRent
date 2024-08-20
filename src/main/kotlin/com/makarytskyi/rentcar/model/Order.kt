@@ -13,21 +13,23 @@ data class Order(
     val to: Date?,
 ) {
 
-    fun toResponse(carPrice: Int?): OrderResponse {
-        val daysBetween = ChronoUnit.DAYS.between(
-            from?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate(),
-            to?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
-        )
+    companion object {
+        fun toResponse(order: Order, carPrice: Int?): OrderResponse {
+            val daysBetween = ChronoUnit.DAYS.between(
+                order.from?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate(),
+                order.to?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
+            )
 
-        val calculatedPrice = carPrice?.let { daysBetween.times(it) } ?: 0
+            val calculatedPrice = carPrice?.let { daysBetween.times(it) } ?: 0
 
-        return OrderResponse(
-            id ?: "none",
-            carId ?: "none",
-            userId ?: "none",
-            from,
-            to,
-            price = calculatedPrice,
-        )
+            return OrderResponse(
+                order.id!!,
+                order.carId ?: "none",
+                order.userId ?: "none",
+                order.from,
+                order.to,
+                price = calculatedPrice,
+            )
+        }
     }
 }

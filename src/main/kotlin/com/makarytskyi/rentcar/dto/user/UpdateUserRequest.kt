@@ -11,11 +11,12 @@ data class UpdateUserRequest(
     val phoneNumber: String?,
     val city: String?,
 ) {
-
-    fun toEntity(): User = User(
-        name = name,
-        email = null,
-        phoneNumber = phoneNumber,
-        city = city,
-    )
+    companion object {
+        fun toEntity(userRequest: UpdateUserRequest): User = User(
+            name = userRequest.name,
+            email = null,
+            phoneNumber = userRequest.phoneNumber,
+            city = userRequest.city,
+        )
+    }
 }

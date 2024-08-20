@@ -10,11 +10,13 @@ data class User(
     val city: String?,
 ) {
 
-    fun toResponse(): UserResponse = UserResponse(
-        id ?: "none",
-        name ?: "none",
-        email ?: "none",
-        phoneNumber ?: "none",
-        city ?: "none",
-    )
+    companion object {
+        fun toResponse(user: User): UserResponse = UserResponse(
+            user.id!!,
+            user.name ?: "none",
+            user.email ?: "none",
+            user.phoneNumber ?: "none",
+            user.city ?: "none",
+        )
+    }
 }

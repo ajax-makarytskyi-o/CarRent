@@ -16,10 +16,12 @@ data class CreateUserRequest(
     val city: String?,
 ) {
 
-    fun toEntity(): User = User(
-        name = name,
-        email = email,
-        phoneNumber = phoneNumber,
-        city = city,
-    )
+    companion object {
+        fun toEntity(userRequest: CreateUserRequest): User = User(
+            name = userRequest.name,
+            email = userRequest.email,
+            phoneNumber = userRequest.phoneNumber,
+            city = userRequest.city,
+        )
+    }
 }

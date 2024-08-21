@@ -11,9 +11,9 @@ data class UpdateOrderRequest(
 
     companion object {
         fun toEntity(orderRequest: UpdateOrderRequest) = Order(
-            null,
-            null,
-            null,
+            id = null,
+            carId = null,
+            userId = null,
             orderRequest.from,
             orderRequest.to,
         )

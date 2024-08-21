@@ -11,7 +11,7 @@ data class CreateUserRequest(
     @field:NotBlank
     @field:Pattern(regexp = "^[a-zA-Z0-9._]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
     val email: String,
-    @field:Size(max = 15)
+    @field:Pattern(regexp = "\\d{4,15}")
     val phoneNumber: String?,
     val city: String?,
 ) {

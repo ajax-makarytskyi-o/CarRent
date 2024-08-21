@@ -1,11 +1,21 @@
 package com.makarytskyi.rentcar.dto.order
 
+import com.makarytskyi.rentcar.model.Order
 import jakarta.validation.constraints.NotNull
 import java.util.Date
 
 data class UpdateOrderRequest(
-    @field:NotNull
-    val from: Date,
-    @field:NotNull
-    val to: Date,
-)
+    val from: Date?,
+    val to: Date?,
+) {
+
+    companion object {
+        fun toEntity(orderRequest: UpdateOrderRequest) = Order(
+            null,
+            null,
+            null,
+            orderRequest.from,
+            orderRequest.to,
+        )
+    }
+}

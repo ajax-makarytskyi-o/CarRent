@@ -7,10 +7,8 @@ import jakarta.validation.constraints.NotNull
 
 data class UpdateRepairingRequest(
     @field:Min(0)
-    @field:NotNull
-    val price: Int,
-    @field:NotNull
-    val status: RepairingStatus,
+    val price: Int?,
+    val status: RepairingStatus?,
 ) {
 
     companion object {

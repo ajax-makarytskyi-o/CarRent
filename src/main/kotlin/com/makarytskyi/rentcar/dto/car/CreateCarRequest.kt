@@ -12,8 +12,7 @@ data class CreateCarRequest(
     val brand: String,
     @field:NotBlank
     @field:Size(max = 30)
-    val model: String?,
-    @field:NotNull
+    val model: String,
     @field:Min(0)
     val price: Int,
     val year: Int?,

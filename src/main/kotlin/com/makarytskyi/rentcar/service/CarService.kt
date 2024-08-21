@@ -3,33 +3,46 @@ package com.makarytskyi.rentcar.service
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
+import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
 import com.makarytskyi.rentcar.exception.CarNotFoundException
-import com.makarytskyi.rentcar.repository.impl.SimpleCarRepository
+import com.makarytskyi.rentcar.model.Car
+import com.makarytskyi.rentcar.repository.impl.InMemoryCarRepository
 import org.springframework.stereotype.Service
 
 @Service
-class CarService(private val repository: SimpleCarRepository) {
+class CarService(private val repository: InMemoryCarRepository) {
 
-    fun findById(id: String): CarResponse = repository.findById(id)?.toResponse()
+    fun getById(id: String): CarResponse = repository.findById(id)?.let { Car.toResponse(it) }
         ?: throw CarNotFoundException("Car with id $id is not found")
 
-    fun findAll(): List<CarResponse> = repository.findAll().map { it.toResponse() }
+    fun findAll(): List<CarResponse> = repository.findAll().map { Car.toResponse(it) }
 
-    fun save(car: CreateCarRequest): CarResponse = repository.findByPlate(car.plate)
-        ?.let { throw IllegalArgumentException("Car with plate ${car.plate} is already exist") }
-        ?: repository.save(car.toEntity()).toResponse()
+    fun create(carRequest: CreateCarRequest): CarResponse {
+        validatePlate(carRequest.plate)
+        return Car.toResponse(repository.create(CreateCarRequest.toEntity(carRequest)))
+    }
 
-    fun deleteById(id: String) {
-        repository.findById(id)?.let { repository.deleteById(id) }
+    fun deleteById(id: String) = repository.deleteById(id)
+
+    fun findAllByBrand(brand: String): List<CarResponse> = repository.findAllByBrand(brand).map { Car.toResponse(it) }
+
+    fun findAllByBrandAndModel(brand: String, model: String): List<CarResponse> = repository.findAllByBrandAndModel(brand, model).map { Car.toResponse(it) }
+
+    fun update(id: String, carRequest: UpdateCarRequest): CarResponse {
+        validateNotEmptyRequest(carRequest)
+
+        return repository.update(id, UpdateCarRequest.toEntity(carRequest))?.let { Car.toResponse(it) }
             ?: throw CarNotFoundException("Car with id $id is not found")
     }
 
-    fun findAllByMark(mark: String): List<CarResponse> = repository.findAllByMark(mark).map { it.toResponse() }
-
-    fun update(id: String, carRequest: UpdateCarRequest): CarResponse =
-        repository.findById(id)?.let { repository.update(id, carRequest.price, carRequest.color) }?.toResponse()
-            ?: throw CarNotFoundException("Car with id $id is not found")
-
-    fun findByPlate(plate: String): CarResponse = repository.findByPlate(plate)?.toResponse()
+    fun getByPlate(plate: String): CarResponse = repository.findByPlate(plate)?.let { Car.toResponse(it) }
         ?: throw CarNotFoundException("Car with plate $plate is not found")
+
+    private fun validatePlate(plate: String) {
+        require(repository.findByPlate(plate) == null) { "Car with plate $plate is already exist" }
+    }
+
+    private fun validateNotEmptyRequest(request: UpdateCarRequest) {
+        require(request.price != null || request.color != null) { "Update request is empty" }
+    }
 }

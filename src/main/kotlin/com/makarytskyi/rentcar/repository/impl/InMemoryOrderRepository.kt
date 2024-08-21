@@ -7,15 +7,15 @@ import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
 
 @Repository
-class SimpleOrderRepository : OrderRepository {
+class InMemoryOrderRepository : OrderRepository {
     val map: MutableMap<String, Order> = HashMap()
 
     override fun findById(id: String): Order? = map[id]
 
     override fun findAll(): List<Order> = map.values.toList()
 
-    override fun save(order: Order): Order {
-        val id = ObjectId().toString()
+    override fun create(order: Order): Order {
+        val id = ObjectId().toHexString()
         val savedOrder = order.copy(id = id)
         map[id] = savedOrder
         return savedOrder
@@ -31,11 +31,14 @@ class SimpleOrderRepository : OrderRepository {
 
     override fun findByCarId(carId: String): List<Order> = map.values.filter { it.carId == carId }
 
-    override fun updateDates(id: String, from: Date?, to: Date?): Order? {
+    override fun update(id: String, order: Order): Order? {
         val oldOrder: Order? = findById(id)
 
         return oldOrder?.let {
-            val updatedOrder = oldOrder.copy(id = id, from = from, to = to)
+            val updatedOrder = oldOrder.copy(
+                from = order.from ?: oldOrder.from,
+                to = order.to ?: oldOrder.to,
+            )
             map[id] = updatedOrder
             return updatedOrder
         }

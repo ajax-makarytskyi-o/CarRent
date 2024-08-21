@@ -6,13 +6,13 @@ import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
 
 @Repository
-class SimpleCarRepository: CarRepository {
+class InMemoryCarRepository: CarRepository {
     val map: MutableMap<String, Car> = HashMap()
 
     override fun findById(id: String): Car? = map[id]
 
-    override fun save(car: Car): Car {
-        val id = ObjectId().toString()
+    override fun create(car: Car): Car {
+        val id = ObjectId().toHexString()
         val savedCar = car.copy(id = id)
         map[id] = savedCar
         return savedCar
@@ -28,13 +28,19 @@ class SimpleCarRepository: CarRepository {
 
     override fun findTheCheapestAvailableCar(): Car? = map.values.filter { it.price != null }.minBy { it.price!! }
 
-    override fun findAllByMark(mark: String): List<Car> = map.values.filter { it.mark == mark }
+    override fun findAllByBrand(brand: String): List<Car> = map.values.filter { it.brand == brand }
 
-    override fun update(id: String, price: Int, color: Car.CarColor): Car? {
+    override fun findAllByBrandAndModel(brand: String, model: String): List<Car> =
+        findAllByBrand(brand).filter { it.model == model }
+
+    override fun update(id: String, car: Car): Car? {
         val oldCar: Car? = findById(id)
 
         return oldCar?.let {
-            val updatedCar = oldCar.copy(price = price, color = color)
+            val updatedCar = oldCar.copy(
+                price = car.price ?: oldCar.price,
+                color = car.color ?: oldCar.color,
+            )
             map[id] = updatedCar
             return updatedCar
         }

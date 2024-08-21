@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface UserRepository {
 
-    fun save(user: User): User?
+    fun create(user: User): User
 
     fun findById(id: String): User?
 

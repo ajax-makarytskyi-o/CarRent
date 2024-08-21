@@ -7,11 +7,11 @@ import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
 
 @Repository
-class SimpleRepairingRepository: RepairingRepository {
+class InMemoryRepairingRepository: RepairingRepository {
     val map: MutableMap<String, Repairing> = HashMap()
 
-    override fun save(repairing: Repairing): Repairing {
-        val id = ObjectId().toString()
+    override fun create(repairing: Repairing): Repairing {
+        val id = ObjectId().toHexString()
         val savedRepairing = repairing.copy(id = id)
         map[id] = savedRepairing
         return savedRepairing
@@ -29,7 +29,10 @@ class SimpleRepairingRepository: RepairingRepository {
         val oldRepairing: Repairing? = findById(id)
 
         return oldRepairing?.let {
-            val updatedCar = oldRepairing.copy(price = repairing.price, status = repairing.status)
+            val updatedCar = oldRepairing.copy(
+                price = repairing.price ?: oldRepairing.price,
+                status = repairing.status ?: oldRepairing.status,
+            )
             map[id] = updatedCar
             return updatedCar
         }
@@ -38,24 +41,4 @@ class SimpleRepairingRepository: RepairingRepository {
     override fun findByStatus(status: RepairingStatus): List<Repairing> = map.values.filter { it.status == status }
 
     override fun findByCarId(carId: String): List<Repairing> = map.values.filter { it.carId == carId }
-
-    override fun updatePrice(id: String, price: Int): Repairing? {
-        val oldRepairing: Repairing? = findById(id)
-
-        return oldRepairing?.let {
-            val updatedRepairing = oldRepairing.copy(price = price)
-            map[id] = updatedRepairing
-            return updatedRepairing
-        }
-    }
-
-    override fun updateStatus(id: String, status: RepairingStatus): Repairing? {
-        val oldRepairing: Repairing? = findById(id)
-
-        return oldRepairing?.let {
-            val updatedRepairing = oldRepairing.copy(status = status)
-            map[id] = updatedRepairing
-            return updatedRepairing
-        }
-    }
 }

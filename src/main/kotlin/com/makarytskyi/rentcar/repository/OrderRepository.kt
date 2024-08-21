@@ -11,7 +11,7 @@ interface OrderRepository {
 
     fun findAll(): List<Order>
 
-    fun save(order: Order): Order
+    fun create(order: Order): Order
 
     fun deleteById(id: String)
 
@@ -23,5 +23,5 @@ interface OrderRepository {
 
     fun findByDate(date: Date): List<Order>
 
-    fun updateDates(id: String, from: Date?, to: Date?): Order?
+    fun update(id: String, order: Order): Order?
 }

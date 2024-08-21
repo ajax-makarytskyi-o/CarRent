@@ -6,13 +6,12 @@ import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
 
 @Repository
-class SimpleUserRepository: UserRepository {
+class InMemoryUserRepository: UserRepository {
     val map: MutableMap<String, User> = HashMap()
 
-    override fun save(user: User): User {
-        val id = ObjectId().toString()
+    override fun create(user: User): User {
+        val id = ObjectId().toHexString()
         val savedUser = user.copy(id = id)
-
         map[id] = savedUser
         return savedUser
     }

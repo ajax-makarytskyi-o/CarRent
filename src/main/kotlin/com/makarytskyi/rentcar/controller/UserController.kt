@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/users")
 class UserController(private val service: UserService) {
 
     @GetMapping("/{id}")

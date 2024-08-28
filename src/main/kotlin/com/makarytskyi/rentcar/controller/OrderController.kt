@@ -8,23 +8,32 @@ import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/order")
+@RequestMapping("/api/v1/orders")
 class OrderController(private val service: OrderService) {
 
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): OrderResponse = service.getById(id)
 
-    @GetMapping("/all")
-    fun findAll(): List<OrderResponse> = service.findAll()
+    @GetMapping()
+    fun findAll(
+        @RequestParam(required = false) carId: String?,
+        @RequestParam(required = false) userId: String?,
+    ): List<OrderResponse> = when {
+        carId != null && userId != null -> service.findByCarAndUser(carId, userId)
+        carId != null -> service.findByCar(carId)
+        userId != null -> service.findByUser(userId)
+        else -> service.findAll()
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -34,12 +43,6 @@ class OrderController(private val service: OrderService) {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun delete(@PathVariable id: String) = service.deleteById(id)
 
-    @GetMapping("/user/{userId}")
-    fun findByUserId(@PathVariable userId: String): List<OrderResponse> = service.findByUserId(userId)
-
-    @GetMapping("/car/{carId}")
-    fun findByCarId(@PathVariable carId: String): List<OrderResponse> = service.findByCarId(carId)
-
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     fun update(@PathVariable id: String, @Valid @RequestBody order: UpdateOrderRequest) = service.update(id, order)
 }

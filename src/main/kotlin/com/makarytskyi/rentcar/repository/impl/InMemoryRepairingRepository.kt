@@ -1,5 +1,6 @@
 package com.makarytskyi.rentcar.repository.impl
 
+import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.model.Repairing
 import com.makarytskyi.rentcar.model.Repairing.RepairingStatus
 import com.makarytskyi.rentcar.repository.RepairingRepository
@@ -37,6 +38,9 @@ class InMemoryRepairingRepository: RepairingRepository {
             return updatedCar
         }
     }
+
+    override fun findByStatusAndCarId(status: RepairingStatus, carId: String): List<Repairing> =
+        map.values.filter { it.status == status && it.carId == carId }
 
     override fun findByStatus(status: RepairingStatus): List<Repairing> = map.values.filter { it.status == status }
 

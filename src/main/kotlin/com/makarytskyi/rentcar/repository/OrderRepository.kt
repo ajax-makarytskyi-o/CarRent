@@ -24,4 +24,6 @@ interface OrderRepository {
     fun findByDate(date: Date): List<Order>
 
     fun update(id: String, order: Order): Order?
+
+    fun findByUserIdAndCarId(carId: String, userId: String): List<Order>
 }

@@ -1,5 +1,6 @@
 package com.makarytskyi.rentcar.repository
 
+import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.model.Repairing
 import org.springframework.stereotype.Repository
 
@@ -19,4 +20,6 @@ interface RepairingRepository {
     fun findByStatus(status: Repairing.RepairingStatus): List<Repairing>
 
     fun findByCarId(carId: String): List<Repairing>
+
+    fun findByStatusAndCarId(status: Repairing.RepairingStatus, carId: String): List<Repairing>
 }

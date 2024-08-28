@@ -38,6 +38,9 @@ class RepairingService(
     fun findByCarId(carId: String): List<RepairingResponse> =
         repairingRepository.findByCarId(carId).map { Repairing.toResponse(it) }
 
+    fun findByStatusAndCar(status: Repairing.RepairingStatus, carId: String): List<RepairingResponse> =
+        repairingRepository.findByStatusAndCarId(status, carId).map { Repairing.toResponse(it) }
+
     private fun validateCarExists(carId: String) {
         require(carRepository.findById(carId) != null) { "Car in repairing with $carId is not found" }
     }

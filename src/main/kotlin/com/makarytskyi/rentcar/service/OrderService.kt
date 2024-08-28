@@ -40,13 +40,17 @@ class OrderService(
 
     fun deleteById(id: String) = orderRepository.deleteById(id)
 
-    fun findByUserId(userId: String): List<OrderResponse> = orderRepository.findByUserId(userId).map {
+    fun findByUser(userId: String): List<OrderResponse> = orderRepository.findByUserId(userId).map {
         Order.toResponse(it, getCarPrice(it.carId))
     }
 
-    fun findByCarId(carId: String): List<OrderResponse> = orderRepository.findByCarId(carId).map {
+    fun findByCar(carId: String): List<OrderResponse> = orderRepository.findByCarId(carId).map {
         Order.toResponse(it, getCarPrice(it.carId))
     }
+
+    fun findByCarAndUser(carId: String, userId: String): List<OrderResponse> =
+        orderRepository.findByUserIdAndCarId(carId, userId)
+            .map { Order.toResponse(it, getCarPrice(it.carId)) }
 
     fun update(id: String, orderRequest: UpdateOrderRequest): OrderResponse {
         val order = orderRepository.findById(id) ?: throw ResourceNotFoundException("Order with $id is not found")

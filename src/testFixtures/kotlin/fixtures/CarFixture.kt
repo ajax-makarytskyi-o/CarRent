@@ -1,4 +1,4 @@
-package car
+package fixtures
 
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest

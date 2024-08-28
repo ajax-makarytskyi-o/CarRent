@@ -1,15 +1,15 @@
 package services
 
-import UserFixture.createUserEntity
-import UserFixture.createUserRequest
-import UserFixture.createdUser
-import UserFixture.createdUserResponse
-import UserFixture.existingUser
-import UserFixture.responseUser
-import UserFixture.updateUserEntity
-import UserFixture.updateUserRequest
-import UserFixture.updatedUser
-import UserFixture.userId
+import fixtures.UserFixture.createUserEntity
+import fixtures.UserFixture.createUserRequest
+import fixtures.UserFixture.createdUser
+import fixtures.UserFixture.createdUserResponse
+import fixtures.UserFixture.existingUser
+import fixtures.UserFixture.responseUser
+import fixtures.UserFixture.updateUserEntity
+import fixtures.UserFixture.updateUserRequest
+import fixtures.UserFixture.updatedUser
+import fixtures.UserFixture.userId
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
 import com.makarytskyi.rentcar.model.User
 import com.makarytskyi.rentcar.repository.UserRepository

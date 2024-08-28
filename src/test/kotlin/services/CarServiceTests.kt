@@ -1,15 +1,16 @@
 package services
 
-import CarFixture.carId
-import CarFixture.createCarEntity
-import CarFixture.createCarRequest
-import CarFixture.createdCar
-import CarFixture.createdCarResponse
-import CarFixture.existingCar
-import CarFixture.responseCar
-import CarFixture.updateCarEntity
-import CarFixture.updateCarRequest
-import CarFixture.updatedCar
+import fixtures.CarFixture.carId
+import fixtures.CarFixture.createCarEntity
+import fixtures.CarFixture.createCarRequest
+import fixtures.CarFixture.createdCar
+import fixtures.CarFixture.createdCarResponse
+import fixtures.CarFixture.existingCar
+import fixtures.CarFixture.newCarPrice
+import fixtures.CarFixture.responseCar
+import fixtures.CarFixture.updateCarEntity
+import fixtures.CarFixture.updateCarRequest
+import fixtures.CarFixture.updatedCar
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
 import com.makarytskyi.rentcar.model.Car
 import kotlin.test.Test
@@ -107,7 +108,7 @@ class CarServiceTests {
 
         //THEN
         assertNotNull(result)
-        assertEquals(250, result.price)
+        assertEquals(newCarPrice, result.price)
         verify(carRepository).update(carId, updateCarEntity)
     }
 

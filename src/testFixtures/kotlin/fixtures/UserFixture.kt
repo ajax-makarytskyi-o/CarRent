@@ -1,4 +1,4 @@
-package user
+package fixtures
 
 import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest

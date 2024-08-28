@@ -1,22 +1,21 @@
 package services
 
-import CarFixture
-import CarFixture.carId
-import OrderFixture.createOrderEntity
-import OrderFixture.createOrderRequest
-import OrderFixture.createdOrder
-import OrderFixture.createdOrderResponse
-import OrderFixture.existingOrder
-import OrderFixture.existingOrderOnCar
-import OrderFixture.orderId
-import OrderFixture.responseOrder
-import OrderFixture.updateOrderEntity
-import OrderFixture.updateOrderRequest
-import OrderFixture.updatedOrder
-import OrderFixture.updatedOrderResponse
-import RepairingFixture.existingCar
-import UserFixture.existingUser
-import UserFixture.userId
+import fixtures.CarFixture.carId
+import fixtures.OrderFixture.createOrderEntity
+import fixtures.OrderFixture.createOrderRequest
+import fixtures.OrderFixture.createdOrder
+import fixtures.OrderFixture.createdOrderResponse
+import fixtures.OrderFixture.existingOrder
+import fixtures.OrderFixture.existingOrderOnCar
+import fixtures.OrderFixture.orderId
+import fixtures.OrderFixture.responseOrder
+import fixtures.OrderFixture.updateOrderEntity
+import fixtures.OrderFixture.updateOrderRequest
+import fixtures.OrderFixture.updatedOrder
+import fixtures.OrderFixture.updatedOrderResponse
+import fixtures.RepairingFixture.existingCar
+import fixtures.UserFixture.existingUser
+import fixtures.UserFixture.userId
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
 import com.makarytskyi.rentcar.model.Repairing
 import com.makarytskyi.rentcar.repository.CarRepository
@@ -79,7 +78,7 @@ class OrderServiceTests {
         val orders = listOf(existingOrder)
         val expected = listOf(responseOrder)
         whenever(orderRepository.findAll()).thenReturn(orders)
-        whenever(carRepository.findById(CarFixture.carId)).thenReturn(existingCar)
+        whenever(carRepository.findById(carId)).thenReturn(existingCar)
 
         //WHEN
         val result = orderService.findAll()

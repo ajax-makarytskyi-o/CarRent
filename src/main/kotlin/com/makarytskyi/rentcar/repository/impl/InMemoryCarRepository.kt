@@ -5,9 +5,10 @@ import com.makarytskyi.rentcar.repository.CarRepository
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
 
+
 @Repository
-class InMemoryCarRepository: CarRepository {
-    val map: MutableMap<String, Car> = HashMap()
+class InMemoryCarRepository : CarRepository {
+    private val map: MutableMap<String, Car> = HashMap()
 
     override fun findById(id: String): Car? = map[id]
 
@@ -48,3 +49,4 @@ class InMemoryCarRepository: CarRepository {
 
     override fun findByPlate(plate: String?): Car? = map.values.find { it.plate == plate }
 }
+

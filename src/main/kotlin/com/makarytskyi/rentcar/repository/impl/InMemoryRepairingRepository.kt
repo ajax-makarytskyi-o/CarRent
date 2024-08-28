@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class InMemoryRepairingRepository: RepairingRepository {
-    val map: MutableMap<String, Repairing> = HashMap()
+    private val map: MutableMap<String, Repairing> = HashMap()
 
     override fun create(repairing: Repairing): Repairing {
         val id = ObjectId().toHexString()

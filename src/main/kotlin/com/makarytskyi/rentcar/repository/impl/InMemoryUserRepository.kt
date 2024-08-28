@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class InMemoryUserRepository: UserRepository {
-    val map: MutableMap<String, User> = HashMap()
+    private val map: MutableMap<String, User> = HashMap()
 
     override fun create(user: User): User {
         val id = ObjectId().toHexString()
@@ -29,7 +29,7 @@ class InMemoryUserRepository: UserRepository {
 
         return oldUser?.let {
             val updatedUser = oldUser.copy(
-                name = user.name,
+                name = user.name ?: oldUser.name,
                 phoneNumber = user.phoneNumber ?: oldUser.phoneNumber,
                 city = user.city ?: oldUser.city
             )

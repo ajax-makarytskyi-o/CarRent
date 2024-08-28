@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class InMemoryOrderRepository : OrderRepository {
-    val map: MutableMap<String, Order> = HashMap()
+    private val map: MutableMap<String, Order> = HashMap()
 
     override fun findById(id: String): Order? = map[id]
 
@@ -25,7 +25,8 @@ class InMemoryOrderRepository : OrderRepository {
         map.remove(id)
     }
 
-    override fun findAllByDate(date: Date): List<Order> = map.values.filter { it.from != null && it.to != null }.filter { date.before(it.to) && date.after(it.from) }
+    override fun findAllByDate(date: Date): List<Order> =
+        map.values.filter { it.from != null && it.to != null }.filter { date.before(it.to) && date.after(it.from) }
 
     override fun findByUserId(userId: String): List<Order> = map.values.filter { it.userId == userId}
 

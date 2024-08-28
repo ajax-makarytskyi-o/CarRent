@@ -1,3 +1,5 @@
+package car
+
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
@@ -6,6 +8,7 @@ import com.makarytskyi.rentcar.model.Car
 object CarFixture {
     const val carId: String = "1231441"
     const val createdCarId: String = "83465294"
+    const val newCarPrice = 250
 
     val existingCar = Car(
         id = carId,
@@ -67,7 +70,7 @@ object CarFixture {
     )
 
     val updateCarRequest = UpdateCarRequest(
-        price = 250,
+        price = newCarPrice,
         color = Car.CarColor.GREEN,
     )
 
@@ -75,7 +78,7 @@ object CarFixture {
         id = null,
         brand = null,
         model = null,
-        price = 250,
+        price = newCarPrice,
         year = null,
         plate = null,
         color = Car.CarColor.GREEN,
@@ -85,7 +88,7 @@ object CarFixture {
         id = carId,
         brand = "Toyota",
         model = "Corolla",
-        price = 250,
+        price = newCarPrice,
         year = 2020,
         plate = "AA1234AA",
         color = Car.CarColor.GREEN,

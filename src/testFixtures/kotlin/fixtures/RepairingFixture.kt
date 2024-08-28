@@ -1,4 +1,6 @@
-import CarFixture.carId
+package repairing
+
+import car.CarFixture.carId
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest

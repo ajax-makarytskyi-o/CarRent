@@ -1,5 +1,7 @@
-import CarFixture.carId
-import UserFixture.userId
+package order
+
+import car.CarFixture.carId
+import user.UserFixture.userId
 import com.makarytskyi.rentcar.dto.order.CreateOrderRequest
 import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest

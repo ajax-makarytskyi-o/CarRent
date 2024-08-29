@@ -1,6 +1,5 @@
 package com.makarytskyi.rentcar.repository.impl
 
-import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.model.Repairing
 import com.makarytskyi.rentcar.model.Repairing.RepairingStatus
 import com.makarytskyi.rentcar.repository.RepairingRepository

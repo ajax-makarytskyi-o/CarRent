@@ -13,30 +13,25 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/cars")
-class CarController(private val service: CarService) {
+internal class CarController(private val service: CarService) {
 
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): CarResponse = service.getById(id)
 
     @GetMapping
-    fun findAll(
-        @RequestParam(required = false) brand: String?,
-        @RequestParam(required = false) model: String?,
-    ): List<CarResponse> {
-        require(model == null || brand != null) { "'model' cannot be provided without 'brand'" }
+    fun findAll(): List<CarResponse> = service.findAll()
 
-        return when {
-            model != null -> service.findAllByBrandAndModel(brand!!, model)
-            brand != null -> service.findAllByBrand(brand)
-            else -> service.findAll()
-        }
-    }
+    @GetMapping("/brand/{brand}")
+    fun findAllByBrand(@PathVariable brand: String): List<CarResponse> = service.findAllByBrand(brand)
+
+    @GetMapping("/brand/{brand}/model/{model}")
+    fun findAllByBrandAndModel(@PathVariable brand: String, @PathVariable model: String): List<CarResponse> =
+        service.findAllByBrandAndModel(brand, model)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

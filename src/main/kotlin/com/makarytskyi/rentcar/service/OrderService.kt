@@ -12,7 +12,7 @@ import java.util.Date
 import org.springframework.stereotype.Service
 
 @Service
-class OrderService(
+internal class OrderService(
     private val orderRepository: OrderRepository,
     private val carRepository: CarRepository,
     private val userRepository: UserRepository

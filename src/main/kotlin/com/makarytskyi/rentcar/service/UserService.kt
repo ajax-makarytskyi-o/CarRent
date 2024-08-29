@@ -9,7 +9,7 @@ import com.makarytskyi.rentcar.repository.UserRepository
 import org.springframework.stereotype.Service
 
 @Service
-class UserService(private val userRepository: UserRepository) {
+internal class UserService(private val userRepository: UserRepository) {
 
     fun findAll(): List<UserResponse> = userRepository.findAll().map { User.toResponse(it) }
 

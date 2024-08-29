@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/users")
-class UserController(private val service: UserService) {
+internal class UserController(private val service: UserService) {
 
     @GetMapping("/{id}")
     fun findById(@PathVariable id: String): UserResponse = service.getById(id)

@@ -1,6 +1,5 @@
 package com.makarytskyi.rentcar.repository
 
-import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.model.Repairing
 import org.springframework.stereotype.Repository
 

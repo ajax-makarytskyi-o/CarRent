@@ -10,7 +10,7 @@ import com.makarytskyi.rentcar.repository.RepairingRepository
 import org.springframework.stereotype.Service
 
 @Service
-class RepairingService(
+internal class RepairingService(
     private val repairingRepository: RepairingRepository,
     private val carRepository: CarRepository
 ) {

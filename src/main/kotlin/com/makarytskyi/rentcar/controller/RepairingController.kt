@@ -14,24 +14,28 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/repairings")
-class RepairingController(private val service: RepairingService) {
+internal class RepairingController(private val service: RepairingService) {
 
     @GetMapping()
-    fun findAll(
-        @RequestParam(required = false) carId: String?,
-        @RequestParam(required = false) status: Repairing.RepairingStatus?
-    ): List<RepairingResponse> = when {
-        carId != null && status != null -> service.findByStatusAndCar(status, carId)
-        carId != null -> service.findByCarId(carId)
-        status != null -> service.findByStatus(status)
-        else -> service.findAll()
-    }
+    fun findAll(): List<RepairingResponse> = service.findAll()
+
+    @GetMapping("/status/{status}/car/{carId}")
+    fun findByStatus(
+        @PathVariable status: Repairing.RepairingStatus,
+        @PathVariable carId: String
+    ): List<RepairingResponse> = service.findByStatusAndCar(status, carId)
+
+    @GetMapping("/status/{status}")
+    fun findByStatus(@PathVariable status: Repairing.RepairingStatus): List<RepairingResponse> =
+        service.findByStatus(status)
+
+    @GetMapping("/car/{carId}")
+    fun findByCarId(@PathVariable carId: String): List<RepairingResponse> = service.findByCarId(carId)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

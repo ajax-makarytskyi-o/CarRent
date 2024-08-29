@@ -9,7 +9,7 @@ import com.makarytskyi.rentcar.repository.CarRepository
 import org.springframework.stereotype.Service
 
 @Service
-class CarService(private val repository: CarRepository) {
+internal class CarService(private val repository: CarRepository) {
 
     fun getById(id: String): CarResponse = repository.findById(id)?.let { Car.toResponse(it) }
         ?: throw ResourceNotFoundException("Car with id $id is not found")

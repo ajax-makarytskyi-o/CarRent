@@ -10,4 +10,17 @@ data class CarResponse(
     val year: Int?,
     val plate: String,
     val color: Car.CarColor?,
-)
+) {
+
+    companion object {
+        fun from(car: Car): CarResponse = CarResponse(
+            car.id!!,
+            car.brand ?: "none",
+            car.model ?: "none",
+            car.price ?: 0,
+            car.year,
+            car.plate ?: "none",
+            car.color,
+        )
+    }
+}

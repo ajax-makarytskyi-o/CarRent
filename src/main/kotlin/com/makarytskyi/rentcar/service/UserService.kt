@@ -4,22 +4,21 @@ import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
-import com.makarytskyi.rentcar.model.User
 import com.makarytskyi.rentcar.repository.UserRepository
 import org.springframework.stereotype.Service
 
 @Service
 internal class UserService(private val userRepository: UserRepository) {
 
-    fun findAll(): List<UserResponse> = userRepository.findAll().map { User.toResponse(it) }
+    fun findAll(): List<UserResponse> = userRepository.findAll().map { UserResponse.from(it) }
 
     fun create(createUserRequest: CreateUserRequest): UserResponse {
         validateAvailabilityEmail(createUserRequest.email)
         createUserRequest.phoneNumber?.let { validateAvailabilityPhoneNumber(createUserRequest.phoneNumber) }
-        return User.toResponse(userRepository.create(CreateUserRequest.toEntity(createUserRequest)))
+        return UserResponse.from(userRepository.create(CreateUserRequest.toEntity(createUserRequest)))
     }
 
-    fun getById(id: String): UserResponse = userRepository.findById(id)?.let { User.toResponse(it) }
+    fun getById(id: String): UserResponse = userRepository.findById(id)?.let { UserResponse.from(it) }
         ?: throw ResourceNotFoundException("User with id $id is not found")
 
     fun deleteById(id: String) = userRepository.deleteById(id)
@@ -28,15 +27,15 @@ internal class UserService(private val userRepository: UserRepository) {
         userRequest.phoneNumber?.let { validateAvailabilityPhoneNumber(it) }
 
         return userRepository.update(id, UpdateUserRequest.toEntity(userRequest))
-            ?.let { User.toResponse(it) }
+            ?.let { UserResponse.from(it) }
             ?: throw ResourceNotFoundException("User with id $id is not found")
     }
 
-    fun getByEmail(email: String): UserResponse = userRepository.findByEmail(email)?.let { User.toResponse(it) }
+    fun getByEmail(email: String): UserResponse = userRepository.findByEmail(email)?.let { UserResponse.from(it) }
         ?: throw ResourceNotFoundException("User with email $email is not found")
 
     fun getByPhoneNumber(phoneNumber: String): UserResponse =
-        userRepository.findByPhoneNumber(phoneNumber)?.let { User.toResponse(it) }
+        userRepository.findByPhoneNumber(phoneNumber)?.let { UserResponse.from(it) }
             ?: throw ResourceNotFoundException("User with phone number $phoneNumber is not found")
 
     private fun validateAvailabilityEmail(email: String) {

@@ -27,7 +27,7 @@ import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.service.CarService
 
 @ExtendWith(MockitoExtension::class)
-class CarServiceTests {
+internal class CarServiceTests {
     @Mock
     lateinit var carRepository: CarRepository
 
@@ -37,7 +37,9 @@ class CarServiceTests {
     @Test
     fun `getById should return CarResponse when Car exists`() {
         //GIVEN
-        whenever(carRepository.findById(carId)).thenReturn(existingCar)
+        val car = existingCar()
+        val responseCar = responseCar(car)
+        whenever(carRepository.findById(carId)).thenReturn(car)
 
         //WHEN
         val result = carService.getById(carId)
@@ -60,16 +62,18 @@ class CarServiceTests {
     @Test
     fun `findAll should return List of CarResponse`() {
         //GIVEN
-        val cars: List<Car> = listOf(existingCar)
-        val expected = listOf(responseCar)
+        val car = existingCar()
+        val response = responseCar(car)
+        val cars: List<Car> = listOf(car)
+        val expected = listOf(response)
         whenever(carRepository.findAll()).thenReturn(cars)
 
         //WHEN
         val result = carService.findAll()
 
         //THEN
-        verify(carRepository).findAll()
         assertEquals(expected, result)
+        verify(carRepository).findAll()
     }
 
     @Test
@@ -81,26 +85,34 @@ class CarServiceTests {
         val result = carService.findAll()
 
         //THEN
-        verify(carRepository).findAll()
         assertEquals(emptyList(), result)
+        verify(carRepository).findAll()
     }
 
     @Test
     fun `should create car successfully`() {
         //GIVEN
-        whenever(carRepository.create(createCarEntity)).thenReturn(createdCar)
+        val request = createCarRequest()
+        val requestEntity = createCarEntity(request)
+        val createdCar = createdCar(requestEntity)
+        val carResponse = createdCarResponse(createdCar)
+        whenever(carRepository.create(requestEntity)).thenReturn(createdCar)
 
         //WHEN
-        val result = carService.create(createCarRequest)
+        val result = carService.create(request)
 
         //THEN
-        verify(carRepository).create(createCarEntity)
-        assertEquals(createdCarResponse, result)
+        assertEquals(carResponse, result)
+        verify(carRepository).create(requestEntity)
     }
 
     @Test
     fun `update should return updated car`() {
         //GIVEN
+        val oldCar = existingCar()
+        val updateCarRequest = updateCarRequest()
+        val updateCarEntity = updateCarEntity(updateCarRequest)
+        val updatedCar = updatedCar(oldCar, updateCarRequest)
         whenever(carRepository.update(carId, updateCarEntity)).thenReturn(updatedCar)
 
         //WHEN
@@ -116,6 +128,7 @@ class CarServiceTests {
     fun `update should throw ResourceNotFoundException if car is not found`() {
         //GIVEN
         val carId = "unknown"
+        val updateCarRequest = updateCarRequest()
 
         //WHEN //THEN
         assertThrows(ResourceNotFoundException::class.java, { carService.update(carId, updateCarRequest) })

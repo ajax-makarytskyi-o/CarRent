@@ -26,7 +26,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @ExtendWith(MockitoExtension::class)
-class UserServiceTests {
+internal class UserServiceTests {
+
     @Mock
     lateinit var userRepository: UserRepository
 
@@ -36,13 +37,15 @@ class UserServiceTests {
     @Test
     fun `getById should return UserResponse when User exists`() {
         //GIVEN
-        whenever(userRepository.findById(userId)).thenReturn(existingUser)
+        val user = existingUser()
+        val response = responseUser(user)
+        whenever(userRepository.findById(userId)).thenReturn(user)
 
         //WHEN
         val result = userService.getById(userId)
 
         //THEN
-        assertEquals(responseUser, result)
+        assertEquals(response, result)
         verify(userRepository).findById(userId)
     }
 
@@ -59,16 +62,18 @@ class UserServiceTests {
     @Test
     fun `findAll should return List of UserResponse`() {
         //GIVEN
-        val users: List<User> = listOf(existingUser)
-        val expected = listOf(responseUser)
+        val user = existingUser()
+        val response = responseUser(user)
+        val users: List<User> = listOf(user)
+        val expected = listOf(response)
         whenever(userRepository.findAll()).thenReturn(users)
 
         //WHEN
         val result = userService.findAll()
 
         //THEN
-        verify(userRepository).findAll()
         assertEquals(expected, result)
+        verify(userRepository).findAll()
     }
 
     @Test
@@ -80,34 +85,42 @@ class UserServiceTests {
         val result = userService.findAll()
 
         //THEN
-        verify(userRepository).findAll()
         assertEquals(emptyList(), result)
+        verify(userRepository).findAll()
     }
 
     @Test
     fun `should create user successfully`() {
         //GIVEN
+        val request = createUserRequest()
+        val createUserEntity = createUserEntity(request)
+        val createdUser = createdUser(createUserEntity)
+        val response = responseUser(createdUser)
         whenever(userRepository.create(createUserEntity)).thenReturn(createdUser)
 
         //WHEN
-        val result = userService.create(createUserRequest)
+        val result = userService.create(request)
 
         //THEN
+        assertEquals(response, result)
         verify(userRepository).create(createUserEntity)
-        assertEquals(createdUserResponse, result)
     }
 
     @Test
     fun `update should return updated user`() {
         //GIVEN
-        whenever(userRepository.update(userId, updateUserEntity)).thenReturn(updatedUser)
+        val user = existingUser()
+        val request = updateUserRequest()
+        val requestEntity = updateUserEntity(request)
+        val updatedUser = updatedUser(user, request)
+        whenever(userRepository.update(userId, requestEntity)).thenReturn(updatedUser)
 
         //WHEN
-        val result = userService.update(userId, updateUserRequest)
+        val result = userService.update(userId, request)
 
         //THEN
         assertNotNull(result)
-        verify(userRepository).update(userId, updateUserEntity)
+        verify(userRepository).update(userId, requestEntity)
     }
 
     @Test
@@ -116,7 +129,7 @@ class UserServiceTests {
         val userId = "unknown"
 
         //WHEN //THEN
-        assertThrows(ResourceNotFoundException::class.java, { userService.update(userId, updateUserRequest) })
+        assertThrows(ResourceNotFoundException::class.java, { userService.update(userId, updateUserRequest()) })
     }
 
     @Test
@@ -128,5 +141,4 @@ class UserServiceTests {
         assertNotNull(userService.deleteById(userId))
         verify(userRepository).deleteById(userId)
     }
-
 }

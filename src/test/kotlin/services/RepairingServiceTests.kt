@@ -1,22 +1,21 @@
 package services
 
+import com.makarytskyi.rentcar.exception.ResourceNotFoundException
+import com.makarytskyi.rentcar.model.Repairing
+import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.repository.RepairingRepository
+import com.makarytskyi.rentcar.service.RepairingService
 import fixtures.CarFixture.carId
+import fixtures.CarFixture.existingCar
 import fixtures.RepairingFixture.createRepairingEntity
 import fixtures.RepairingFixture.createRepairingRequest
 import fixtures.RepairingFixture.createdRepairing
-import fixtures.RepairingFixture.createdRepairingResponse
-import fixtures.RepairingFixture.existingCar
 import fixtures.RepairingFixture.existingRepairing
 import fixtures.RepairingFixture.repairingId
 import fixtures.RepairingFixture.responseRepairing
 import fixtures.RepairingFixture.updateRepairingEntity
 import fixtures.RepairingFixture.updateRepairingRequest
 import fixtures.RepairingFixture.updatedRepairing
-import com.makarytskyi.rentcar.exception.ResourceNotFoundException
-import com.makarytskyi.rentcar.model.Repairing
-import com.makarytskyi.rentcar.repository.CarRepository
-import com.makarytskyi.rentcar.repository.RepairingRepository
-import com.makarytskyi.rentcar.service.RepairingService
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -30,7 +29,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @ExtendWith(MockitoExtension::class)
-class RepairingServiceTests {
+internal class RepairingServiceTests {
+
     @Mock
     lateinit var repairingRepository: RepairingRepository
 
@@ -43,13 +43,16 @@ class RepairingServiceTests {
     @Test
     fun `getById should return RepairingResponse when Repairing exists`() {
         //GIVEN
-        whenever(repairingRepository.findById(repairingId)).thenReturn(existingRepairing)
+        val car = existingCar()
+        val repairing = existingRepairing(car)
+        val response = responseRepairing(repairing)
+        whenever(repairingRepository.findById(repairingId)).thenReturn(repairing)
 
         //WHEN
         val result = repairingService.getById(repairingId)
 
         //THEN
-        assertEquals(responseRepairing, result)
+        assertEquals(response, result)
         verify(repairingRepository).findById(repairingId)
     }
 
@@ -66,16 +69,19 @@ class RepairingServiceTests {
     @Test
     fun `findAll should return List of RepairingResponse`() {
         //GIVEN
-        val repairings = listOf(existingRepairing)
-        val expected = listOf(responseRepairing)
+        val car = existingCar()
+        val repairing = existingRepairing(car)
+        val response = responseRepairing(repairing)
+        val repairings = listOf(repairing)
+        val expected = listOf(response)
         whenever(repairingRepository.findAll()).thenReturn(repairings)
 
         //WHEN
         val result = repairingService.findAll()
 
         //THEN
-        verify(repairingRepository).findAll()
         assertEquals(expected, result)
+        verify(repairingRepository).findAll()
     }
 
     @Test
@@ -87,44 +93,56 @@ class RepairingServiceTests {
         val result = repairingService.findAll()
 
         //THEN
-        verify(repairingRepository).findAll()
         Assertions.assertEquals(emptyList<Repairing>(), result)
+        verify(repairingRepository).findAll()
     }
 
     @Test
     fun `should create repairing successfully`() {
         //GIVEN
-        whenever(repairingRepository.create(createRepairingEntity)).thenReturn(createdRepairing)
-        whenever(carRepository.findById(carId)).thenReturn(existingCar)
+        val car = existingCar()
+        val request = createRepairingRequest(car)
+        val requestEntity = createRepairingEntity(request)
+        val createdRepairing = createdRepairing(requestEntity)
+        val response = responseRepairing(createdRepairing)
+        whenever(repairingRepository.create(requestEntity)).thenReturn(createdRepairing)
+        whenever(carRepository.findById(carId)).thenReturn(car)
 
         //WHEN
-        val result = repairingService.create(createRepairingRequest)
+        val result = repairingService.create(request)
 
         //THEN
-        verify(repairingRepository).create(createRepairingEntity)
-        assertEquals(createdRepairingResponse, result)
+        assertEquals(response, result)
+        verify(repairingRepository).create(requestEntity)
     }
 
     @Test
     fun `should throw IllegalArgumentException if car doesn't exist`() {
         //GIVEN
+        val car = existingCar()
+        val request = createRepairingRequest(car)
         whenever(carRepository.findById(carId)).thenReturn(null)
 
         //WHEN //THEN
-        assertThrows(IllegalArgumentException::class.java, { repairingService.create(createRepairingRequest) })
+        assertThrows(IllegalArgumentException::class.java, { repairingService.create(request) })
     }
 
     @Test
     fun `update should return updated repairing`() {
         //GIVEN
-        whenever(repairingRepository.update(repairingId, updateRepairingEntity)).thenReturn(updatedRepairing)
+        val car = existingCar()
+        val repairing = existingRepairing(car)
+        val request = updateRepairingRequest()
+        val requestEntity = updateRepairingEntity(request)
+        val updatedRepairing = updatedRepairing(repairing, request)
+        whenever(repairingRepository.update(repairingId, requestEntity)).thenReturn(updatedRepairing)
 
         //WHEN
-        val result = repairingService.update(repairingId, updateRepairingRequest)
+        val result = repairingService.update(repairingId, request)
 
         //THEN
         assertNotNull(result)
-        verify(repairingRepository).update(repairingId, updateRepairingEntity)
+        verify(repairingRepository).update(repairingId, requestEntity)
     }
 
     @Test
@@ -135,7 +153,7 @@ class RepairingServiceTests {
         //WHEN //THEN
         assertThrows(
             ResourceNotFoundException::class.java,
-            { repairingService.update(repairingId, updateRepairingRequest) })
+            { repairingService.update(repairingId, updateRepairingRequest()) })
     }
 
     @Test
@@ -147,5 +165,4 @@ class RepairingServiceTests {
         assertNotNull(repairingService.deleteById(repairingId))
         verify(repairingRepository).deleteById(repairingId)
     }
-
 }

@@ -4,93 +4,79 @@ import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
 import com.makarytskyi.rentcar.model.Car
+import fixtures.Utils.generateString
+import kotlin.random.Random
+import org.bson.types.ObjectId
 
 object CarFixture {
-    const val carId: String = "1231441"
-    const val createdCarId: String = "83465294"
-    const val newCarPrice = 250
+    val carId: String = ObjectId().toHexString()
+    val newCarPrice = Random.nextInt(500)
 
-    val existingCar = Car(
+    fun existingCar() = Car(
         id = carId,
-        brand = "Toyota",
-        model = "Corolla",
-        price = 150,
-        year = 2020,
-        plate = "AA1234AA",
+        brand = generateString(15),
+        model = generateString(15),
+        price = Random.nextInt(500),
+        year = Random.nextInt(1900, 2020),
+        plate = generateString(6),
         color = Car.CarColor.BLUE,
     )
 
-    val responseCar = CarResponse(
+    fun responseCar(car: Car) = CarResponse(
         id = carId,
-        brand = "Toyota",
-        model = "Corolla",
-        price = 150,
-        year = 2020,
-        plate = "AA1234AA",
+        brand = car.brand ?: generateString(15),
+        model = car.model ?: generateString(15),
+        price = car.price ?: Random.nextInt(500),
+        year = car.year ?: Random.nextInt(1900, 2020),
+        plate = car.plate ?: generateString(6),
         color = Car.CarColor.BLUE,
     )
 
-    val createCarRequest = CreateCarRequest(
-        brand = "BMW",
-        model = "M3",
-        price = 200,
-        year = 2016,
-        plate = "AA5678AA",
+    fun createCarRequest() = CreateCarRequest(
+        brand = generateString(15),
+        model = generateString(15),
+        price = Random.nextInt(500),
+        year = Random.nextInt(1900, 2020),
+        plate = generateString(6),
         color = Car.CarColor.RED,
     )
 
-    val createCarEntity = Car(
+    fun createCarEntity(request: CreateCarRequest) = Car(
         id = null,
-        brand = "BMW",
-        model = "M3",
-        price = 200,
-        year = 2016,
-        plate = "AA5678AA",
+        brand = request.brand,
+        model = request.model,
+        price = request.price,
+        year = request.year,
+        plate = request.plate,
         color = Car.CarColor.RED,
     )
 
-    val createdCar = Car(
-        id = createdCarId,
-        brand = "BMW",
-        model = "M3",
-        price = 200,
-        year = 2016,
-        plate = "AA5678AA",
+    fun createdCar(car: Car) = car.copy(id = ObjectId().toHexString())
+
+    fun createdCarResponse(car: Car) = CarResponse(
+        id = car.id ?: ObjectId().toHexString(),
+        brand = car.brand ?: generateString(15),
+        model = car.model ?: generateString(15),
+        price = car.price ?: Random.nextInt(500),
+        year = car.year ?: Random.nextInt(1900, 2020),
+        plate = car.plate ?: generateString(6),
         color = Car.CarColor.RED,
     )
 
-    val createdCarResponse = CarResponse(
-        id = createdCarId,
-        brand = "BMW",
-        model = "M3",
-        price = 200,
-        year = 2016,
-        plate = "AA5678AA",
-        color = Car.CarColor.RED,
-    )
-
-    val updateCarRequest = UpdateCarRequest(
+    fun updateCarRequest() = UpdateCarRequest(
         price = newCarPrice,
         color = Car.CarColor.GREEN,
     )
 
-    val updateCarEntity = Car(
+    fun updateCarEntity(request: UpdateCarRequest) = Car(
         id = null,
         brand = null,
         model = null,
-        price = newCarPrice,
+        price = request.price,
         year = null,
         plate = null,
-        color = Car.CarColor.GREEN,
+        color = request.color,
     )
 
-    val updatedCar = Car(
-        id = carId,
-        brand = "Toyota",
-        model = "Corolla",
-        price = newCarPrice,
-        year = 2020,
-        plate = "AA1234AA",
-        color = Car.CarColor.GREEN,
-    )
+    fun updatedCar(oldCar: Car, request: UpdateCarRequest) = oldCar.copy(price = request.price, color = request.color)
 }

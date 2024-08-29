@@ -1,3 +1,4 @@
+
 package services
 
 import fixtures.CarFixture.carId
@@ -13,7 +14,6 @@ import fixtures.OrderFixture.updateOrderEntity
 import fixtures.OrderFixture.updateOrderRequest
 import fixtures.OrderFixture.updatedOrder
 import fixtures.OrderFixture.updatedOrderResponse
-import fixtures.RepairingFixture.existingCar
 import fixtures.UserFixture.existingUser
 import fixtures.UserFixture.userId
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
@@ -22,6 +22,7 @@ import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.service.OrderService
+import fixtures.CarFixture.existingCar
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -35,7 +36,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @ExtendWith(MockitoExtension::class)
-class OrderServiceTests {
+internal class OrderServiceTests {
     @Mock
     lateinit var orderRepository: OrderRepository
 
@@ -51,14 +52,18 @@ class OrderServiceTests {
     @Test
     fun `getById should return OrderResponse when Order exists`() {
         //GIVEN
-        whenever(orderRepository.findById(orderId)).thenReturn(existingOrder)
-        whenever(carRepository.findById(carId)).thenReturn(existingCar)
+        val car = existingCar()
+        val user = existingUser()
+        val order = existingOrder(car, user)
+        val response = responseOrder(order, car)
+        whenever(orderRepository.findById(orderId)).thenReturn(order)
+        whenever(carRepository.findById(carId)).thenReturn(car)
 
         //WHEN
         val result = orderService.getById(orderId)
 
         //THEN
-        assertEquals(responseOrder, result)
+        assertEquals(response, result)
         verify(orderRepository).findById(orderId)
     }
 
@@ -75,17 +80,21 @@ class OrderServiceTests {
     @Test
     fun `findAll should return List of OrderResponse`() {
         //GIVEN
-        val orders = listOf(existingOrder)
-        val expected = listOf(responseOrder)
+        val car = existingCar()
+        val user = existingUser()
+        val order = existingOrder(car, user)
+        val response = responseOrder(order, car)
+        val orders = listOf(order)
+        val expected = listOf(response)
         whenever(orderRepository.findAll()).thenReturn(orders)
-        whenever(carRepository.findById(carId)).thenReturn(existingCar)
+        whenever(carRepository.findById(carId)).thenReturn(car)
 
         //WHEN
         val result = orderService.findAll()
 
         //THEN
-        verify(orderRepository).findAll()
         assertEquals(expected, result)
+        verify(orderRepository).findAll()
     }
 
     @Test
@@ -97,69 +106,89 @@ class OrderServiceTests {
         val result = orderService.findAll()
 
         //THEN
-        verify(orderRepository).findAll()
         Assertions.assertEquals(emptyList<Repairing>(), result)
+        verify(orderRepository).findAll()
     }
 
     @Test
     fun `should create order successfully`() {
         //GIVEN
-        whenever(orderRepository.create(createOrderEntity)).thenReturn(createdOrder)
-        whenever(carRepository.findById(carId)).thenReturn(existingCar)
-        whenever(userRepository.findById(userId)).thenReturn(existingUser)
+        val car = existingCar()
+        val user = existingUser()
+        val request = createOrderRequest(car, user)
+        val requestEntity = createOrderEntity(request)
+        val createdOrder = createdOrder(requestEntity)
+        val response = responseOrder(createdOrder, car)
+        whenever(orderRepository.create(requestEntity)).thenReturn(createdOrder)
+        whenever(carRepository.findById(carId)).thenReturn(car)
+        whenever(userRepository.findById(userId)).thenReturn(user)
 
         //WHEN
-        val result = orderService.create(createOrderRequest)
+        val result = orderService.create(request)
 
         //THEN
-        verify(orderRepository).create(createOrderEntity)
-        assertEquals(createdOrderResponse, result)
+        assertEquals(response, result)
+        verify(orderRepository).create(requestEntity)
     }
 
     @Test
     fun `should throw IllegalArgumentException if car doesn't exist`() {
         //GIVEN
-        whenever(userRepository.findById(userId)).thenReturn(existingUser)
+        val user = existingUser()
+        val car = existingCar()
+        whenever(userRepository.findById(userId)).thenReturn(user)
         whenever(carRepository.findById(carId)).thenReturn(null)
 
         //WHEN //THEN
-        assertThrows(ResourceNotFoundException::class.java, { orderService.create(createOrderRequest) })
+        assertThrows(ResourceNotFoundException::class.java, { orderService.create(createOrderRequest(car, user)) })
     }
 
     @Test
     fun `should throw IllegalArgumentException if user doesn't exist`() {
         //GIVEN
+        val car = existingCar()
+        val user = existingUser()
+        val request = createOrderRequest(car, user)
         whenever(userRepository.findById(userId)).thenReturn(null)
 
         //WHEN //THEN
-        assertThrows(IllegalArgumentException::class.java, { orderService.create(createOrderRequest) })
+        assertThrows(IllegalArgumentException::class.java, { orderService.create(request) })
     }
 
     @Test
     fun `should throw IllegalArgumentException if car is ordered`() {
         //GIVEN
-        whenever(userRepository.findById(userId)).thenReturn(existingUser)
-        whenever(carRepository.findById(carId)).thenReturn(existingCar)
-        whenever(orderRepository.findByCarId(carId)).thenReturn(listOf(existingOrderOnCar))
+        val user = existingUser()
+        val car = existingCar()
+        whenever(userRepository.findById(userId)).thenReturn(user)
+        whenever(carRepository.findById(carId)).thenReturn(car)
+        whenever(orderRepository.findByCarId(carId)).thenReturn(listOf(existingOrderOnCar(car, user)))
 
         //WHEN //THEN
-        assertThrows(IllegalArgumentException::class.java, { orderService.create(createOrderRequest) })
+        assertThrows(IllegalArgumentException::class.java, { orderService.create(createOrderRequest(car, user)) })
         verify(orderRepository).findByCarId(carId)
     }
 
     @Test
     fun `update should return updated order`() {
         //GIVEN
-        whenever(orderRepository.findById(orderId)).thenReturn(existingOrder)
-        whenever(carRepository.findById(carId)).thenReturn(existingCar)
-        whenever(orderRepository.update(orderId, updateOrderEntity)).thenReturn(updatedOrder)
+        val car = existingCar()
+        val user = existingUser()
+        val order = existingOrder(car, user)
+        val request = updateOrderRequest()
+        val requestEntity = updateOrderEntity(request)
+        val updatedOrder = updatedOrder(order, request)
+        val response = responseOrder(updatedOrder, car)
+        whenever(orderRepository.findById(orderId)).thenReturn(order)
+        whenever(carRepository.findById(carId)).thenReturn(car)
+        whenever(orderRepository.update(orderId, requestEntity)).thenReturn(updatedOrder)
 
         //WHEN
-        val result = orderService.update(orderId, updateOrderRequest)
+        val result = orderService.update(orderId, request)
 
         //THEN
-        assertEquals(updatedOrderResponse, result)
-        verify(orderRepository).update(orderId, updateOrderEntity)
+        assertEquals(response, result)
+        verify(orderRepository).update(orderId, requestEntity)
     }
 
     @Test
@@ -170,7 +199,7 @@ class OrderServiceTests {
         //WHEN //THEN
         assertThrows(
             ResourceNotFoundException::class.java,
-            { orderService.update(orderId, updateOrderRequest) })
+            { orderService.update(orderId, updateOrderRequest()) })
     }
 
     @Test

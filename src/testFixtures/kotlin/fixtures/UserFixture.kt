@@ -1,80 +1,79 @@
 package fixtures
 
+import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
 import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
 import com.makarytskyi.rentcar.model.User
+import kotlin.random.Random
+import org.bson.types.ObjectId
 
 object UserFixture {
-    const val userId: String = "1241242"
-    const val createdUserId: String = "83465294"
+    val userId = ObjectId().toHexString()
+    val createdUserId = ObjectId().toHexString()
 
-    val existingUser = User(
+    fun existingUser() = User(
         id = userId,
-        name = "john",
-        email = "john@gmail.com",
-        phoneNumber = "1234567890",
-        city = "Kyiv",
+        name = generateString(10),
+        email = "${generateString(8)}@gmail.com",
+        phoneNumber = generateString(10),
+        city = generateString(8),
     )
 
-    val responseUser = UserResponse(
-        id = userId,
-        name = "john",
-        email = "john@gmail.com",
-        phoneNumber = "1234567890",
-        city = "Kyiv",
+    fun responseUser(user: User) = UserResponse(
+        id = user.id ?: userId,
+        name = user.name ?: generateString(10),
+        email = user.email ?: "${generateString(8)}@gmail.com",
+        phoneNumber = user.phoneNumber ?: generateString(10),
+        city = user.city ?: generateString(8),
     )
 
-    val createUserRequest = CreateUserRequest(
-        name = "steve",
-        email = "stv@gmail.com",
-        phoneNumber = "1223334444",
-        city = "Lviv",
+    fun createUserRequest() = CreateUserRequest(
+        name = generateString(10),
+        email = "${generateString(8)}@gmail.com",
+        phoneNumber = generateString(10),
+        city = generateString(8),
     )
 
-    val createUserEntity = User(
+    fun createUserEntity(request: CreateUserRequest) = User(
         id = null,
-        name = "steve",
-        email = "stv@gmail.com",
-        phoneNumber = "1223334444",
-        city = "Lviv",
+        name = request.name,
+        email = request.email,
+        phoneNumber = request.phoneNumber,
+        city = request.city,
     )
 
-    val createdUser = User(
-        id = createdUserId,
-        name = "steve",
-        email = "stv@gmail.com",
-        phoneNumber = "1223334444",
-        city = "Lviv",
+    fun createdUser(user: User) = user.copy(id = createdUserId)
+
+    fun createdUserResponse(user: User) = UserResponse(
+        id = user.id ?: createdUserId,
+        name = user.name ?: generateString(10),
+        email = user.email ?: "${generateString(8)}@gmail.com",
+        phoneNumber = user.phoneNumber ?: generateString(10),
+        city = user.city ?: generateString(8),
     )
 
-    val createdUserResponse = UserResponse(
-        id = createdUserId,
-        name = "steve",
-        email = "stv@gmail.com",
-        phoneNumber = "1223334444",
-        city = "Lviv",
+    fun updateUserRequest() = UpdateUserRequest(
+        name = generateString(10),
+        phoneNumber = generateString(10),
+        city = generateString(8)
     )
 
-    val updateUserRequest = UpdateUserRequest(
-        name = "jake",
-        phoneNumber = "0987654321",
-        city = "Zaporizhzhia"
-    )
-
-    val updateUserEntity = User(
+    fun updateUserEntity(request: UpdateUserRequest) = User(
         id = null,
-        name = "jake",
+        name = request.name,
         email = null,
-        phoneNumber = "0987654321",
-        city = "Zaporizhzhia",
+        phoneNumber = request.phoneNumber,
+        city = request.city,
     )
 
-    val updatedUser = User(
-        id = userId,
-        name = "jake",
-        email = "stv@gmail.com",
-        phoneNumber = "0987654321",
-        city = "Zaporizhzhia",
-    )
+    fun updatedUser(user: User, request: UpdateUserRequest) =
+        user.copy(name = request.name, phoneNumber = request.phoneNumber, city = request.city)
+
+    private fun generateString(length: Int): String {
+        val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+        return (1..length)
+            .map { charPool[Random.nextInt(charPool.size)] }
+            .joinToString("")
+    }
 }

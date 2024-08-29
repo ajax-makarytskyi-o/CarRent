@@ -7,12 +7,15 @@ import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
 import com.makarytskyi.rentcar.model.Car
 import com.makarytskyi.rentcar.model.Repairing
 import com.makarytskyi.rentcar.model.Repairing.RepairingStatus
+import fixtures.Utils.generateString
 import java.util.Calendar
 import java.util.Date
+import kotlin.random.Random
+import org.bson.types.ObjectId
 
 object RepairingFixture {
-    const val repairingId = "5254225"
-    const val createdRepairingId = "9720582"
+    val repairingId = ObjectId().toHexString()
+    val createdRepairingId = ObjectId().toHexString()
     var tommorow = Calendar.getInstance()
     var monthAfter = Calendar.getInstance()
 
@@ -21,81 +24,60 @@ object RepairingFixture {
         monthAfter.add(Calendar.MONTH, 1)
     }
 
-    val existingCar = Car(
-        id = carId,
-        brand = "Toyota",
-        model = "Corolla",
-        price = 150,
-        year = 2020,
-        plate = "AA1234AA",
-        color = Car.CarColor.BLUE,
-    )
-
-    val existingRepairing = Repairing(
+    fun existingRepairing(car: Car) = Repairing(
         id = repairingId,
-        carId = carId,
+        carId = car.id,
         date = Date.from(tommorow.toInstant()),
-        price = 120,
+        price = Random.nextInt(300),
         status = RepairingStatus.PENDING,
     )
 
-    val responseRepairing = RepairingResponse(
-        id = repairingId,
-        carId = carId,
-        date = Date.from(tommorow.toInstant()),
-        price = 120,
-        status = RepairingStatus.PENDING,
+    fun responseRepairing(repairing: Repairing) = RepairingResponse(
+        id = repairing.id ?: repairingId,
+        carId = repairing.carId ?: "",
+        date = repairing.date,
+        price = repairing.price,
+        status = repairing.status,
     )
 
-    val createRepairingRequest = CreateRepairingRequest(
-        carId = carId,
+    fun createRepairingRequest(car: Car) = CreateRepairingRequest(
+        carId = car.id ?: "",
         date = Date.from(monthAfter.toInstant()),
-        price = 200,
+        price = Random.nextInt(300),
         status = RepairingStatus.IN_PROGRESS,
     )
 
-    val createRepairingEntity = Repairing(
+    fun createRepairingEntity(request: CreateRepairingRequest) = Repairing(
         id = null,
-        carId = carId,
-        date = Date.from(monthAfter.toInstant()),
-        price = 200,
-        status = RepairingStatus.IN_PROGRESS,
+        carId = request.carId,
+        date = request.date,
+        price = request.price,
+        status = request.status,
     )
 
-    val createdRepairing = Repairing(
-        id = createdRepairingId,
-        carId = carId,
-        date = Date.from(monthAfter.toInstant()),
-        price = 200,
-        status = RepairingStatus.IN_PROGRESS,
+    fun createdRepairing(repairing: Repairing) = repairing.copy(id = createdRepairingId)
+
+    fun createdRepairingResponse(repairing: Repairing) = RepairingResponse(
+        id = repairing.id ?: createdRepairingId,
+        carId = repairing.carId ?: "",
+        date = repairing.date ?: Date.from(monthAfter.toInstant()),
+        price = repairing.price,
+        status = repairing.status,
     )
 
-    val createdRepairingResponse = RepairingResponse(
-        id = createdRepairingId,
-        carId = carId,
-        date = Date.from(monthAfter.toInstant()),
-        price = 200,
-        status = RepairingStatus.IN_PROGRESS,
-    )
-
-    val updateRepairingRequest = UpdateRepairingRequest(
-        price = 250,
+    fun updateRepairingRequest() = UpdateRepairingRequest(
+        price = Random.nextInt(300),
         status = RepairingStatus.COMPLETED,
     )
 
-    val updateRepairingEntity = Repairing(
+    fun updateRepairingEntity(request: UpdateRepairingRequest) = Repairing(
         id = null,
         carId = null,
         date = null,
-        price = 250,
-        status = RepairingStatus.COMPLETED,
+        price = request.price,
+        status = request.status,
     )
 
-    val updatedRepairing = Repairing(
-        id = repairingId,
-        carId = carId,
-        date = Date.from(tommorow.toInstant()),
-        price = 250,
-        status = RepairingStatus.COMPLETED,
-    )
+    fun updatedRepairing(oldRepairing: Repairing, request: UpdateRepairingRequest) =
+        oldRepairing.copy(price = request.price, status = request.status)
 }

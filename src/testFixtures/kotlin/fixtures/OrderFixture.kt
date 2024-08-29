@@ -1,7 +1,5 @@
 package fixtures
 
-import fixtures.CarFixture.carId
-import fixtures.UserFixture.userId
 import com.makarytskyi.rentcar.dto.order.CreateOrderRequest
 import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest

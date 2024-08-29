@@ -1,13 +1,11 @@
 package fixtures
 
-import fixtures.CarFixture.carId
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
 import com.makarytskyi.rentcar.model.Car
 import com.makarytskyi.rentcar.model.Repairing
 import com.makarytskyi.rentcar.model.Repairing.RepairingStatus
-import fixtures.Utils.generateString
 import java.util.Calendar
 import java.util.Date
 import kotlin.random.Random

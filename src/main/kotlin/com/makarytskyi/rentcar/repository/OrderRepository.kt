@@ -5,7 +5,7 @@ import java.util.Date
 import org.springframework.stereotype.Repository
 
 @Repository
-interface OrderRepository {
+internal interface OrderRepository {
 
     fun findById(id: String): Order?
 

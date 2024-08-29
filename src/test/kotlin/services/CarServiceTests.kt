@@ -1,5 +1,9 @@
 package services
 
+import com.makarytskyi.rentcar.exception.ResourceNotFoundException
+import com.makarytskyi.rentcar.model.Car
+import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.service.CarService
 import fixtures.CarFixture.carId
 import fixtures.CarFixture.createCarEntity
 import fixtures.CarFixture.createCarRequest
@@ -11,8 +15,6 @@ import fixtures.CarFixture.responseCar
 import fixtures.CarFixture.updateCarEntity
 import fixtures.CarFixture.updateCarRequest
 import fixtures.CarFixture.updatedCar
-import com.makarytskyi.rentcar.exception.ResourceNotFoundException
-import com.makarytskyi.rentcar.model.Car
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -23,8 +25,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import com.makarytskyi.rentcar.repository.CarRepository
-import com.makarytskyi.rentcar.service.CarService
 
 @ExtendWith(MockitoExtension::class)
 internal class CarServiceTests {

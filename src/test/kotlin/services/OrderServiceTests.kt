@@ -1,11 +1,17 @@
 
 package services
 
+import com.makarytskyi.rentcar.exception.ResourceNotFoundException
+import com.makarytskyi.rentcar.model.Repairing
+import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.repository.OrderRepository
+import com.makarytskyi.rentcar.repository.UserRepository
+import com.makarytskyi.rentcar.service.OrderService
 import fixtures.CarFixture.carId
+import fixtures.CarFixture.existingCar
 import fixtures.OrderFixture.createOrderEntity
 import fixtures.OrderFixture.createOrderRequest
 import fixtures.OrderFixture.createdOrder
-import fixtures.OrderFixture.createdOrderResponse
 import fixtures.OrderFixture.existingOrder
 import fixtures.OrderFixture.existingOrderOnCar
 import fixtures.OrderFixture.orderId
@@ -13,16 +19,8 @@ import fixtures.OrderFixture.responseOrder
 import fixtures.OrderFixture.updateOrderEntity
 import fixtures.OrderFixture.updateOrderRequest
 import fixtures.OrderFixture.updatedOrder
-import fixtures.OrderFixture.updatedOrderResponse
 import fixtures.UserFixture.existingUser
 import fixtures.UserFixture.userId
-import com.makarytskyi.rentcar.exception.ResourceNotFoundException
-import com.makarytskyi.rentcar.model.Repairing
-import com.makarytskyi.rentcar.repository.CarRepository
-import com.makarytskyi.rentcar.repository.OrderRepository
-import com.makarytskyi.rentcar.repository.UserRepository
-import com.makarytskyi.rentcar.service.OrderService
-import fixtures.CarFixture.existingCar
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

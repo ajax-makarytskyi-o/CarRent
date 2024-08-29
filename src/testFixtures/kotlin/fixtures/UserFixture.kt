@@ -1,6 +1,5 @@
 package fixtures
 
-import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
 import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse

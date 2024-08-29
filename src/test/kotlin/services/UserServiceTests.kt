@@ -1,19 +1,18 @@
 package services
 
+import com.makarytskyi.rentcar.exception.ResourceNotFoundException
+import com.makarytskyi.rentcar.model.User
+import com.makarytskyi.rentcar.repository.UserRepository
+import com.makarytskyi.rentcar.service.UserService
 import fixtures.UserFixture.createUserEntity
 import fixtures.UserFixture.createUserRequest
 import fixtures.UserFixture.createdUser
-import fixtures.UserFixture.createdUserResponse
 import fixtures.UserFixture.existingUser
 import fixtures.UserFixture.responseUser
 import fixtures.UserFixture.updateUserEntity
 import fixtures.UserFixture.updateUserRequest
 import fixtures.UserFixture.updatedUser
 import fixtures.UserFixture.userId
-import com.makarytskyi.rentcar.exception.ResourceNotFoundException
-import com.makarytskyi.rentcar.model.User
-import com.makarytskyi.rentcar.repository.UserRepository
-import com.makarytskyi.rentcar.service.UserService
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

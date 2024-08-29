@@ -7,7 +7,7 @@ import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
 
 @Repository
-class InMemoryOrderRepository : OrderRepository {
+internal class InMemoryOrderRepository : OrderRepository {
     private val map: MutableMap<String, Order> = HashMap()
 
     override fun findById(id: String): Order? = map[id]

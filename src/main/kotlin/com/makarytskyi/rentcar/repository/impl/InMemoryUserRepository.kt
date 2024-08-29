@@ -6,7 +6,7 @@ import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
 
 @Repository
-class InMemoryUserRepository: UserRepository {
+internal class InMemoryUserRepository: UserRepository {
     private val map: MutableMap<String, User> = HashMap()
 
     override fun create(user: User): User {

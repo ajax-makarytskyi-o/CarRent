@@ -4,7 +4,7 @@ import com.makarytskyi.rentcar.model.Car
 import org.springframework.stereotype.Repository
 
 @Repository
-interface CarRepository {
+internal interface CarRepository {
 
     fun findById(id: String): Car?
 

@@ -4,7 +4,7 @@ import com.makarytskyi.rentcar.model.Repairing
 import org.springframework.stereotype.Repository
 
 @Repository
-interface RepairingRepository {
+internal interface RepairingRepository {
 
     fun create(repairing: Repairing): Repairing
 

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository
 
 
 @Repository
-class InMemoryCarRepository : CarRepository {
+internal class InMemoryCarRepository : CarRepository {
     private val map: MutableMap<String, Car> = HashMap()
 
     override fun findById(id: String): Car? = map[id]

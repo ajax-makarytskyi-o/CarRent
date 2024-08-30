@@ -1,11 +1,10 @@
 package com.makarytskyi.rentcar.repository
 
-import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
 import com.makarytskyi.rentcar.model.Car
 import org.springframework.stereotype.Repository
 
 @Repository
-interface CarRepository {
+internal interface CarRepository {
 
     fun findById(id: String): Car?
 

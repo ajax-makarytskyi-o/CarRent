@@ -7,8 +7,8 @@ import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
 
 @Repository
-class InMemoryRepairingRepository: RepairingRepository {
-    val map: MutableMap<String, Repairing> = HashMap()
+internal class InMemoryRepairingRepository: RepairingRepository {
+    private val map: MutableMap<String, Repairing> = HashMap()
 
     override fun create(repairing: Repairing): Repairing {
         val id = ObjectId().toHexString()
@@ -37,6 +37,9 @@ class InMemoryRepairingRepository: RepairingRepository {
             return updatedCar
         }
     }
+
+    override fun findByStatusAndCarId(status: RepairingStatus, carId: String): List<Repairing> =
+        map.values.filter { it.status == status && it.carId == carId }
 
     override fun findByStatus(status: RepairingStatus): List<Repairing> = map.values.filter { it.status == status }
 

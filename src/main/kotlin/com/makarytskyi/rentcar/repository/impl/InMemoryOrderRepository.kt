@@ -7,8 +7,8 @@ import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
 
 @Repository
-class InMemoryOrderRepository : OrderRepository {
-    val map: MutableMap<String, Order> = HashMap()
+internal class InMemoryOrderRepository : OrderRepository {
+    private val map: MutableMap<String, Order> = HashMap()
 
     override fun findById(id: String): Order? = map[id]
 
@@ -25,7 +25,9 @@ class InMemoryOrderRepository : OrderRepository {
         map.remove(id)
     }
 
-    override fun findAllByDate(date: Date): List<Order> = map.values.filter { it.from != null && it.to != null }.filter { date.before(it.to) && date.after(it.from) }
+    override fun findAllByDate(date: Date): List<Order> = map.values
+        .filter { it.from != null && it.to != null }
+        .filter { date.before(it.to) && date.after(it.from) }
 
     override fun findByUserId(userId: String): List<Order> = map.values.filter { it.userId == userId}
 
@@ -44,6 +46,10 @@ class InMemoryOrderRepository : OrderRepository {
         }
     }
 
-    override fun findByDate(date: Date): List<Order> =
-        map.values.filter { it.from?.before(date) == true && it.to?.after(date) == true }.toList()
+    override fun findByUserIdAndCarId(carId: String, userId: String): List<Order> =
+        map.values.filter { it.carId == carId && it.userId == userId }
+
+    override fun findByDate(date: Date): List<Order> = map.values
+        .filter { it.from?.before(date) == true && it.to?.after(date) == true }
+        .toList()
 }

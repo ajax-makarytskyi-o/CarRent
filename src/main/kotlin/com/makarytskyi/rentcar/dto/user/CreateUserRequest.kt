@@ -3,7 +3,6 @@ package com.makarytskyi.rentcar.dto.user
 import com.makarytskyi.rentcar.model.User
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
-import jakarta.validation.constraints.Size
 
 data class CreateUserRequest(
     @field:NotBlank

@@ -1,7 +1,6 @@
 package com.makarytskyi.rentcar.dto.order
 
 import com.makarytskyi.rentcar.model.Order
-import jakarta.validation.constraints.NotNull
 import java.util.Date
 
 data class UpdateOrderRequest(

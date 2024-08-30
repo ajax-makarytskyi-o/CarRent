@@ -4,7 +4,7 @@ import com.makarytskyi.rentcar.model.User
 import org.springframework.stereotype.Repository
 
 @Repository
-interface UserRepository {
+internal interface UserRepository {
 
     fun create(user: User): User
 

@@ -9,4 +9,15 @@ data class RepairingResponse(
     val date: Date?,
     val price: Int?,
     val status: Repairing.RepairingStatus?,
-)
+) {
+
+    companion object {
+        fun from(repairing: Repairing): RepairingResponse = RepairingResponse(
+            repairing.id!!,
+            repairing.carId ?: "none",
+            repairing.date,
+            repairing.price,
+            repairing.status,
+        )
+    }
+}

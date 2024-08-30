@@ -4,7 +4,7 @@ import com.makarytskyi.rentcar.model.Repairing
 import org.springframework.stereotype.Repository
 
 @Repository
-interface RepairingRepository {
+internal interface RepairingRepository {
 
     fun create(repairing: Repairing): Repairing
 
@@ -19,4 +19,6 @@ interface RepairingRepository {
     fun findByStatus(status: Repairing.RepairingStatus): List<Repairing>
 
     fun findByCarId(carId: String): List<Repairing>
+
+    fun findByStatusAndCarId(status: Repairing.RepairingStatus, carId: String): List<Repairing>
 }

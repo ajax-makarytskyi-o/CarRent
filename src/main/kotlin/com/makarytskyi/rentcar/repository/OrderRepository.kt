@@ -5,7 +5,7 @@ import java.util.Date
 import org.springframework.stereotype.Repository
 
 @Repository
-interface OrderRepository {
+internal interface OrderRepository {
 
     fun findById(id: String): Order?
 
@@ -24,4 +24,6 @@ interface OrderRepository {
     fun findByDate(date: Date): List<Order>
 
     fun update(id: String, order: Order): Order?
+
+    fun findByUserIdAndCarId(carId: String, userId: String): List<Order>
 }

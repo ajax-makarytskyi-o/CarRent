@@ -5,7 +5,6 @@ import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
 import org.springframework.stereotype.Service
 
-@Service
 internal interface CarService {
 
     fun getById(id: String): CarResponse

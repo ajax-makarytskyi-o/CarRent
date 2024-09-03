@@ -6,7 +6,6 @@ import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
 import com.makarytskyi.rentcar.model.Repairing
 import org.springframework.stereotype.Service
 
-@Service
 internal interface RepairingService {
 
     fun findAll(): List<RepairingResponse>

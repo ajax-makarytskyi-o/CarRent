@@ -5,7 +5,6 @@ import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
 import org.springframework.stereotype.Service
 
-@Service
 internal interface UserService {
 
     fun findAll(): List<UserResponse>

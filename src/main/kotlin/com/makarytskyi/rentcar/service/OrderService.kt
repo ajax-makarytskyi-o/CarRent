@@ -5,7 +5,6 @@ import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
 import org.springframework.stereotype.Service
 
-@Service
 internal interface OrderService {
 
     fun getById(id: String): OrderResponse

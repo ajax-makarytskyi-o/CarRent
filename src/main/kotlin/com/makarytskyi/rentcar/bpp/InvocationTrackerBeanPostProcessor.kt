@@ -25,20 +25,19 @@ internal class InvocationTrackerBeanPostProcessor : BeanPostProcessor {
         return bean
     }
 
-    override fun postProcessAfterInitialization(bean: Any, beanName: String): Any? {
-        val originalClassName = classes[beanName]?.simpleName
-        val res = classes[beanName]?.let { beanClass ->
+    override fun postProcessAfterInitialization(bean: Any, beanName: String): Any {
+        val simpleClassName = classes[beanName]?.simpleName
+        return classes[beanName]?.let { beanClass ->
             Proxy.newProxyInstance(
                 beanClass.java.classLoader,
                 beanClass.java.interfaces,
-                InvocationTrackerHandler(bean, originalClassName)
+                InvocationTrackerHandler(bean, simpleClassName)
             )
         } ?: bean
-        return res
     }
 
-
-    class InvocationTrackerHandler(private val bean: Any, private val originalClassName: String?) : InvocationHandler {
+    private class InvocationTrackerHandler(private val bean: Any, private val simpleClassName: String?) :
+        InvocationHandler {
 
         @Suppress("SwallowedException", "SpreadOperator")
         override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any? {
@@ -47,12 +46,12 @@ internal class InvocationTrackerBeanPostProcessor : BeanPostProcessor {
                 val result = method?.invoke(bean, *(args ?: emptyArray()))
                 val endTime = System.currentTimeMillis()
                 log.atInfo()
-                    .setMessage("Method '{}' of class '{}' with arguments: {} returned {} executed in {} ms")
+                    .setMessage("Method '{}' of class '{}' returned {} executed in {} ms with arguments: {} ")
                     .addArgument(method?.name)
-                    .addArgument(originalClassName)
-                    .addArgument { args?.joinToString(", ", "[ ", " ]") }
+                    .addArgument(simpleClassName)
                     .addArgument(result)
                     .addArgument(endTime - startTime)
+                    .addArgument { args?.joinToString(", ", "[ ", " ]") }
                     .log()
                 result
 
@@ -61,7 +60,7 @@ internal class InvocationTrackerBeanPostProcessor : BeanPostProcessor {
                 log.atError()
                     .setMessage("Method '{}' of class '{}' with arguments: {} finished in {} ms and threw {}: '{}'")
                     .addArgument(method?.name)
-                    .addArgument(originalClassName)
+                    .addArgument(simpleClassName)
                     .addArgument { args?.joinToString(", ", "[ ", " ]") }
                     .addArgument(endTime - startTime)
                     .addArgument(e.javaClass.simpleName)
@@ -73,7 +72,7 @@ internal class InvocationTrackerBeanPostProcessor : BeanPostProcessor {
         }
 
         companion object {
-            val log: Logger = LoggerFactory.getLogger(InvocationTrackerBeanPostProcessor::class.java)
+            private val log: Logger = LoggerFactory.getLogger(InvocationTrackerBeanPostProcessor::class.java)
         }
     }
 }

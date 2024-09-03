@@ -39,7 +39,6 @@ internal class CarServiceImpl(private val repository: CarRepository) : CarServic
     override fun getByPlate(plate: String): CarResponse = repository.findByPlate(plate)?.let { CarResponse.from(it) }
         ?: throw ResourceNotFoundException("Car with plate $plate is not found")
 
-    private fun validatePlate(plate: String) {
+    private fun validatePlate(plate: String) =
         require(repository.findByPlate(plate) == null) { "Car with plate $plate is already exist" }
-    }
 }

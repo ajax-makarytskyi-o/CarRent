@@ -42,9 +42,8 @@ internal class UserServiceImpl(private val userRepository: UserRepository) : Use
         userRepository.findByPhoneNumber(phoneNumber)?.let { UserResponse.from(it) }
             ?: throw ResourceNotFoundException("User with phone number $phoneNumber is not found")
 
-    private fun validateAvailabilityEmail(email: String) {
+    private fun validateAvailabilityEmail(email: String) =
         require(userRepository.findByEmail(email) == null) { "User with email $email is already exist" }
-    }
 
     private fun validateAvailabilityPhoneNumber(phoneNumber: String) {
         require(userRepository.findByPhoneNumber(phoneNumber) == null)

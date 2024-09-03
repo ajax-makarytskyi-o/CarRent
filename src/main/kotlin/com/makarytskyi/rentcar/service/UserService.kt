@@ -1,6 +1,5 @@
 package com.makarytskyi.rentcar.service
 
-import com.makarytskyi.rentcar.annotation.InvocationTracker
 import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse

@@ -71,9 +71,9 @@ internal class OrderServiceImpl(
         require(from.after(Date()))
     }
 
-    private fun validateUserExists(userId: String) {
+    private fun validateUserExists(userId: String) =
         require(userRepository.findById(userId) != null) { "User with id $userId is not found" }
-    }
+
 
     private fun validateCarAvailability(carId: String?, from: Date, to: Date) {
         require(carId != null) { "Car id should not be null" }

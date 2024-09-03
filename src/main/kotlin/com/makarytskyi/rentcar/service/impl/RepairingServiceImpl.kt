@@ -46,7 +46,6 @@ internal class RepairingServiceImpl(
     override fun findByStatusAndCar(status: Repairing.RepairingStatus, carId: String): List<RepairingResponse> =
         repairingRepository.findByStatusAndCarId(status, carId).map { RepairingResponse.from(it) }
 
-    private fun validateCarExists(carId: String) {
+    private fun validateCarExists(carId: String) =
         require(carRepository.findById(carId) != null) { "Car in repairing with $carId is not found" }
-    }
 }

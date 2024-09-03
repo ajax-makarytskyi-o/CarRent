@@ -40,7 +40,7 @@ internal class InvocationTrackerBeanPostProcessor : BeanPostProcessor {
 
     class InvocationTrackerHandler(private val bean: Any, private val originalClassName: String?) : InvocationHandler {
 
-        @Suppress("TooGenericExceptionCaught")
+        @Suppress("SwallowedException", "SpreadOperator")
         override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>?): Any? {
             val startTime = System.currentTimeMillis()
             return try {

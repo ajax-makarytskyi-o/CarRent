@@ -26,7 +26,8 @@ internal class CarServiceImpl(private val repository: CarRepository) : CarServic
 
     override fun deleteById(id: String) = repository.deleteById(id)
 
-    override fun findAllByBrand(brand: String): List<CarResponse> = repository.findAllByBrand(brand).map { CarResponse.from(it) }
+    override fun findAllByBrand(brand: String): List<CarResponse> =
+        repository.findAllByBrand(brand).map { CarResponse.from(it) }
 
     override fun findAllByBrandAndModel(brand: String, model: String): List<CarResponse> =
         repository.findAllByBrandAndModel(brand, model).map { CarResponse.from(it) }

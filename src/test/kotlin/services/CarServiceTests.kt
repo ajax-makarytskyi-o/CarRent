@@ -3,7 +3,7 @@ package services
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
 import com.makarytskyi.rentcar.model.Car
 import com.makarytskyi.rentcar.repository.CarRepository
-import com.makarytskyi.rentcar.service.CarService
+import com.makarytskyi.rentcar.service.impl.CarServiceImpl
 import fixtures.CarFixture.carId
 import fixtures.CarFixture.createCarEntity
 import fixtures.CarFixture.createCarRequest
@@ -32,7 +32,7 @@ internal class CarServiceTests {
     lateinit var carRepository: CarRepository
 
     @InjectMocks
-    lateinit var carService: CarService
+    lateinit var carService: CarServiceImpl
 
     @Test
     fun `getById should return CarResponse when Car exists`() {

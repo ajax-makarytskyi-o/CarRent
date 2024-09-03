@@ -1,41 +1,27 @@
 package com.makarytskyi.rentcar.service
 
+import com.makarytskyi.rentcar.annotation.InvocationTracker
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
-import com.makarytskyi.rentcar.exception.ResourceNotFoundException
-import com.makarytskyi.rentcar.repository.CarRepository
 import org.springframework.stereotype.Service
 
 @Service
-internal class CarService(private val repository: CarRepository) {
+internal interface CarService {
 
-    fun getById(id: String): CarResponse = repository.findById(id)?.let { CarResponse.from(it) }
-        ?: throw ResourceNotFoundException("Car with id $id is not found")
+    fun getById(id: String): CarResponse
 
-    fun findAll(): List<CarResponse> = repository.findAll().map { CarResponse.from(it) }
+    fun findAll(): List<CarResponse>
 
-    fun create(carRequest: CreateCarRequest): CarResponse {
-        validatePlate(carRequest.plate)
-        val car = repository.create(CreateCarRequest.toEntity(carRequest))
-        return CarResponse.from(car)
-    }
+    fun create(carRequest: CreateCarRequest): CarResponse
 
-    fun deleteById(id: String) = repository.deleteById(id)
+    fun deleteById(id: String)
 
-    fun findAllByBrand(brand: String): List<CarResponse> = repository.findAllByBrand(brand).map { CarResponse.from(it) }
+    fun findAllByBrand(brand: String): List<CarResponse>
 
-    fun findAllByBrandAndModel(brand: String, model: String): List<CarResponse> =
-        repository.findAllByBrandAndModel(brand, model).map { CarResponse.from(it) }
+    fun findAllByBrandAndModel(brand: String, model: String): List<CarResponse>
 
-    fun update(id: String, carRequest: UpdateCarRequest): CarResponse =
-        repository.update(id, UpdateCarRequest.toEntity(carRequest))?.let { CarResponse.from(it) }
-            ?: throw ResourceNotFoundException("Car with id $id is not found")
+    fun update(id: String, carRequest: UpdateCarRequest): CarResponse
 
-    fun getByPlate(plate: String): CarResponse = repository.findByPlate(plate)?.let { CarResponse.from(it) }
-        ?: throw ResourceNotFoundException("Car with plate $plate is not found")
-
-    private fun validatePlate(plate: String) {
-        require(repository.findByPlate(plate) == null) { "Car with plate $plate is already exist" }
-    }
+    fun getByPlate(plate: String): CarResponse
 }

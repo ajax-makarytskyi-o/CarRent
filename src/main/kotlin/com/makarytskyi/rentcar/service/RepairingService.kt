@@ -4,7 +4,6 @@ import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
 import com.makarytskyi.rentcar.model.Repairing
-import org.springframework.stereotype.Service
 
 internal interface RepairingService {
 

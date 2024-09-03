@@ -3,7 +3,6 @@ package com.makarytskyi.rentcar.service
 import com.makarytskyi.rentcar.dto.order.CreateOrderRequest
 import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
-import org.springframework.stereotype.Service
 
 internal interface OrderService {
 

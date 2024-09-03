@@ -3,7 +3,6 @@ package com.makarytskyi.rentcar.service
 import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
-import org.springframework.stereotype.Service
 
 internal interface UserService {
 

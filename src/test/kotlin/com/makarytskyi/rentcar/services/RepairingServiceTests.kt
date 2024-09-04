@@ -1,10 +1,10 @@
-package services
+package com.makarytskyi.rentcar.services
 
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
 import com.makarytskyi.rentcar.model.Repairing
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.RepairingRepository
-import com.makarytskyi.rentcar.service.RepairingService
+import com.makarytskyi.rentcar.service.impl.RepairingServiceImpl
 import fixtures.CarFixture.carId
 import fixtures.CarFixture.existingCar
 import fixtures.RepairingFixture.createRepairingEntity
@@ -38,7 +38,7 @@ internal class RepairingServiceTests {
     lateinit var carRepository: CarRepository
 
     @InjectMocks
-    lateinit var repairingService: RepairingService
+    lateinit var repairingService: RepairingServiceImpl
 
     @Test
     fun `getById should return RepairingResponse when Repairing exists`() {

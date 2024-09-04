@@ -1,12 +1,12 @@
 
-package services
+package com.makarytskyi.rentcar.services
 
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
 import com.makarytskyi.rentcar.model.Repairing
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
-import com.makarytskyi.rentcar.service.OrderService
+import com.makarytskyi.rentcar.service.impl.OrderServiceImpl
 import fixtures.CarFixture.carId
 import fixtures.CarFixture.existingCar
 import fixtures.OrderFixture.createOrderEntity
@@ -45,7 +45,7 @@ internal class OrderServiceTests {
     lateinit var userRepository: UserRepository
 
     @InjectMocks
-    lateinit var orderService: OrderService
+    lateinit var orderService: OrderServiceImpl
 
     @Test
     fun `getById should return OrderResponse when Order exists`() {

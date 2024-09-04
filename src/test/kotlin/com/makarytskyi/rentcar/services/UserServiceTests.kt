@@ -1,9 +1,9 @@
-package services
+package com.makarytskyi.rentcar.services
 
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
 import com.makarytskyi.rentcar.model.User
 import com.makarytskyi.rentcar.repository.UserRepository
-import com.makarytskyi.rentcar.service.UserService
+import com.makarytskyi.rentcar.service.impl.UserServiceImpl
 import fixtures.UserFixture.createUserEntity
 import fixtures.UserFixture.createUserRequest
 import fixtures.UserFixture.createdUser
@@ -31,7 +31,7 @@ internal class UserServiceTests {
     lateinit var userRepository: UserRepository
 
     @InjectMocks
-    lateinit var userService: UserService
+    lateinit var userService: UserServiceImpl
 
     @Test
     fun `getById should return UserResponse when User exists`() {

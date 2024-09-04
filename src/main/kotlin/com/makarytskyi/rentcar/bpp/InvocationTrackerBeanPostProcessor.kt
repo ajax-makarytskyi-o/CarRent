@@ -59,7 +59,7 @@ internal class InvocationTrackerBeanPostProcessor : BeanPostProcessor {
                 val endTime = System.currentTimeMillis()
 
                 log.atError()
-                    .setMessage("Method '{}' of class '{}' with arguments: {} finished in {} ms and threw")
+                    .setMessage("Method '{}' of class '{}' with arguments: {} finished with exception in {} ms")
                     .addArgument(method?.name)
                     .addArgument(simpleClassName)
                     .addArgument { args?.joinToString(", ", "[ ", " ]") }

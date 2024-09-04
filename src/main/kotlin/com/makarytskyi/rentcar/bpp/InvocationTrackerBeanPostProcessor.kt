@@ -57,15 +57,16 @@ internal class InvocationTrackerBeanPostProcessor : BeanPostProcessor {
 
             } catch (e: InvocationTargetException) {
                 val endTime = System.currentTimeMillis()
-                log.atError()
-                    .setMessage("Method '{}' of class '{}' with arguments: {} finished in {} ms and threw {}: '{}'")
-                    .addArgument(method?.name)
-                    .addArgument(simpleClassName)
-                    .addArgument { args?.joinToString(", ", "[ ", " ]") }
-                    .addArgument(endTime - startTime)
-                    .addArgument(e.javaClass.simpleName)
-                    .addArgument(e.targetException.message)
-                    .log()
+                val joinArgs = { args?.joinToString(", ", "[ ", " ]") }
+                log.error(
+                    "Method '{}' of class '{}' with arguments: {} finished in {} ms and threw {}",
+                    method?.name,
+                    simpleClassName,
+                    joinArgs(),
+                    endTime - startTime,
+                    e.targetException.javaClass.simpleName,
+                    e.targetException
+                )
 
                 throw e.targetException
             }

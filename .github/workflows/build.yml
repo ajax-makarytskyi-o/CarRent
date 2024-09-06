@@ -22,7 +22,7 @@ jobs:
           cache: gradle
 
       - name: Run gradle build
-        run: ./gradlew build
+        run: ./gradlew build -x deltaCoverage
 
       - name: Delta Coverage check
         if: ${{ github.event_name == 'pull_request' && success() }}

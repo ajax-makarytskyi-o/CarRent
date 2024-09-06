@@ -1,0 +1,38 @@
+name: Build CarRent
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+          cache: gradle
+
+      - name: Gradle Set up
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Run gradle build
+        run: ./gradlew build -x deltaCoverage
+
+      - name: Delta Coverage check
+        if: ${{ github.event_name == 'pull_request' && success() }}
+        run: ./gradlew deltaCoverage -PdiffBase="refs/remotes/origin/$GITHUB_BASE_REF"

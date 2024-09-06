@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -23,6 +24,11 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
           cache: gradle
+
+      - name: Gradle Set up
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Run gradle build
         run: ./gradlew build -x deltaCoverage

@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-depl
+  labels:
+    app: app
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: app
+          image: application
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 2
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 4
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: database
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-configmap
+                  key: database
+            - name: username
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: username
+            - name: password
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: password
+            - name: authentication_database
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-configmap
+                  key: authentication_database
+            - name: mongo_host
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-configmap
+                  key: mongo_host
+            - name: mongo_port
+              valueFrom:
+                configMapKeyRef:
+                  name: mongo-configmap
+                  key: mongo_port
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service
+spec:
+  selector:
+    app: app
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

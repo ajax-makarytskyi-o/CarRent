@@ -4,6 +4,5 @@ metadata:
   name: mongo-configmap
 data:
   database: rentcar
-  authentication_database: admin
   mongo_host: mongo-service
   mongo_port: "27017"

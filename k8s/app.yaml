@@ -5,11 +5,6 @@ metadata:
   labels:
     app: app
 spec:
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
   replicas: 3
   selector:
     matchLabels:
@@ -24,42 +19,37 @@ spec:
           image: application
           readinessProbe:
             httpGet:
-              path: /
+              path: /api/v1/actuator/health
               port: 8080
             initialDelaySeconds: 2
-            periodSeconds: 10
+            periodSeconds: 5
             timeoutSeconds: 2
             failureThreshold: 4
           imagePullPolicy: Never
           ports:
             - containerPort: 8080
           env:
-            - name: database
+            - name: DATABASE
               valueFrom:
                 configMapKeyRef:
                   name: mongo-configmap
                   key: database
-            - name: username
+            - name: USERNAME
               valueFrom:
                 secretKeyRef:
                   name: mongo-secret
                   key: username
-            - name: password
+            - name: PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mongo-secret
                   key: password
-            - name: authentication_database
-              valueFrom:
-                configMapKeyRef:
-                  name: mongo-configmap
-                  key: authentication_database
-            - name: mongo_host
+            - name: MONGO_HOST
               valueFrom:
                 configMapKeyRef:
                   name: mongo-configmap
                   key: mongo_host
-            - name: mongo_port
+            - name: MONGO_PORT
               valueFrom:
                 configMapKeyRef:
                   name: mongo-configmap

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: mongo
-          image: mongo
+          image: mongo:7.0.12
           ports:
             - containerPort: 27017
           env:
@@ -35,6 +35,13 @@ spec:
                 configMapKeyRef:
                   name: mongo-configmap
                   key: database
+          volumeMounts:
+            - name: data
+              mountPath: /data/db
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mongo-claim
 
 ---
 apiVersion: v1

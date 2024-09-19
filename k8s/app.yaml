@@ -34,12 +34,12 @@ spec:
                 configMapKeyRef:
                   name: mongo-configmap
                   key: database
-            - name: USERNAME
+            - name: MONGO_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: mongo-secret
                   key: username
-            - name: PASSWORD
+            - name: MONGO_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mongo-secret

@@ -4,8 +4,14 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://${username}:${password}@${mongo_host}:${mongo_port}/${database}?authSource=${authentication_database}
+      uri: mongodb://${USERNAME}:${PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${DATABASE}?authSource=admin
 
 server:
   servlet:
     contextPath: /api/v1
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true

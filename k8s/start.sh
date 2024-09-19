@@ -5,11 +5,13 @@ eval $(minikube docker-env)
 docker build -t application .
 cd k8s
 
-kubectl apply -f config-map.yaml
-kubectl apply -f secret_mongo.yaml
-kubectl apply -f mongo-depl.yaml
-kubectl apply -f app-depl.yaml
+kubectl apply -f mongo-config-map.yaml
+kubectl apply -f mongo-secret.yaml
+kubectl apply -f mongo.yaml
+kubectl apply -f app.yaml
 kubectl apply -f express.yaml
+kubectl apply -f persistence-volume.yaml
+kubectl apply -f persistence-volume-claim.yaml
 
 minikube addons enable ingress
 

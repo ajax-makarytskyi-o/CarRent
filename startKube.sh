@@ -1,9 +1,8 @@
 minikube start
-cd ..
-./gradlew build
+
+../gradlew build
 eval $(minikube docker-env)
-docker build -t application .
-cd k8s
+docker build -t application ..
 
 kubectl apply -f mongo-config-map.yaml
 kubectl apply -f mongo-secret.yaml

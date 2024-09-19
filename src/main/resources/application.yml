@@ -4,7 +4,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://${USERNAME}:${PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${DATABASE}?authSource=admin
+      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${DATABASE}?authSource=admin
 
 server:
   servlet:

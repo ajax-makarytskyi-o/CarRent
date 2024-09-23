@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-configmap
+data:
+  database: rentcar
+  mongo_host: mongo-service
+  mongo_port: "27017"

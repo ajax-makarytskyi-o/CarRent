@@ -1,5 +1,6 @@
 package com.makarytskyi.rentcar.controller
 
+import com.makarytskyi.rentcar.dto.order.AggregatedOrderResponse
 import com.makarytskyi.rentcar.dto.order.CreateOrderRequest
 import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
@@ -21,10 +22,10 @@ import org.springframework.web.bind.annotation.RestController
 internal class OrderController(private val service: OrderService) {
 
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): OrderResponse = service.getById(id)
+    fun findById(@PathVariable id: String): AggregatedOrderResponse = service.getById(id)
 
     @GetMapping()
-    fun findAll(): List<OrderResponse> = service.findAll()
+    fun findAll(): List<AggregatedOrderResponse> = service.findAll()
 
     @GetMapping("/car/{carId}")
     fun findByCar(@PathVariable carId: String): List<OrderResponse> = service.findByCar(carId)

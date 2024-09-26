@@ -1,9 +1,10 @@
 package com.makarytskyi.rentcar.controller
 
+import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
-import com.makarytskyi.rentcar.model.Repairing
+import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.service.RepairingService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -22,16 +23,16 @@ import org.springframework.web.bind.annotation.RestController
 internal class RepairingController(private val service: RepairingService) {
 
     @GetMapping()
-    fun findAll(): List<RepairingResponse> = service.findAll()
+    fun findAll(): List<AggregatedRepairingResponse> = service.findAll()
 
     @GetMapping("/status/{status}/car/{carId}")
-    fun findByStatus(
-        @PathVariable status: Repairing.RepairingStatus,
+    fun findByStatusAndCar(
+        @PathVariable status: MongoRepairing.RepairingStatus,
         @PathVariable carId: String
     ): List<RepairingResponse> = service.findByStatusAndCar(status, carId)
 
     @GetMapping("/status/{status}")
-    fun findByStatus(@PathVariable status: Repairing.RepairingStatus): List<RepairingResponse> =
+    fun findByStatus(@PathVariable status: MongoRepairing.RepairingStatus): List<RepairingResponse> =
         service.findByStatus(status)
 
     @GetMapping("/car/{carId}")
@@ -42,7 +43,7 @@ internal class RepairingController(private val service: RepairingService) {
     fun create(@Valid @RequestBody repairing: CreateRepairingRequest): RepairingResponse = service.create(repairing)
 
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): RepairingResponse = service.getById(id)
+    fun findById(@PathVariable id: String): AggregatedRepairingResponse = service.getById(id)
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

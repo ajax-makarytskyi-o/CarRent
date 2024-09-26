@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.service.impl
 
 import com.makarytskyi.rentcar.annotation.InvocationTracker
+import com.makarytskyi.rentcar.dto.order.AggregatedOrderResponse
 import com.makarytskyi.rentcar.dto.order.CreateOrderRequest
 import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
@@ -20,12 +21,12 @@ internal class OrderServiceImpl(
     private val userRepository: UserRepository
 ) : OrderService {
 
-    override fun getById(id: String): OrderResponse =
-        orderRepository.findById(id)?.let { OrderResponse.from(it, getCarPrice(it.carId)) }
+    override fun getById(id: String): AggregatedOrderResponse =
+        orderRepository.findById(id)?.let { AggregatedOrderResponse.from(it) }
             ?: throw ResourceNotFoundException("Order with id $id is not found")
 
-    override fun findAll(): List<OrderResponse> =
-        orderRepository.findAll().map { OrderResponse.from(it, getCarPrice(it.carId)) }
+    override fun findAll(): List<AggregatedOrderResponse> =
+        orderRepository.findAll().map { AggregatedOrderResponse.from(it) }
             .toList()
 
     override fun create(createOrderRequest: CreateOrderRequest): OrderResponse {
@@ -43,32 +44,32 @@ internal class OrderServiceImpl(
     override fun deleteById(id: String) = orderRepository.deleteById(id)
 
     override fun findByUser(userId: String): List<OrderResponse> = orderRepository.findByUserId(userId).map {
-        OrderResponse.from(it, getCarPrice(it.carId))
+        OrderResponse.from(it, getCarPrice(it.carId.toString()))
     }
 
     override fun findByCar(carId: String): List<OrderResponse> = orderRepository.findByCarId(carId).map {
-        OrderResponse.from(it, getCarPrice(it.carId))
+        OrderResponse.from(it, getCarPrice(it.carId.toString()))
     }
 
     override fun findByCarAndUser(carId: String, userId: String): List<OrderResponse> =
-        orderRepository.findByUserIdAndCarId(carId, userId)
-            .map { OrderResponse.from(it, getCarPrice(it.carId)) }
+        orderRepository.findByCarIdAndUserId(carId, userId)
+            .map { OrderResponse.from(it, getCarPrice(it.carId.toString())) }
 
     override fun update(id: String, orderRequest: UpdateOrderRequest): OrderResponse {
         val order = orderRepository.findById(id) ?: throw ResourceNotFoundException("Order with $id is not found")
         val newFrom = orderRequest.from ?: order.from
         val newTo = orderRequest.to ?: order.to
         validateDates(newFrom!!, newTo!!)
-        validateCarAvailability(order.carId, newFrom, newTo)
+        validateCarAvailability(order.car?.id.toString(), newFrom, newTo)
 
         return orderRepository.update(id, UpdateOrderRequest.toEntity(orderRequest))
-            ?.let { OrderResponse.from(it, getCarPrice(order.carId)) }
+            ?.let { OrderResponse.from(it, order.car?.price) }
             ?: throw ResourceNotFoundException("Order with $id is not found")
     }
 
     private fun validateDates(from: Date, to: Date) {
         require(to.after(from)) { "Start date must be before end date"}
-        require(from.after(Date()))
+        require(from.after(Date())) { "Dates must be in future" }
     }
 
     private fun validateUserExists(userId: String) =

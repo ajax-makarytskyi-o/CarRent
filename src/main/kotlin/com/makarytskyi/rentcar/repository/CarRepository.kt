@@ -1,28 +1,24 @@
 package com.makarytskyi.rentcar.repository
 
-import com.makarytskyi.rentcar.model.Car
+import com.makarytskyi.rentcar.model.MongoCar
 import org.springframework.stereotype.Repository
 
 @Repository
 internal interface CarRepository {
 
-    fun findById(id: String): Car?
+    fun findById(id: String): MongoCar?
 
-    fun findAll(): List<Car>
+    fun findAll(): List<MongoCar>
 
-    fun create(car: Car): Car
+    fun create(mongoCar: MongoCar): MongoCar
 
     fun deleteById(id: String)
 
-    fun update(id: String, car: Car): Car?
+    fun update(id: String, mongoCar: MongoCar): MongoCar?
 
-    fun findTheMostExpensiveAvailableCar(): Car?
+    fun findByPlate(plate: String): MongoCar?
 
-    fun findTheCheapestAvailableCar(): Car?
+    fun findAllByBrand(brand: String): List<MongoCar>
 
-    fun findByPlate(plate: String?): Car?
-
-    fun findAllByBrand(brand: String): List<Car>
-
-    fun findAllByBrandAndModel(brand: String, model: String): List<Car>
+    fun findAllByBrandAndModel(brand: String, model: String): List<MongoCar>
 }

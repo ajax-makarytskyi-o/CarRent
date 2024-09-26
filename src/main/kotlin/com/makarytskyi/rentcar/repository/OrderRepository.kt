@@ -1,29 +1,25 @@
 package com.makarytskyi.rentcar.repository
 
-import com.makarytskyi.rentcar.model.Order
-import java.util.Date
+import com.makarytskyi.rentcar.model.MongoOrder
+import com.makarytskyi.rentcar.model.aggregated.AggregatedMongoOrder
 import org.springframework.stereotype.Repository
 
 @Repository
 internal interface OrderRepository {
 
-    fun findById(id: String): Order?
+    fun findById(id: String): AggregatedMongoOrder?
 
-    fun findAll(): List<Order>
+    fun findAll(): List<AggregatedMongoOrder>
 
-    fun create(order: Order): Order
+    fun create(mongoOrder: MongoOrder): MongoOrder
 
     fun deleteById(id: String)
 
-    fun findAllByDate(date: Date): List<Order>
+    fun findByUserId(userId: String): List<MongoOrder>
 
-    fun findByUserId(userId: String): List<Order>
+    fun findByCarId(carId: String): List<MongoOrder>
 
-    fun findByCarId(carId: String): List<Order>
+    fun update(id: String, mongoOrder: MongoOrder): MongoOrder?
 
-    fun findByDate(date: Date): List<Order>
-
-    fun update(id: String, order: Order): Order?
-
-    fun findByUserIdAndCarId(carId: String, userId: String): List<Order>
+    fun findByCarIdAndUserId(carId: String, userId: String): List<MongoOrder>
 }

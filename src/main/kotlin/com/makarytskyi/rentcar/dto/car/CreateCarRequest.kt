@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.dto.car
 
-import com.makarytskyi.rentcar.model.Car
+import com.makarytskyi.rentcar.model.MongoCar
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -19,11 +19,11 @@ data class CreateCarRequest(
     @field:NotNull
     @field:Size(max = 12)
     val plate: String,
-    val color: Car.CarColor?,
+    val color: MongoCar.CarColor?,
 ) {
 
     companion object {
-        fun toEntity(carRequest: CreateCarRequest): Car = Car(
+        fun toEntity(carRequest: CreateCarRequest): MongoCar = MongoCar(
             brand = carRequest.brand,
             model = carRequest.model,
             price = carRequest.price,

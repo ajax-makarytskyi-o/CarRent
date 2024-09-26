@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.dto.user
 
-import com.makarytskyi.rentcar.model.User
+import com.makarytskyi.rentcar.model.MongoUser
 import jakarta.validation.constraints.Pattern
 
 data class UpdateUserRequest(
@@ -12,7 +12,7 @@ data class UpdateUserRequest(
 ) {
 
     companion object {
-        fun toEntity(userRequest: UpdateUserRequest): User = User(
+        fun toEntity(userRequest: UpdateUserRequest): MongoUser = MongoUser(
             name = userRequest.name,
             email = null,
             phoneNumber = userRequest.phoneNumber,

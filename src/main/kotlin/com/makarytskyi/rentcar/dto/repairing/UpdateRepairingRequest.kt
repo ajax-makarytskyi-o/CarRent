@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.dto.repairing
 
-import com.makarytskyi.rentcar.model.Repairing
-import com.makarytskyi.rentcar.model.Repairing.RepairingStatus
+import com.makarytskyi.rentcar.model.MongoRepairing
+import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus
 import jakarta.validation.constraints.Min
 
 data class UpdateRepairingRequest(
@@ -11,7 +11,7 @@ data class UpdateRepairingRequest(
 ) {
 
     companion object {
-        fun toEntity(repairingRequest: UpdateRepairingRequest): Repairing = Repairing(
+        fun toEntity(repairingRequest: UpdateRepairingRequest): MongoRepairing = MongoRepairing(
             carId = null,
             date = null,
             price = repairingRequest.price,

@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.services
 
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
-import com.makarytskyi.rentcar.model.Repairing
+import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.RepairingRepository
 import com.makarytskyi.rentcar.service.impl.RepairingServiceImpl
@@ -10,8 +10,10 @@ import fixtures.CarFixture.existingCar
 import fixtures.RepairingFixture.createRepairingEntity
 import fixtures.RepairingFixture.createRepairingRequest
 import fixtures.RepairingFixture.createdRepairing
+import fixtures.RepairingFixture.existingAggregatedRepairing
 import fixtures.RepairingFixture.existingRepairing
 import fixtures.RepairingFixture.repairingId
+import fixtures.RepairingFixture.responseAggregatedRepairing
 import fixtures.RepairingFixture.responseRepairing
 import fixtures.RepairingFixture.updateRepairingEntity
 import fixtures.RepairingFixture.updateRepairingRequest
@@ -44,34 +46,34 @@ internal class RepairingServiceTests {
     fun `getById should return RepairingResponse when Repairing exists`() {
         //GIVEN
         val car = existingCar()
-        val repairing = existingRepairing(car)
-        val response = responseRepairing(repairing)
-        whenever(repairingRepository.findById(repairingId)).thenReturn(repairing)
+        val repairing = existingAggregatedRepairing(car)
+        val response = responseAggregatedRepairing(repairing)
+        whenever(repairingRepository.findById(repairingId.toString())).thenReturn(repairing)
 
         //WHEN
-        val result = repairingService.getById(repairingId)
+        val result = repairingService.getById(repairingId.toString())
 
         //THEN
         assertEquals(response, result)
-        verify(repairingRepository).findById(repairingId)
+        verify(repairingRepository).findById(repairingId.toString())
     }
 
     @Test
     fun `getById should return throw ResourceNotFoundException`() {
         //GIVEN
-        whenever(repairingRepository.findById(repairingId)).thenReturn(null)
+        whenever(repairingRepository.findById(repairingId.toString())).thenReturn(null)
 
         //WHEN //THEN
-        assertThrows(ResourceNotFoundException::class.java, { repairingService.getById(repairingId) })
-        verify(repairingRepository).findById(repairingId)
+        assertThrows(ResourceNotFoundException::class.java, { repairingService.getById(repairingId.toString()) })
+        verify(repairingRepository).findById(repairingId.toString())
     }
 
     @Test
     fun `findAll should return List of RepairingResponse`() {
         //GIVEN
         val car = existingCar()
-        val repairing = existingRepairing(car)
-        val response = responseRepairing(repairing)
+        val repairing = existingAggregatedRepairing(car)
+        val response = responseAggregatedRepairing(repairing)
         val repairings = listOf(repairing)
         val expected = listOf(response)
         whenever(repairingRepository.findAll()).thenReturn(repairings)
@@ -93,7 +95,7 @@ internal class RepairingServiceTests {
         val result = repairingService.findAll()
 
         //THEN
-        Assertions.assertEquals(emptyList<Repairing>(), result)
+        Assertions.assertEquals(emptyList<MongoRepairing>(), result)
         verify(repairingRepository).findAll()
     }
 
@@ -106,7 +108,7 @@ internal class RepairingServiceTests {
         val createdRepairing = createdRepairing(requestEntity)
         val response = responseRepairing(createdRepairing)
         whenever(repairingRepository.create(requestEntity)).thenReturn(createdRepairing)
-        whenever(carRepository.findById(carId)).thenReturn(car)
+        whenever(carRepository.findById(carId.toString())).thenReturn(car)
 
         //WHEN
         val result = repairingService.create(request)
@@ -121,7 +123,7 @@ internal class RepairingServiceTests {
         //GIVEN
         val car = existingCar()
         val request = createRepairingRequest(car)
-        whenever(carRepository.findById(carId)).thenReturn(null)
+        whenever(carRepository.findById(carId.toString())).thenReturn(null)
 
         //WHEN //THEN
         assertThrows(IllegalArgumentException::class.java, { repairingService.create(request) })
@@ -135,14 +137,14 @@ internal class RepairingServiceTests {
         val request = updateRepairingRequest()
         val requestEntity = updateRepairingEntity(request)
         val updatedRepairing = updatedRepairing(repairing, request)
-        whenever(repairingRepository.update(repairingId, requestEntity)).thenReturn(updatedRepairing)
+        whenever(repairingRepository.update(repairingId.toString(), requestEntity)).thenReturn(updatedRepairing)
 
         //WHEN
-        val result = repairingService.update(repairingId, request)
+        val result = repairingService.update(repairingId.toString(), request)
 
         //THEN
         assertNotNull(result)
-        verify(repairingRepository).update(repairingId, requestEntity)
+        verify(repairingRepository).update(repairingId.toString(), requestEntity)
     }
 
     @Test

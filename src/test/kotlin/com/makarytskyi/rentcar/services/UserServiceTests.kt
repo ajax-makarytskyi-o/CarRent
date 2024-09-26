@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.services
 
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
-import com.makarytskyi.rentcar.model.User
+import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.service.impl.UserServiceImpl
 import fixtures.UserFixture.createUserEntity
@@ -38,24 +38,24 @@ internal class UserServiceTests {
         //GIVEN
         val user = existingUser()
         val response = responseUser(user)
-        whenever(userRepository.findById(userId)).thenReturn(user)
+        whenever(userRepository.findById(userId.toString())).thenReturn(user)
 
         //WHEN
-        val result = userService.getById(userId)
+        val result = userService.getById(userId.toString())
 
         //THEN
         assertEquals(response, result)
-        verify(userRepository).findById(userId)
+        verify(userRepository).findById(userId.toString())
     }
 
     @Test
     fun `getById should return throw ResourceNotFoundException`() {
         //GIVEN
-        whenever(userRepository.findById(userId)).thenReturn(null)
+        whenever(userRepository.findById(userId.toString())).thenReturn(null)
 
         //WHEN //THEN
-        assertThrows(ResourceNotFoundException::class.java, { userService.getById(userId) })
-        verify(userRepository).findById(userId)
+        assertThrows(ResourceNotFoundException::class.java, { userService.getById(userId.toString()) })
+        verify(userRepository).findById(userId.toString())
     }
 
     @Test
@@ -63,9 +63,9 @@ internal class UserServiceTests {
         //GIVEN
         val user = existingUser()
         val response = responseUser(user)
-        val users: List<User> = listOf(user)
+        val mongoUsers: List<MongoUser> = listOf(user)
         val expected = listOf(response)
-        whenever(userRepository.findAll()).thenReturn(users)
+        whenever(userRepository.findAll()).thenReturn(mongoUsers)
 
         //WHEN
         val result = userService.findAll()
@@ -112,14 +112,14 @@ internal class UserServiceTests {
         val request = updateUserRequest()
         val requestEntity = updateUserEntity(request)
         val updatedUser = updatedUser(user, request)
-        whenever(userRepository.update(userId, requestEntity)).thenReturn(updatedUser)
+        whenever(userRepository.update(userId.toString(), requestEntity)).thenReturn(updatedUser)
 
         //WHEN
-        val result = userService.update(userId, request)
+        val result = userService.update(userId.toString(), request)
 
         //THEN
         assertNotNull(result)
-        verify(userRepository).update(userId, requestEntity)
+        verify(userRepository).update(userId.toString(), requestEntity)
     }
 
     @Test

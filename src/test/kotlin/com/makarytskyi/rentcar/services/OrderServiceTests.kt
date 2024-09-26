@@ -2,7 +2,7 @@
 package com.makarytskyi.rentcar.services
 
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
-import com.makarytskyi.rentcar.model.Repairing
+import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
@@ -12,9 +12,10 @@ import fixtures.CarFixture.existingCar
 import fixtures.OrderFixture.createOrderEntity
 import fixtures.OrderFixture.createOrderRequest
 import fixtures.OrderFixture.createdOrder
-import fixtures.OrderFixture.existingOrder
+import fixtures.OrderFixture.existingAggregatedOrder
 import fixtures.OrderFixture.existingOrderOnCar
 import fixtures.OrderFixture.orderId
+import fixtures.OrderFixture.responseAggregatedOrder
 import fixtures.OrderFixture.responseOrder
 import fixtures.OrderFixture.updateOrderEntity
 import fixtures.OrderFixture.updateOrderRequest
@@ -52,27 +53,26 @@ internal class OrderServiceTests {
         //GIVEN
         val car = existingCar()
         val user = existingUser()
-        val order = existingOrder(car, user)
-        val response = responseOrder(order, car)
-        whenever(orderRepository.findById(orderId)).thenReturn(order)
-        whenever(carRepository.findById(carId)).thenReturn(car)
+        val order = existingAggregatedOrder(car, user)
+        val response = responseAggregatedOrder(order, car)
+        whenever(orderRepository.findById(orderId.toString())).thenReturn(order)
 
         //WHEN
-        val result = orderService.getById(orderId)
+        val result = orderService.getById(orderId.toString())
 
         //THEN
         assertEquals(response, result)
-        verify(orderRepository).findById(orderId)
+        verify(orderRepository).findById(orderId.toString())
     }
 
     @Test
     fun `getById should return throw ResourceNotFoundException`() {
         //GIVEN
-        whenever(orderRepository.findById(orderId)).thenReturn(null)
+        whenever(orderRepository.findById(orderId.toString())).thenReturn(null)
 
         //WHEN //THEN
-        assertThrows(ResourceNotFoundException::class.java, { orderService.getById(orderId) })
-        verify(orderRepository).findById(orderId)
+        assertThrows(ResourceNotFoundException::class.java, { orderService.getById(orderId.toString()) })
+        verify(orderRepository).findById(orderId.toString())
     }
 
     @Test
@@ -80,12 +80,11 @@ internal class OrderServiceTests {
         //GIVEN
         val car = existingCar()
         val user = existingUser()
-        val order = existingOrder(car, user)
-        val response = responseOrder(order, car)
+        val order = existingAggregatedOrder(car, user)
+        val response = responseAggregatedOrder(order, car)
         val orders = listOf(order)
         val expected = listOf(response)
         whenever(orderRepository.findAll()).thenReturn(orders)
-        whenever(carRepository.findById(carId)).thenReturn(car)
 
         //WHEN
         val result = orderService.findAll()
@@ -104,7 +103,7 @@ internal class OrderServiceTests {
         val result = orderService.findAll()
 
         //THEN
-        Assertions.assertEquals(emptyList<Repairing>(), result)
+        Assertions.assertEquals(emptyList<MongoRepairing>(), result)
         verify(orderRepository).findAll()
     }
 
@@ -118,8 +117,8 @@ internal class OrderServiceTests {
         val createdOrder = createdOrder(requestEntity)
         val response = responseOrder(createdOrder, car)
         whenever(orderRepository.create(requestEntity)).thenReturn(createdOrder)
-        whenever(carRepository.findById(carId)).thenReturn(car)
-        whenever(userRepository.findById(userId)).thenReturn(user)
+        whenever(carRepository.findById(carId.toString())).thenReturn(car)
+        whenever(userRepository.findById(userId.toString())).thenReturn(user)
 
         //WHEN
         val result = orderService.create(request)
@@ -134,8 +133,8 @@ internal class OrderServiceTests {
         //GIVEN
         val user = existingUser()
         val car = existingCar()
-        whenever(userRepository.findById(userId)).thenReturn(user)
-        whenever(carRepository.findById(carId)).thenReturn(null)
+        whenever(userRepository.findById(userId.toString())).thenReturn(user)
+        whenever(carRepository.findById(carId.toString())).thenReturn(null)
 
         //WHEN //THEN
         assertThrows(ResourceNotFoundException::class.java, { orderService.create(createOrderRequest(car, user)) })
@@ -147,7 +146,7 @@ internal class OrderServiceTests {
         val car = existingCar()
         val user = existingUser()
         val request = createOrderRequest(car, user)
-        whenever(userRepository.findById(userId)).thenReturn(null)
+        whenever(userRepository.findById(userId.toString())).thenReturn(null)
 
         //WHEN //THEN
         assertThrows(IllegalArgumentException::class.java, { orderService.create(request) })
@@ -158,13 +157,13 @@ internal class OrderServiceTests {
         //GIVEN
         val user = existingUser()
         val car = existingCar()
-        whenever(userRepository.findById(userId)).thenReturn(user)
-        whenever(carRepository.findById(carId)).thenReturn(car)
-        whenever(orderRepository.findByCarId(carId)).thenReturn(listOf(existingOrderOnCar(car, user)))
+        whenever(userRepository.findById(userId.toString())).thenReturn(user)
+        whenever(carRepository.findById(carId.toString())).thenReturn(car)
+        whenever(orderRepository.findByCarId(carId.toString())).thenReturn(listOf(existingOrderOnCar(car, user)))
 
         //WHEN //THEN
         assertThrows(IllegalArgumentException::class.java, { orderService.create(createOrderRequest(car, user)) })
-        verify(orderRepository).findByCarId(carId)
+        verify(orderRepository).findByCarId(carId.toString())
     }
 
     @Test
@@ -172,21 +171,21 @@ internal class OrderServiceTests {
         //GIVEN
         val car = existingCar()
         val user = existingUser()
-        val order = existingOrder(car, user)
+        val order = existingAggregatedOrder(car, user)
         val request = updateOrderRequest()
         val requestEntity = updateOrderEntity(request)
         val updatedOrder = updatedOrder(order, request)
         val response = responseOrder(updatedOrder, car)
-        whenever(orderRepository.findById(orderId)).thenReturn(order)
-        whenever(carRepository.findById(carId)).thenReturn(car)
-        whenever(orderRepository.update(orderId, requestEntity)).thenReturn(updatedOrder)
+        whenever(orderRepository.findById(orderId.toString())).thenReturn(order)
+        whenever(carRepository.findById(carId.toString())).thenReturn(car)
+        whenever(orderRepository.update(orderId.toString(), requestEntity)).thenReturn(updatedOrder)
 
         //WHEN
-        val result = orderService.update(orderId, request)
+        val result = orderService.update(orderId.toString(), request)
 
         //THEN
         assertEquals(response, result)
-        verify(orderRepository).update(orderId, requestEntity)
+        verify(orderRepository).update(orderId.toString(), requestEntity)
     }
 
     @Test

@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.services
 
 import com.makarytskyi.rentcar.exception.ResourceNotFoundException
-import com.makarytskyi.rentcar.model.Car
+import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.service.impl.CarServiceImpl
 import fixtures.CarFixture.carId
@@ -39,24 +39,24 @@ internal class CarServiceTests {
         //GIVEN
         val car = existingCar()
         val responseCar = responseCar(car)
-        whenever(carRepository.findById(carId)).thenReturn(car)
+        whenever(carRepository.findById(carId.toString())).thenReturn(car)
 
         //WHEN
-        val result = carService.getById(carId)
+        val result = carService.getById(carId.toString())
 
         //THEN
         assertEquals(responseCar, result)
-        verify(carRepository).findById(carId)
+        verify(carRepository).findById(carId.toHexString())
     }
 
     @Test
     fun `getById should return throw ResourceNotFoundException`() {
         //GIVEN
-        whenever(carRepository.findById(carId)).thenReturn(null)
+        whenever(carRepository.findById(carId.toString())).thenReturn(null)
 
         //WHEN //THEN
-        assertThrows(ResourceNotFoundException::class.java, { carService.getById(carId) })
-        verify(carRepository).findById(carId)
+        assertThrows(ResourceNotFoundException::class.java, { carService.getById(carId.toString()) })
+        verify(carRepository).findById(carId.toString())
     }
 
     @Test
@@ -64,9 +64,9 @@ internal class CarServiceTests {
         //GIVEN
         val car = existingCar()
         val response = responseCar(car)
-        val cars: List<Car> = listOf(car)
+        val mongoCars: List<MongoCar> = listOf(car)
         val expected = listOf(response)
-        whenever(carRepository.findAll()).thenReturn(cars)
+        whenever(carRepository.findAll()).thenReturn(mongoCars)
 
         //WHEN
         val result = carService.findAll()
@@ -113,15 +113,15 @@ internal class CarServiceTests {
         val updateCarRequest = updateCarRequest()
         val updateCarEntity = updateCarEntity(updateCarRequest)
         val updatedCar = updatedCar(oldCar, updateCarRequest)
-        whenever(carRepository.update(carId, updateCarEntity)).thenReturn(updatedCar)
+        whenever(carRepository.update(carId.toString(), updateCarEntity)).thenReturn(updatedCar)
 
         //WHEN
-        val result = carService.update(carId, updateCarRequest)
+        val result = carService.update(carId.toString(), updateCarRequest)
 
         //THEN
         assertNotNull(result)
         assertEquals(newCarPrice, result.price)
-        verify(carRepository).update(carId, updateCarEntity)
+        verify(carRepository).update(carId.toString(), updateCarEntity)
     }
 
     @Test

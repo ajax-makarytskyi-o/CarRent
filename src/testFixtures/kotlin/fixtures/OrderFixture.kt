@@ -1,18 +1,22 @@
 package fixtures
 
+import com.makarytskyi.rentcar.dto.order.AggregatedOrderResponse
 import com.makarytskyi.rentcar.dto.order.CreateOrderRequest
 import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
-import com.makarytskyi.rentcar.model.Car
-import com.makarytskyi.rentcar.model.Order
-import com.makarytskyi.rentcar.model.User
+import com.makarytskyi.rentcar.model.MongoCar
+import com.makarytskyi.rentcar.model.MongoOrder
+import com.makarytskyi.rentcar.model.MongoUser
+import com.makarytskyi.rentcar.model.aggregated.AggregatedMongoOrder
+import fixtures.CarFixture.responseCar
+import fixtures.UserFixture.responseUser
 import java.util.Calendar
 import java.util.Date
 import org.bson.types.ObjectId
 
 object OrderFixture {
-    val orderId = ObjectId().toHexString()
-    val createdOrderId = ObjectId().toHexString()
+    val orderId = ObjectId()
+    val createdOrderId = ObjectId()
     var tommorow = Calendar.getInstance()
     var twoDaysAfter = Calendar.getInstance()
     var monthAfter = Calendar.getInstance()
@@ -26,63 +30,80 @@ object OrderFixture {
 
     }
 
-    fun existingOrder(car: Car, user: User) = Order(
-        id = orderId,
-        carId = car.id,
-        userId = user.id,
+    fun unexistingOrder(carId: ObjectId?, userId: ObjectId?) = MongoOrder(
+        id = null,
+        carId = carId,
+        userId = userId,
         from = Date.from(tommorow.toInstant()),
         to = Date.from(twoDaysAfter.toInstant()),
     )
 
-    fun existingOrderOnCar(car: Car, user: User) = Order(
-        id = ObjectId().toHexString(),
-        carId = car.id,
-        userId = user.id,
+
+    fun randomOrder(carId: ObjectId?, userId: ObjectId?) = MongoOrder(
+        id = ObjectId(),
+        carId = carId,
+        userId = userId,
+        from = Date.from(tommorow.toInstant()),
+        to = Date.from(twoDaysAfter.toInstant()),
+    )
+
+    fun existingAggregatedOrder(mongoCar: MongoCar, mongoUser: MongoUser) = AggregatedMongoOrder(
+        id = orderId,
+        car = mongoCar,
+        user = mongoUser,
+        from = Date.from(tommorow.toInstant()),
+        to = Date.from(twoDaysAfter.toInstant()),
+    )
+
+    fun existingOrderOnCar(mongoCar: MongoCar, mongoUser: MongoUser) = MongoOrder(
+        id = ObjectId(),
+        carId = mongoCar.id,
+        userId = mongoUser.id,
         from = Date.from(monthAfter.toInstant()),
         to = Date.from(monthAndDayAfter.toInstant()),
     )
 
-    fun responseOrder(order: Order, car: Car) = OrderResponse(
-        id = order.id ?: "",
-        carId = order.carId ?: "",
-        userId = order.userId ?: "",
-        from = order.from,
-        to = order.to,
-        price = car.price?.toLong(),
+    fun responseOrder(mongoOrder: MongoOrder, mongoCar: MongoCar) = OrderResponse(
+        id = mongoOrder.id.toString(),
+        carId = mongoOrder.carId.toString(),
+        userId = mongoOrder.userId.toString(),
+        from = mongoOrder.from,
+        to = mongoOrder.to,
+        price = mongoCar.price?.toLong(),
     )
 
-    fun createOrderRequest(car: Car, user: User) = CreateOrderRequest(
-        carId = car.id ?: "",
-        userId = user.id ?: "",
+    fun responseAggregatedOrder(mongoOrder: AggregatedMongoOrder, mongoCar: MongoCar) = AggregatedOrderResponse(
+        id = mongoOrder.id.toString(),
+        car = responseCar(mongoOrder.car!!),
+        user = responseUser(mongoOrder.user!!),
+        from = mongoOrder.from,
+        to = mongoOrder.to,
+        price = mongoCar.price?.toLong(),
+    )
+
+    fun createOrderRequest(mongoCar: MongoCar, mongoUser: MongoUser) = CreateOrderRequest(
+        carId = mongoCar.id.toString(),
+        userId = mongoUser.id.toString(),
         from = Date.from(monthAfter.toInstant()),
         to = Date.from(monthAndDayAfter.toInstant()),
     )
 
-    fun createOrderEntity(request: CreateOrderRequest) = Order(
+    fun createOrderEntity(request: CreateOrderRequest) = MongoOrder(
         id = null,
-        carId = request.carId,
-        userId = request.userId,
+        carId = ObjectId(request.carId),
+        userId = ObjectId(request.userId),
         from = request.from,
         to = request.to,
     )
 
-    fun createdOrder(order: Order) = order.copy(id = createdOrderId)
-
-    fun createdOrderResponse(order: Order, car: Car) = OrderResponse(
-        id = order.id ?: "",
-        carId = order.carId ?: "",
-        userId = order.userId ?: "",
-        from = order.from ?: Date.from(monthAfter.toInstant()),
-        to = order.to ?: Date.from(monthAndDayAfter.toInstant()),
-        price = car.price?.toLong(),
-    )
+    fun createdOrder(mongoOrder: MongoOrder) = mongoOrder.copy(id = createdOrderId)
 
     fun updateOrderRequest() = UpdateOrderRequest(
         from = Date.from(monthAfter.toInstant()),
         to = Date.from(monthAndDayAfter.toInstant()),
     )
 
-    fun updateOrderEntity(request: UpdateOrderRequest) = Order(
+    fun updateOrderEntity(request: UpdateOrderRequest) = MongoOrder(
         id = null,
         carId = null,
         userId = null,
@@ -90,14 +111,12 @@ object OrderFixture {
         to = request.to,
     )
 
-    fun updatedOrder(oldOrder: Order, request: UpdateOrderRequest) = oldOrder.copy(from = request.from, to = request.to)
-
-    fun updatedOrderResponse(order: Order, car: Car) = OrderResponse(
-        id = order.id ?: "",
-        carId = order.carId ?: "",
-        userId = order.userId ?: "",
-        from = Date.from(tommorow.toInstant()),
-        to = Date.from(twoDaysAfter.toInstant()),
-        price = car.price?.toLong(),
-    )
+    fun updatedOrder(oldMongoOrder: AggregatedMongoOrder, request: UpdateOrderRequest) =
+        MongoOrder(
+            id = oldMongoOrder.id,
+            carId = oldMongoOrder.car?.id,
+            userId = oldMongoOrder.user?.id,
+            from = request.from,
+            to = request.to,
+        )
 }

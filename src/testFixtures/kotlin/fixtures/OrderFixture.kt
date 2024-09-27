@@ -17,14 +17,18 @@ import org.bson.types.ObjectId
 object OrderFixture {
     val orderId = ObjectId()
     val createdOrderId = ObjectId()
+    var yesterday = Calendar.getInstance()
     var tommorow = Calendar.getInstance()
     var twoDaysAfter = Calendar.getInstance()
+    var threeDaysAfter = Calendar.getInstance()
     var monthAfter = Calendar.getInstance()
     var monthAndDayAfter = Calendar.getInstance()
 
     init {
+        yesterday.add(Calendar.DAY_OF_YEAR, -1)
         tommorow.add(Calendar.DAY_OF_YEAR, 1)
         twoDaysAfter.add(Calendar.DAY_OF_YEAR, 2)
+        threeDaysAfter.add(Calendar.DAY_OF_YEAR, 3)
         monthAfter.add(Calendar.DAY_OF_YEAR, 30)
         monthAndDayAfter.add(Calendar.DAY_OF_YEAR, 31)
 
@@ -47,12 +51,20 @@ object OrderFixture {
         to = Date.from(twoDaysAfter.toInstant()),
     )
 
+    fun randomAggregatedOrder(car: MongoCar?, user: MongoUser?) = AggregatedMongoOrder(
+        id = ObjectId(),
+        car = car,
+        user = user,
+        from = Date.from(tommorow.toInstant()),
+        to = Date.from(twoDaysAfter.toInstant()),
+    )
+
     fun existingAggregatedOrder(mongoCar: MongoCar, mongoUser: MongoUser) = AggregatedMongoOrder(
         id = orderId,
         car = mongoCar,
         user = mongoUser,
-        from = Date.from(tommorow.toInstant()),
-        to = Date.from(twoDaysAfter.toInstant()),
+        from = Date.from(twoDaysAfter.toInstant()),
+        to = Date.from(threeDaysAfter.toInstant()),
     )
 
     fun existingOrderOnCar(mongoCar: MongoCar, mongoUser: MongoUser) = MongoOrder(
@@ -99,8 +111,8 @@ object OrderFixture {
     fun createdOrder(mongoOrder: MongoOrder) = mongoOrder.copy(id = createdOrderId)
 
     fun updateOrderRequest() = UpdateOrderRequest(
-        from = Date.from(monthAfter.toInstant()),
-        to = Date.from(monthAndDayAfter.toInstant()),
+        from = Date.from(tommorow.toInstant()),
+        to = Date.from(twoDaysAfter.toInstant()),
     )
 
     fun updateOrderEntity(request: UpdateOrderRequest) = MongoOrder(
@@ -116,7 +128,7 @@ object OrderFixture {
             id = oldMongoOrder.id,
             carId = oldMongoOrder.car?.id,
             userId = oldMongoOrder.user?.id,
-            from = request.from,
-            to = request.to,
+            from = request.from ?: oldMongoOrder.from,
+            to = request.to ?: oldMongoOrder.to,
         )
 }

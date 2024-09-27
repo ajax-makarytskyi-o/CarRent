@@ -105,4 +105,12 @@ object RepairingFixture {
         price = Random.nextInt(300),
         status = RepairingStatus.PENDING,
     )
+
+    fun randomAggregatedRepairing(car: MongoCar?) = AggregatedMongoRepairing(
+        id = ObjectId(),
+        car = car,
+        date = Date.from(tommorow.toInstant()),
+        price = Random.nextInt(300),
+        status = RepairingStatus.PENDING,
+    )
 }

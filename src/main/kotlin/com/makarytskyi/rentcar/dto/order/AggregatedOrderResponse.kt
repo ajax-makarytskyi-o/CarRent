@@ -18,10 +18,12 @@ data class AggregatedOrderResponse(
 
     companion object {
         fun from(mongoOrder: AggregatedMongoOrder): AggregatedOrderResponse {
-            val daysBetween = ChronoUnit.DAYS.between(
-                mongoOrder.from?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate(),
-                mongoOrder.to?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
-            )
+            val daysBetween = if (mongoOrder.from != null && mongoOrder.to != null)
+                ChronoUnit.DAYS.between(
+                    mongoOrder.from.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate(),
+                    mongoOrder.to.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
+                )
+            else 0
 
             return AggregatedOrderResponse(
                 mongoOrder.id?.toString().orEmpty(),

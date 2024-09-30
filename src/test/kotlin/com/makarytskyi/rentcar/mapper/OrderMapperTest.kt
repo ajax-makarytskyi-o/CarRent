@@ -8,7 +8,7 @@ import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoOrder
-import com.makarytskyi.rentcar.model.aggregated.AggregatedMongoOrder
+import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
 import fixtures.CarFixture.randomCar
 import fixtures.OrderFixture.createOrderRequest
 import fixtures.OrderFixture.randomAggregatedOrder

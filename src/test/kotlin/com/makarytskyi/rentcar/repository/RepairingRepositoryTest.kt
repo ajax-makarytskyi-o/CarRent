@@ -3,9 +3,8 @@ package com.makarytskyi.rentcar.repository
 import com.makarytskyi.rentcar.model.MongoRepairing
 import fixtures.CarFixture.randomCar
 import fixtures.RepairingFixture.randomRepairing
-import fixtures.RepairingFixture.unexistingRepairing
+import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -25,12 +24,13 @@ internal class RepairingRepositoryTests : ContainerBase {
         val car = carRepository.create(randomCar())
 
         // WHEN
-        val repairing = repairingRepository.create(unexistingRepairing(car.id))
+        val repairing = repairingRepository.create(randomRepairing(car.id).copy(id = null))
 
         // THEN
         val foundRepairing = repairingRepository.findById(repairing.id.toString())
-        assertNotNull(foundRepairing)
-        assertNotNull(repairing.id)
+        assertEquals(repairing.id, foundRepairing?.id)
+        assertEquals(repairing.carId, foundRepairing?.car?.id)
+        assertEquals(repairing.date, foundRepairing?.date)
     }
 
     @Test
@@ -52,40 +52,21 @@ internal class RepairingRepositoryTests : ContainerBase {
     @Test
     fun `update should update price of repairing`() {
         // GIVEN
-        val price = 300
-        val car = carRepository.create(randomCar())
-        val repairing = repairingRepository.create(randomRepairing(car.id))
-
-        val updateRepairing = repairing.copy(
-            price = price,
-            status = null
-        )
-
-        // WHEN
-        repairingRepository.update(repairing.id.toString(), updateRepairing)
-
-        // THEN
-        val updated = repairingRepository.findById(repairing.id.toString())
-        assertEquals(price, updated?.price)
-    }
-
-    @Test
-    fun `update should update status of repairing`() {
-        // GIVEN
+        val price = BigDecimal("300")
         val status = MongoRepairing.RepairingStatus.COMPLETED
         val car = carRepository.create(randomCar())
         val repairing = repairingRepository.create(randomRepairing(car.id))
 
         val updateRepairing = repairing.copy(
-            price = null,
+            price = price,
             status = status
         )
 
         // WHEN
-        repairingRepository.update(repairing.id.toString(), updateRepairing)
+        val updated = repairingRepository.update(repairing.id.toString(), updateRepairing)
 
         // THEN
-        val updated = repairingRepository.findById(repairing.id.toString())
+        assertEquals(price, updated?.price)
         assertEquals(status, updated?.status)
     }
 
@@ -94,14 +75,13 @@ internal class RepairingRepositoryTests : ContainerBase {
         // GIVEN
         val status = MongoRepairing.RepairingStatus.COMPLETED
         val car = carRepository.create(randomCar())
-        val repairing = randomRepairing(car.id).copy(status = status)
-        repairingRepository.create(repairing)
+        val repairing = repairingRepository.create(randomRepairing(car.id).copy(status = status))
 
         // WHEN
         val foundRepairings = repairingRepository.findByStatusAndCarId(status, car.id.toString())
 
         // THEN
-        assertTrue(foundRepairings.isNotEmpty())
+        assertTrue(foundRepairings.contains(repairing))
     }
 
     @Test
@@ -110,14 +90,11 @@ internal class RepairingRepositoryTests : ContainerBase {
         val car = carRepository.create(randomCar())
         val repairing = repairingRepository.create(randomRepairing(car.id))
 
-        val createdRepairing = repairingRepository.findById(repairing.id.toString())
-
         // WHEN
         repairingRepository.deleteById(repairing.id.toString())
 
         // THEN
         val deletedRepairing = repairingRepository.findById(repairing.id.toString())
-        assertNotNull(createdRepairing)
         assertNull(deletedRepairing)
     }
 
@@ -125,14 +102,15 @@ internal class RepairingRepositoryTests : ContainerBase {
     fun `findById should return existing repairing by id`() {
         // GIVEN
         val car = carRepository.create(randomCar())
-        val repairing = randomRepairing(car.id)
-        repairingRepository.create(repairing)
+        val repairing = repairingRepository.create(randomRepairing(car.id))
 
         // WHEN
         val foundRepairing = repairingRepository.findById(repairing.id.toString())
 
         // THEN
-        assertNotNull(foundRepairing)
+        assertEquals(repairing.id, foundRepairing?.id)
+        assertEquals(repairing.carId, foundRepairing?.car?.id)
+        assertEquals(repairing.date, foundRepairing?.date)
     }
 
     @Test
@@ -152,27 +130,25 @@ internal class RepairingRepositoryTests : ContainerBase {
         // GIVEN
         val status = MongoRepairing.RepairingStatus.IN_PROGRESS
         val car = carRepository.create(randomCar())
-        val repairing = randomRepairing(car.id).copy(status = status)
-        repairingRepository.create(repairing)
+        val repairing = repairingRepository.create(randomRepairing(car.id).copy(status = status))
 
         // WHEN
         val repairings = repairingRepository.findByStatus(status)
 
         // THEN
-        assertTrue(repairings.isNotEmpty())
+        assertTrue(repairings.contains(repairing))
     }
 
     @Test
     fun `findByCarId should return repairings found by carId`() {
         // GIVEN
         val car = carRepository.create(randomCar())
-        val repairing = randomRepairing(car.id)
-        repairingRepository.create(repairing)
+        val repairing = repairingRepository.create(randomRepairing(car.id))
 
         // WHEN
         val repairings = repairingRepository.findByCarId(car.id.toString())
 
         // THEN
-        assertTrue(repairings.isNotEmpty())
+        assertTrue(repairings.contains(repairing))
     }
 }

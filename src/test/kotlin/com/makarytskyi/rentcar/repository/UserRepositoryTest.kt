@@ -1,7 +1,6 @@
 package com.makarytskyi.rentcar.repository
 
 import fixtures.UserFixture.randomUser
-import fixtures.UserFixture.unexistingUser
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -17,7 +16,7 @@ internal class UserRepositoryTests : ContainerBase {
     @Test
     fun `create should insert user and return it with id`() {
         // GIVEN
-        val unexistingUser = unexistingUser()
+        val unexistingUser = randomUser()
 
         // WHEN
         val user = userRepository.create(unexistingUser)
@@ -47,62 +46,36 @@ internal class UserRepositoryTests : ContainerBase {
         // GIVEN
         val name = "Alex"
         val phoneNumber = "670185014"
+        val city = "London"
 
         val user = userRepository.create(randomUser())
 
         val updateUser = user.copy(
             name = name,
             phoneNumber = phoneNumber,
-            city = null
-        )
-
-        // WHEN
-        userRepository.update(updateUser.id.toString(), updateUser)
-
-        // THEN
-        val updatedUser = userRepository.findById(updateUser.id.toString())
-
-        assertNotNull(updatedUser)
-        assertEquals(name, updatedUser?.name)
-        assertEquals(phoneNumber, updatedUser?.phoneNumber)
-        assertEquals(user.city, updatedUser?.city)
-    }
-
-    @Test
-    fun `update should update city of user`() {
-        // GIVEN
-        val city = "London"
-        val user = userRepository.create(randomUser())
-
-        val updateUser = user.copy(
-            name = null,
-            phoneNumber = null,
             city = city
         )
 
         // WHEN
-        userRepository.update(user.id.toString(), updateUser)
+        val updated = userRepository.update(updateUser.id.toString(), updateUser)
 
         // THEN
-        val updated = userRepository.findById(user.id.toString())
-
-        assertNotNull(updated)
+        assertEquals(name, updated?.name)
+        assertEquals(phoneNumber, updated?.phoneNumber)
         assertEquals(city, updated?.city)
-        assertEquals(user.name, updated?.name)
-        assertEquals(user.phoneNumber, updated?.phoneNumber)
     }
 
     @Test
     fun `findByPhoneNumber should return user found by phone number`() {
         // GIVEN
         val phoneNumber = "15025025"
-        userRepository.create(randomUser().copy(phoneNumber = phoneNumber))
+        val user = userRepository.create(randomUser().copy(phoneNumber = phoneNumber))
 
         // WHEN
         val foundUser = userRepository.findByPhoneNumber(phoneNumber)
 
         // THEN
-        assertNotNull(foundUser)
+        assertEquals(user, foundUser)
         assertEquals(phoneNumber, foundUser?.phoneNumber)
     }
 
@@ -122,13 +95,13 @@ internal class UserRepositoryTests : ContainerBase {
     fun `findByEmail should return user found by email`() {
         // GIVEN
         val email = "testing@email.com"
-        userRepository.create(randomUser().copy(email = email))
+        val user = userRepository.create(randomUser().copy(email = email))
 
         // WHEN
         val foundUser = userRepository.findByEmail(email)
 
         // THEN
-        assertNotNull(foundUser)
+        assertEquals(user, foundUser)
         assertEquals(email, foundUser?.email)
     }
 
@@ -153,7 +126,7 @@ internal class UserRepositoryTests : ContainerBase {
         val foundUser = userRepository.findById(user.id.toString())
 
         // THEN
-        assertNotNull(foundUser)
+        assertEquals(user, foundUser)
     }
 
     @Test
@@ -173,15 +146,12 @@ internal class UserRepositoryTests : ContainerBase {
         // GIVEN
         val user = userRepository.create(randomUser())
 
-        val resultBefore = userRepository.findById(user.id.toString())
-
         // WHEN
         userRepository.deleteById(user.id.toString())
 
         // THEN
         val result = userRepository.findById(user.id.toString())
 
-        assertNotNull(resultBefore)
         assertNull(result)
     }
 }

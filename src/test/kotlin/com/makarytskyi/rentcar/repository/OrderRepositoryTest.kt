@@ -4,9 +4,7 @@ import fixtures.CarFixture.randomCar
 import fixtures.OrderFixture.monthAfter
 import fixtures.OrderFixture.monthAndDayAfter
 import fixtures.OrderFixture.randomOrder
-import fixtures.OrderFixture.unexistingOrder
 import fixtures.UserFixture.randomUser
-import java.util.Date
 import kotlin.test.assertNotNull
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -32,7 +30,7 @@ internal class OrderRepositoryTests : ContainerBase {
         val user = userRepository.create(randomUser())
 
         // WHEN
-        val order = orderRepository.create(unexistingOrder(car.id, user.id))
+        val order = orderRepository.create(randomOrder(car.id, user.id).copy(id = null))
 
         // THEN
         val foundOrder = orderRepository.findById(order.id.toString())
@@ -55,52 +53,30 @@ internal class OrderRepositoryTests : ContainerBase {
         val orders = orderRepository.findAll()
 
         // THEN
-        assertTrue(orders.any { it.id == order1.id && it.car?.id == order1.carId && it.user?.id == order1.userId })
-        assertTrue(orders.any { it.id == order2.id && it.car?.id == order2.carId && it.user?.id == order2.userId })
+        assertTrue(orders.any { it.id == order1.id })
+        assertTrue(orders.any { it.id == order2.id })
     }
 
     @Test
-    fun `update should update start date`() {
+    fun `update should update order`() {
         // GIVEN
-        val from = Date.from(monthAfter.toInstant())
+        val from = monthAfter
+        val to = monthAndDayAfter
         val car = carRepository.create(randomCar())
         val user = userRepository.create(randomUser())
         val order = orderRepository.create(randomOrder(car.id, user.id))
 
-        val update = order.copy(
+        val updateOrder = order.copy(
             from = from,
-            to = null
-        )
-
-        // WHEN
-        orderRepository.update(order.id.toString(), update)
-
-        // THEN
-        val updated = orderRepository.findById(order.id.toString())
-        assertEquals(from, updated?.from)
-        assertEquals(order.to, updated?.to)
-    }
-
-    @Test
-    fun `update should update end date`() {
-        // GIVEN
-        val to = Date.from(monthAndDayAfter.toInstant())
-        val car = carRepository.create(randomCar())
-        val user = userRepository.create(randomUser())
-        val order = orderRepository.create(randomOrder(car.id, user.id))
-
-        val update = order.copy(
-            from = null,
             to = to
         )
 
         // WHEN
-        orderRepository.update(order.id.toString(), update)
+        val updated = orderRepository.update(order.id.toString(), updateOrder)
 
         // THEN
-        val updated = orderRepository.findById(order.id.toString())
+        assertEquals(from, updated?.from)
         assertEquals(to, updated?.to)
-        assertEquals(order.from, updated?.from)
     }
 
     @Test
@@ -114,7 +90,9 @@ internal class OrderRepositoryTests : ContainerBase {
         val foundOrder = orderRepository.findById(order.id.toString())
 
         // THEN
-        assertNotNull(foundOrder)
+        assertEquals(order.id, foundOrder?.id)
+        assertEquals(order.carId, foundOrder?.car?.id)
+        assertEquals(order.userId, foundOrder?.user?.id)
     }
 
     @Test
@@ -136,14 +114,11 @@ internal class OrderRepositoryTests : ContainerBase {
         val user = userRepository.create(randomUser())
         val order = orderRepository.create(randomOrder(car.id, user.id))
 
-        val createdOrder = orderRepository.findById(order.id.toString())
-
         // WHEN
         orderRepository.deleteById(order.id.toString())
 
         // THEN
         val deletedRepairing = orderRepository.findById(order.id.toString())
-        assertNotNull(createdOrder)
         assertNull(deletedRepairing)
     }
 
@@ -152,13 +127,13 @@ internal class OrderRepositoryTests : ContainerBase {
         // GIVEN
         val car = carRepository.create(randomCar())
         val user = userRepository.create(randomUser())
-        orderRepository.create(randomOrder(car.id, user.id))
+        val order = orderRepository.create(randomOrder(car.id, user.id))
 
         // WHEN
         val foundOrders = orderRepository.findByCarId(car.id.toString())
 
         // THEN
-        assertTrue(foundOrders.isNotEmpty())
+        assertTrue(foundOrders.contains(order))
     }
 
     @Test
@@ -166,13 +141,13 @@ internal class OrderRepositoryTests : ContainerBase {
         // GIVEN
         val car = carRepository.create(randomCar())
         val user = userRepository.create(randomUser())
-        orderRepository.create(randomOrder(car.id, user.id))
+        val order = orderRepository.create(randomOrder(car.id, user.id))
 
         // WHEN
         val foundOrders = orderRepository.findByUserId(user.id.toString())
 
         // THEN
-        assertTrue(foundOrders.isNotEmpty())
+        assertTrue(foundOrders.contains(order))
     }
 
     @Test
@@ -180,12 +155,12 @@ internal class OrderRepositoryTests : ContainerBase {
         // GIVEN
         val car = carRepository.create(randomCar())
         val user = userRepository.create(randomUser())
-        orderRepository.create(randomOrder(car.id, user.id))
+        val order = orderRepository.create(randomOrder(car.id, user.id))
 
         // WHEN
         val foundOrders = orderRepository.findByCarIdAndUserId(car.id.toString(), user.id.toString())
 
         // THEN
-        assertTrue(foundOrders.isNotEmpty())
+        assertTrue(foundOrders.contains(order))
     }
 }

@@ -1,37 +1,32 @@
-
 package com.makarytskyi.rentcar.services
 
-import com.makarytskyi.rentcar.exception.ResourceNotFoundException
-import com.makarytskyi.rentcar.model.MongoRepairing
+import com.makarytskyi.rentcar.exception.NotFoundException
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.service.impl.OrderServiceImpl
-import fixtures.CarFixture.carId
-import fixtures.CarFixture.existingCar
+import fixtures.CarFixture.randomCar
 import fixtures.OrderFixture.createOrderEntity
 import fixtures.OrderFixture.createOrderRequest
 import fixtures.OrderFixture.createdOrder
-import fixtures.OrderFixture.existingAggregatedOrder
-import fixtures.OrderFixture.existingOrderOnCar
 import fixtures.OrderFixture.monthAfter
-import fixtures.OrderFixture.orderId
+import fixtures.OrderFixture.monthAndDayAfter
+import fixtures.OrderFixture.randomAggregatedOrder
+import fixtures.OrderFixture.randomOrder
 import fixtures.OrderFixture.responseAggregatedOrder
 import fixtures.OrderFixture.responseOrder
-import fixtures.OrderFixture.tommorow
+import fixtures.OrderFixture.tomorrow
 import fixtures.OrderFixture.updateOrderEntity
 import fixtures.OrderFixture.updateOrderRequest
 import fixtures.OrderFixture.updatedOrder
 import fixtures.OrderFixture.yesterday
-import fixtures.UserFixture.existingUser
-import fixtures.UserFixture.userId
-import java.util.Date
+import fixtures.UserFixture.randomUser
+import java.math.BigDecimal
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.bson.types.ObjectId
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -56,308 +51,317 @@ internal class OrderServiceTests {
 
     @Test
     fun `getById should return OrderResponse when Order exists`() {
-        //GIVEN
-        val car = existingCar()
-        val user = existingUser()
-        val order = existingAggregatedOrder(car, user)
+        // GIVEN
+        val car = randomCar()
+        val user = randomUser()
+        val order = randomAggregatedOrder(car, user)
         val response = responseAggregatedOrder(order, car)
-        whenever(orderRepository.findById(orderId.toString())).thenReturn(order)
+        whenever(orderRepository.findById(order.id.toString())).thenReturn(order)
 
-        //WHEN
-        val result = orderService.getById(orderId.toString())
+        // WHEN
+        val result = orderService.getById(order.id.toString())
 
-        //THEN
+        // THEN
         assertEquals(response, result)
-        verify(orderRepository).findById(orderId.toString())
+        verify(orderRepository).findById(order.id.toString())
     }
 
     @Test
     fun `getById should return throw ResourceNotFoundException`() {
-        //GIVEN
+        // GIVEN
+        val orderId = ObjectId()
         whenever(orderRepository.findById(orderId.toString())).thenReturn(null)
 
-        //WHEN //THEN
-        assertThrows(ResourceNotFoundException::class.java, { orderService.getById(orderId.toString()) })
+        // WHEN // THEN
+        assertThrows(NotFoundException::class.java, { orderService.getById(orderId.toString()) })
         verify(orderRepository).findById(orderId.toString())
     }
 
     @Test
     fun `findAll should return List of OrderResponse`() {
-        //GIVEN
-        val car = existingCar()
-        val user = existingUser()
-        val order = existingAggregatedOrder(car, user)
+        // GIVEN
+        val car = randomCar()
+        val user = randomUser()
+        val order = randomAggregatedOrder(car, user)
         val response = responseAggregatedOrder(order, car)
         val orders = listOf(order)
         val expected = listOf(response)
         whenever(orderRepository.findAll()).thenReturn(orders)
 
-        //WHEN
+        // WHEN
         val result = orderService.findAll()
 
-        //THEN
+        // THEN
         assertEquals(expected, result)
         verify(orderRepository).findAll()
     }
 
     @Test
     fun `findAll should return empty List of OrderResponse if repository return empty List`() {
-        //GIVEN
+        // GIVEN
         whenever(orderRepository.findAll()).thenReturn(emptyList())
 
-        //WHEN
+        // WHEN
         val result = orderService.findAll()
 
-        //THEN
-        Assertions.assertEquals(emptyList<MongoRepairing>(), result)
+        // THEN
+        assertEquals(emptyList(), result)
         verify(orderRepository).findAll()
     }
 
     @Test
     fun `should create order successfully`() {
-        //GIVEN
-        val car = existingCar()
-        val user = existingUser()
+        // GIVEN
+        val car = randomCar()
+        val user = randomUser()
         val request = createOrderRequest(car, user)
         val requestEntity = createOrderEntity(request)
         val createdOrder = createdOrder(requestEntity)
         val response = responseOrder(createdOrder, car)
         whenever(orderRepository.create(requestEntity)).thenReturn(createdOrder)
-        whenever(carRepository.findById(carId.toString())).thenReturn(car)
-        whenever(userRepository.findById(userId.toString())).thenReturn(user)
+        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
+        whenever(userRepository.findById(user.id.toString())).thenReturn(user)
 
-        //WHEN
+        // WHEN
         val result = orderService.create(request)
 
-        //THEN
+        // THEN
         assertEquals(response, result)
         verify(orderRepository).create(requestEntity)
     }
 
     @Test
     fun `should throw IllegalArgumentException if car doesn't exist`() {
-        //GIVEN
-        val user = existingUser()
-        val car = existingCar()
-        whenever(userRepository.findById(userId.toString())).thenReturn(user)
-        whenever(carRepository.findById(carId.toString())).thenReturn(null)
+        // GIVEN
+        val user = randomUser()
+        val car = randomCar()
+        whenever(userRepository.findById(user.id.toString())).thenReturn(user)
+        whenever(carRepository.findById(car.id.toString())).thenReturn(null)
 
-        //WHEN //THEN
-        assertThrows(ResourceNotFoundException::class.java, { orderService.create(createOrderRequest(car, user)) })
+        // WHEN // THEN
+        assertThrows(NotFoundException::class.java, { orderService.create(createOrderRequest(car, user)) })
     }
 
     @Test
     fun `should throw IllegalArgumentException if user doesn't exist`() {
-        //GIVEN
-        val car = existingCar()
-        val user = existingUser()
+        // GIVEN
+        val car = randomCar()
+        val user = randomUser()
         val request = createOrderRequest(car, user)
-        whenever(userRepository.findById(userId.toString())).thenReturn(null)
+        whenever(userRepository.findById(user.id.toString())).thenReturn(null)
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertThrows(IllegalArgumentException::class.java, { orderService.create(request) })
     }
 
     @Test
     fun `should throw IllegalArgumentException if car is ordered`() {
-        //GIVEN
-        val user = existingUser()
-        val car = existingCar()
-        whenever(userRepository.findById(userId.toString())).thenReturn(user)
-        whenever(carRepository.findById(carId.toString())).thenReturn(car)
-        whenever(orderRepository.findByCarId(carId.toString())).thenReturn(listOf(existingOrderOnCar(car, user)))
+        // GIVEN
+        val user = randomUser()
+        val car = randomCar()
+        whenever(userRepository.findById(user.id.toString())).thenReturn(user)
+        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
+        whenever(orderRepository.findByCarId(car.id.toString())).thenReturn(
+            listOf(
+                randomOrder(car.id, user.id).copy(
+                    from = monthAfter,
+                    to = monthAndDayAfter
+                )
+            )
+        )
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertThrows(IllegalArgumentException::class.java, { orderService.create(createOrderRequest(car, user)) })
-        verify(orderRepository).findByCarId(carId.toString())
+        verify(orderRepository).findByCarId(car.id.toString())
     }
 
     @Test
     fun `should throw IllegalArgumentException if dates reversed`() {
-        //GIVEN
-        val user = existingUser()
-        val car = existingCar()
+        // GIVEN
+        val user = randomUser()
+        val car = randomCar()
         val request = createOrderRequest(car, user).copy(
-            from = Date.from(monthAfter.toInstant()),
-            to = Date.from(tommorow.toInstant())
+            from = monthAfter,
+            to = tomorrow
         )
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertThrows(IllegalArgumentException::class.java, { orderService.create(request) })
     }
 
     @Test
     fun `should throw IllegalArgumentException if date in past`() {
-        //GIVEN
-        val user = existingUser()
-        val car = existingCar()
+        // GIVEN
+        val user = randomUser()
+        val car = randomCar()
         val request = createOrderRequest(car, user).copy(
-            from = Date.from(yesterday.toInstant()),
-            to = Date.from(tommorow.toInstant())
+            from = yesterday,
+            to = tomorrow
         )
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertThrows(IllegalArgumentException::class.java, { orderService.create(request) })
     }
 
     @Test
     fun `update should return updated order with start date`() {
-        //GIVEN
-        val car = existingCar()
-        val user = existingUser()
-        val order = existingAggregatedOrder(car, user)
-        val price = car.price?.toLong()?.times(2)
-        val request = updateOrderRequest().copy(from = Date.from(tommorow.toInstant()), to = null)
+        // GIVEN
+        val car = randomCar()
+        val user = randomUser()
+        val order = randomAggregatedOrder(car, user)
+        val price = car.price?.multiply(BigDecimal(1))
+        val request = updateOrderRequest().copy(from = tomorrow, to = null)
         val requestEntity = updateOrderEntity(request)
         val updatedOrder = updatedOrder(order, request)
         val response = responseOrder(updatedOrder, car).copy(price = price)
-        whenever(orderRepository.findById(orderId.toString())).thenReturn(order)
-        whenever(carRepository.findById(carId.toString())).thenReturn(car)
-        whenever(orderRepository.update(orderId.toString(), requestEntity)).thenReturn(updatedOrder)
+        whenever(orderRepository.findById(order.id.toString())).thenReturn(order)
+        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
+        whenever(orderRepository.update(order.id.toString(), requestEntity)).thenReturn(updatedOrder)
 
-        //WHEN
-        val result = orderService.update(orderId.toString(), request)
+        // WHEN
+        val result = orderService.update(order.id.toString(), request)
 
-        //THEN
+        // THEN
         assertEquals(response, result)
-        verify(orderRepository).update(orderId.toString(), requestEntity)
+        verify(orderRepository).update(order.id.toString(), requestEntity)
     }
 
     @Test
     fun `update should return updated order with end date`() {
-        //GIVEN
-        val car = existingCar()
-        val user = existingUser()
-        val order = existingAggregatedOrder(car, user)
-        val price = car.price?.toLong()?.times(28)
-        val request = updateOrderRequest().copy(from = null, to = Date.from(monthAfter.toInstant()))
+        // GIVEN
+        val car = randomCar()
+        val user = randomUser()
+        val order = randomAggregatedOrder(car, user)
+        val price = car.price?.multiply(BigDecimal(29))
+        val request = updateOrderRequest().copy(from = null, to = monthAfter)
         val requestEntity = updateOrderEntity(request)
         val updatedOrder = updatedOrder(order, request)
         val response = responseOrder(updatedOrder, car).copy(price = price)
-        whenever(orderRepository.findById(orderId.toString())).thenReturn(order)
-        whenever(carRepository.findById(carId.toString())).thenReturn(car)
-        whenever(orderRepository.update(orderId.toString(), requestEntity)).thenReturn(updatedOrder)
+        whenever(orderRepository.findById(order.id.toString())).thenReturn(order)
+        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
+        whenever(orderRepository.update(order.id.toString(), requestEntity)).thenReturn(updatedOrder)
 
-        //WHEN
-        val result = orderService.update(orderId.toString(), request)
+        // WHEN
+        val result = orderService.update(order.id.toString(), request)
 
-        //THEN
+        // THEN
         assertEquals(response, result)
-        verify(orderRepository).update(orderId.toString(), requestEntity)
+        verify(orderRepository).update(order.id.toString(), requestEntity)
     }
 
     @Test
     fun `update should throw ResourceNotFoundException if order is not found`() {
-        //GIVEN
+        // GIVEN
         val orderId = "unknown"
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertThrows(
-            ResourceNotFoundException::class.java,
-            { orderService.update(orderId, updateOrderRequest()) })
+            NotFoundException::class.java,
+            { orderService.update(orderId, updateOrderRequest()) }
+        )
     }
 
     @Test
     fun `deleteById should be successful`() {
-        //GIVEN
+        // GIVEN
         val orderId = "someId"
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertNotNull(orderService.deleteById(orderId))
         verify(orderRepository).deleteById(orderId)
     }
 
     @Test
     fun `findByUser should return all user's orders`() {
-        //GIVEN
-        val user = existingUser()
-        val car = existingCar()
-        val order = existingOrderOnCar(car, user)
+        // GIVEN
+        val user = randomUser()
+        val car = randomCar()
+        val order = randomOrder(car.id, user.id)
         val orderResponse = responseOrder(order, car)
-        whenever(orderRepository.findByUserId(userId.toString())).thenReturn(listOf(order))
-        whenever(carRepository.findById(carId.toString())).thenReturn(car)
+        whenever(orderRepository.findByUserId(user.id.toString())).thenReturn(listOf(order))
+        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
 
-        //WHEN
+        // WHEN
         val orders = orderService.findByUser(user.id.toString())
 
-        //THEN
+        // THEN
         assertTrue(orders.isNotEmpty())
         assertTrue(orders.contains(orderResponse))
     }
 
     @Test
     fun `findByUser should return empty list if user's orders don't exist`() {
-        //GIVEN
+        // GIVEN
         val userId = ObjectId().toString()
         whenever(orderRepository.findByUserId(userId)).thenReturn(listOf())
 
-        //WHEN
+        // WHEN
         val orders = orderService.findByUser(userId)
 
-        //THEN
+        // THEN
         assertTrue(orders.isEmpty())
     }
 
     @Test
     fun `findByCar should return all orders on car`() {
-        //GIVEN
-        val user = existingUser()
-        val car = existingCar()
-        val order = existingOrderOnCar(car, user)
+        // GIVEN
+        val user = randomUser()
+        val car = randomCar()
+        val order = randomOrder(car.id, user.id)
         val orderResponse = responseOrder(order, car)
-        whenever(orderRepository.findByCarId(carId.toString())).thenReturn(listOf(order))
-        whenever(carRepository.findById(carId.toString())).thenReturn(car)
+        whenever(orderRepository.findByCarId(car.id.toString())).thenReturn(listOf(order))
+        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
 
-        //WHEN
-        val orders = orderService.findByCar(carId.toString())
+        // WHEN
+        val orders = orderService.findByCar(car.id.toString())
 
-        //THEN
+        // THEN
         assertTrue(orders.isNotEmpty())
         assertTrue(orders.contains(orderResponse))
     }
 
     @Test
     fun `findByCar should return empty list if orders on car don't exist`() {
-        //GIVEN
+        // GIVEN
         val carId = ObjectId().toString()
         whenever(orderRepository.findByCarId(carId)).thenReturn(listOf())
 
-        //WHEN
+        // WHEN
         val orders = orderService.findByCar(carId)
 
-        //THEN
+        // THEN
         assertTrue(orders.isEmpty())
     }
 
     @Test
     fun `findByCarAndUser should return all user's orders on car`() {
-        //GIVEN
-        val user = existingUser()
-        val car = existingCar()
-        val order = existingOrderOnCar(car, user)
+        // GIVEN
+        val user = randomUser()
+        val car = randomCar()
+        val order = randomOrder(car.id, user.id)
         val orderResponse = responseOrder(order, car)
-        whenever(orderRepository.findByCarIdAndUserId(carId.toString(), userId.toString())).thenReturn(listOf(order))
-        whenever(carRepository.findById(carId.toString())).thenReturn(car)
+        whenever(orderRepository.findByCarIdAndUserId(car.id.toString(), user.id.toString())).thenReturn(listOf(order))
+        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
 
-        //WHEN
-        val orders = orderService.findByCarAndUser(carId.toString(), userId.toString())
+        // WHEN
+        val orders = orderService.findByCarAndUser(car.id.toString(), user.id.toString())
 
-        //THEN
+        // THEN
         assertTrue(orders.isNotEmpty())
         assertTrue(orders.contains(orderResponse))
     }
 
     @Test
     fun `findByCarAndUser should return empty list if such orders don't exist`() {
-        //GIVEN
+        // GIVEN
         val carId = ObjectId().toString()
         val userId = ObjectId().toString()
         whenever(orderRepository.findByCarIdAndUserId(carId, userId)).thenReturn(listOf())
 
-        //WHEN
+        // WHEN
         val orders = orderService.findByCarAndUser(carId, userId)
 
-        //THEN
+        // THEN
         assertTrue(orders.isEmpty())
     }
 }

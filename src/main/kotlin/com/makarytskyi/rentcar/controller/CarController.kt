@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 internal class CarController(private val service: CarService) {
 
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): CarResponse = service.getById(id)
+    fun getById(@PathVariable id: String): CarResponse = service.getById(id)
 
     @GetMapping
     fun findAll(): List<CarResponse> = service.findAll()

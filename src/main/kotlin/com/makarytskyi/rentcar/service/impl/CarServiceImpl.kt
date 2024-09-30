@@ -4,7 +4,7 @@ import com.makarytskyi.rentcar.annotation.InvocationTracker
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
-import com.makarytskyi.rentcar.exception.ResourceNotFoundException
+import com.makarytskyi.rentcar.exception.NotFoundException
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.service.CarService
 import org.springframework.stereotype.Service
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 internal class CarServiceImpl(private val repository: CarRepository) : CarService {
 
     override fun getById(id: String): CarResponse = repository.findById(id)?.let { CarResponse.from(it) }
-        ?: throw ResourceNotFoundException("Car with id $id is not found")
+        ?: throw NotFoundException("Car with id $id is not found")
 
     override fun findAll(): List<CarResponse> = repository.findAll().map { CarResponse.from(it) }
 
@@ -34,10 +34,10 @@ internal class CarServiceImpl(private val repository: CarRepository) : CarServic
 
     override fun update(id: String, carRequest: UpdateCarRequest): CarResponse =
         repository.update(id, UpdateCarRequest.toEntity(carRequest))?.let { CarResponse.from(it) }
-            ?: throw ResourceNotFoundException("Car with id $id is not found")
+            ?: throw NotFoundException("Car with id $id is not found")
 
     override fun getByPlate(plate: String): CarResponse = repository.findByPlate(plate)?.let { CarResponse.from(it) }
-        ?: throw ResourceNotFoundException("Car with plate $plate is not found")
+        ?: throw NotFoundException("Car with plate $plate is not found")
 
     private fun validatePlate(plate: String) =
         require(repository.findByPlate(plate) == null) { "Car with plate $plate is already exist" }

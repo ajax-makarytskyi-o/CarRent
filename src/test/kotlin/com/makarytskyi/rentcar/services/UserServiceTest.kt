@@ -1,21 +1,21 @@
 package com.makarytskyi.rentcar.services
 
-import com.makarytskyi.rentcar.exception.ResourceNotFoundException
+import com.makarytskyi.rentcar.exception.NotFoundException
 import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.service.impl.UserServiceImpl
 import fixtures.UserFixture.createUserEntity
 import fixtures.UserFixture.createUserRequest
 import fixtures.UserFixture.createdUser
-import fixtures.UserFixture.existingUser
+import fixtures.UserFixture.randomUser
 import fixtures.UserFixture.responseUser
 import fixtures.UserFixture.updateUserEntity
 import fixtures.UserFixture.updateUserRequest
 import fixtures.UserFixture.updatedUser
-import fixtures.UserFixture.userId
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
@@ -35,108 +35,109 @@ internal class UserServiceTests {
 
     @Test
     fun `getById should return UserResponse when User exists`() {
-        //GIVEN
-        val user = existingUser()
+        // GIVEN
+        val user = randomUser()
         val response = responseUser(user)
-        whenever(userRepository.findById(userId.toString())).thenReturn(user)
+        whenever(userRepository.findById(user.id.toString())).thenReturn(user)
 
-        //WHEN
-        val result = userService.getById(userId.toString())
+        // WHEN
+        val result = userService.getById(user.id.toString())
 
-        //THEN
+        // THEN
         assertEquals(response, result)
-        verify(userRepository).findById(userId.toString())
+        verify(userRepository).findById(user.id.toString())
     }
 
     @Test
     fun `getById should return throw ResourceNotFoundException`() {
-        //GIVEN
+        // GIVEN
+        val userId = ObjectId()
         whenever(userRepository.findById(userId.toString())).thenReturn(null)
 
-        //WHEN //THEN
-        assertThrows(ResourceNotFoundException::class.java, { userService.getById(userId.toString()) })
+        // WHEN // THEN
+        assertThrows(NotFoundException::class.java, { userService.getById(userId.toString()) })
         verify(userRepository).findById(userId.toString())
     }
 
     @Test
     fun `findAll should return List of UserResponse`() {
-        //GIVEN
-        val user = existingUser()
+        // GIVEN
+        val user = randomUser()
         val response = responseUser(user)
         val mongoUsers: List<MongoUser> = listOf(user)
         val expected = listOf(response)
         whenever(userRepository.findAll()).thenReturn(mongoUsers)
 
-        //WHEN
+        // WHEN
         val result = userService.findAll()
 
-        //THEN
+        // THEN
         assertEquals(expected, result)
         verify(userRepository).findAll()
     }
 
     @Test
     fun `findAll should return empty List of UserResponse if repository return empty List`() {
-        //GIVEN
+        // GIVEN
         whenever(userRepository.findAll()).thenReturn(emptyList())
 
-        //WHEN
+        // WHEN
         val result = userService.findAll()
 
-        //THEN
+        // THEN
         assertEquals(emptyList(), result)
         verify(userRepository).findAll()
     }
 
     @Test
     fun `should create user successfully`() {
-        //GIVEN
+        // GIVEN
         val request = createUserRequest()
         val createUserEntity = createUserEntity(request)
         val createdUser = createdUser(createUserEntity)
         val response = responseUser(createdUser)
         whenever(userRepository.create(createUserEntity)).thenReturn(createdUser)
 
-        //WHEN
+        // WHEN
         val result = userService.create(request)
 
-        //THEN
+        // THEN
         assertEquals(response, result)
         verify(userRepository).create(createUserEntity)
     }
 
     @Test
     fun `update should return updated user`() {
-        //GIVEN
-        val user = existingUser()
+        // GIVEN
+        val user = randomUser()
         val request = updateUserRequest()
         val requestEntity = updateUserEntity(request)
         val updatedUser = updatedUser(user, request)
-        whenever(userRepository.update(userId.toString(), requestEntity)).thenReturn(updatedUser)
+        whenever(userRepository.update(user.id.toString(), requestEntity)).thenReturn(updatedUser)
 
-        //WHEN
-        val result = userService.update(userId.toString(), request)
+        // WHEN
+        val result = userService.update(user.id.toString(), request)
 
-        //THEN
+        // THEN
         assertNotNull(result)
-        verify(userRepository).update(userId.toString(), requestEntity)
+        verify(userRepository).update(user.id.toString(), requestEntity)
     }
 
     @Test
     fun `update should throw ResourceNotFoundException if user is not found`() {
-        //GIVEN
+        // GIVEN
         val userId = "unknown"
 
-        //WHEN //THEN
-        assertThrows(ResourceNotFoundException::class.java, { userService.update(userId, updateUserRequest()) })
+        // WHEN // THEN
+        assertThrows(NotFoundException::class.java, { userService.update(userId, updateUserRequest()) })
     }
 
     @Test
     fun `deleteById should not throw ResourceNotFoundException if user is not found`() {
-        //GIVEN
+        // GIVEN
         val userId = "unknown"
 
-        //WHEN //THEN
+        // WHEN // THEN
         assertNotNull(userService.deleteById(userId))
         verify(userRepository).deleteById(userId)
     }

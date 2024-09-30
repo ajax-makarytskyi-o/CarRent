@@ -5,7 +5,7 @@ import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
-import com.makarytskyi.rentcar.exception.ResourceNotFoundException
+import com.makarytskyi.rentcar.exception.NotFoundException
 import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.RepairingRepository
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 @Service
 internal class RepairingServiceImpl(
     private val repairingRepository: RepairingRepository,
-    private val carRepository: CarRepository
+    private val carRepository: CarRepository,
 ) : RepairingService {
 
     override fun findAll(): List<AggregatedRepairingResponse> =
@@ -31,14 +31,14 @@ internal class RepairingServiceImpl(
 
     override fun getById(id: String): AggregatedRepairingResponse = repairingRepository.findById(id)
         ?.let { AggregatedRepairingResponse.from(it) }
-        ?: throw ResourceNotFoundException("Repairing with id $id is not found")
+        ?: throw NotFoundException("Repairing with id $id is not found")
 
     override fun deleteById(id: String) = repairingRepository.deleteById(id)
 
     override fun update(id: String, repairingRequest: UpdateRepairingRequest): RepairingResponse =
         repairingRepository.update(id, UpdateRepairingRequest.toEntity(repairingRequest))
             ?.let { RepairingResponse.from(it) }
-            ?: throw ResourceNotFoundException("Repairing with id $id is not found")
+            ?: throw NotFoundException("Repairing with id $id is not found")
 
     override fun findByStatus(status: MongoRepairing.RepairingStatus): List<RepairingResponse> =
         repairingRepository.findByStatus(status).map { RepairingResponse.from(it) }

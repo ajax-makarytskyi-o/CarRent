@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 internal class UserController(private val service: UserService) {
 
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): UserResponse = service.getById(id)
+    fun getById(@PathVariable id: String): UserResponse = service.getById(id)
 
     @GetMapping()
     fun findAll(): List<UserResponse> = service.findAll()

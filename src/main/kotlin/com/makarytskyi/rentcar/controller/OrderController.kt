@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 internal class OrderController(private val service: OrderService) {
 
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): AggregatedOrderResponse = service.getById(id)
+    fun getById(@PathVariable id: String): AggregatedOrderResponse = service.getById(id)
 
     @GetMapping()
     fun findAll(): List<AggregatedOrderResponse> = service.findAll()

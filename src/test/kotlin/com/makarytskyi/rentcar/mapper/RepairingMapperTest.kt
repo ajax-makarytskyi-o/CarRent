@@ -6,7 +6,7 @@ import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
 import com.makarytskyi.rentcar.model.MongoRepairing
-import com.makarytskyi.rentcar.model.aggregated.AggregatedMongoRepairing
+import com.makarytskyi.rentcar.model.projection.AggregatedMongoRepairing
 import fixtures.CarFixture.randomCar
 import fixtures.RepairingFixture.createRepairingRequest
 import fixtures.RepairingFixture.randomAggregatedRepairing
@@ -15,7 +15,6 @@ import fixtures.RepairingFixture.updateRepairingRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
-
 
 class RepairingDTOTests {
     @Test
@@ -196,4 +195,3 @@ class RepairingDTOTests {
         assertEquals(result, response)
     }
 }
-

@@ -28,7 +28,7 @@ internal class RepairingController(private val service: RepairingService) {
     @GetMapping("/status/{status}/car/{carId}")
     fun findByStatusAndCar(
         @PathVariable status: MongoRepairing.RepairingStatus,
-        @PathVariable carId: String
+        @PathVariable carId: String,
     ): List<RepairingResponse> = service.findByStatusAndCar(status, carId)
 
     @GetMapping("/status/{status}")
@@ -43,7 +43,7 @@ internal class RepairingController(private val service: RepairingService) {
     fun create(@Valid @RequestBody repairing: CreateRepairingRequest): RepairingResponse = service.create(repairing)
 
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): AggregatedRepairingResponse = service.getById(id)
+    fun getById(@PathVariable id: String): AggregatedRepairingResponse = service.getById(id)
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

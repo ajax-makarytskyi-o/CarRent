@@ -34,7 +34,7 @@ internal class UserRepositoryTest : ContainerBase {
         val insertedUser2 = userRepository.create(randomUser())
 
         // WHEN
-        val allUsers = userRepository.findAll()
+        val allUsers = userRepository.findAll(0, 20)
 
         // THEN
         assertTrue(allUsers.any { it.email == insertedUser1.email && it.name == insertedUser1.name })
@@ -42,7 +42,7 @@ internal class UserRepositoryTest : ContainerBase {
     }
 
     @Test
-    fun `update should update phone number and name of user`() {
+    fun `patch should partially update user`() {
         // GIVEN
         val name = "Alex"
         val phoneNumber = "670185014"
@@ -57,7 +57,7 @@ internal class UserRepositoryTest : ContainerBase {
         )
 
         // WHEN
-        val updated = userRepository.update(updateUser.id.toString(), updateUser)
+        val updated = userRepository.patch(updateUser.id.toString(), updateUser)
 
         // THEN
         assertEquals(name, updated?.name)

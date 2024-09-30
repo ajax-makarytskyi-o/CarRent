@@ -60,7 +60,7 @@ internal class BeanPostProcessorTest {
 
         // WHEN
         val proxyService = postProcessor.postProcessAfterInitialization(service, beanName) as CarService
-        proxyService.findAll()
+        proxyService.findAll(0, 10)
 
         // THEN
         Mockito.verify(mockAppender, Mockito.times(1)).doAppend(ArgumentMatchers.any(ILoggingEvent::class.java))
@@ -72,7 +72,7 @@ internal class BeanPostProcessorTest {
         val service = CarServiceImpl(repository)
 
         // WHEN
-        service.findAll()
+        service.findAll(0, 10)
 
         // THEN
         Mockito.verify(mockAppender, Mockito.times(0)).doAppend(ArgumentMatchers.any())

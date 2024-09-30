@@ -74,27 +74,27 @@ internal class RepairingServiceTest {
         val response = responseAggregatedRepairing(repairing)
         val repairings = listOf(repairing)
         val expected = listOf(response)
-        whenever(repairingRepository.findAll()).thenReturn(repairings)
+        whenever(repairingRepository.findAll(0, 10)).thenReturn(repairings)
 
         // WHEN
-        val result = repairingService.findAll()
+        val result = repairingService.findAll(0, 10)
 
         // THEN
         assertEquals(expected, result)
-        verify(repairingRepository).findAll()
+        verify(repairingRepository).findAll(0, 10)
     }
 
     @Test
     fun `findAll should return empty List of RepairingResponse if repository return empty List`() {
         // GIVEN
-        whenever(repairingRepository.findAll()).thenReturn(emptyList())
+        whenever(repairingRepository.findAll(0, 10)).thenReturn(emptyList())
 
         // WHEN
-        val result = repairingService.findAll()
+        val result = repairingService.findAll(0, 10)
 
         // THEN
         assertEquals(emptyList(), result)
-        verify(repairingRepository).findAll()
+        verify(repairingRepository).findAll(0, 10)
     }
 
     @Test
@@ -128,32 +128,32 @@ internal class RepairingServiceTest {
     }
 
     @Test
-    fun `update should return updated repairing`() {
+    fun `patch should return updated repairing`() {
         // GIVEN
         val car = randomCar()
         val repairing = randomRepairing(car.id)
         val request = updateRepairingRequest()
         val requestEntity = updateRepairingEntity(request)
         val updatedRepairing = updatedRepairing(repairing, request)
-        whenever(repairingRepository.update(repairing.id.toString(), requestEntity)).thenReturn(updatedRepairing)
+        whenever(repairingRepository.patch(repairing.id.toString(), requestEntity)).thenReturn(updatedRepairing)
 
         // WHEN
-        val result = repairingService.update(repairing.id.toString(), request)
+        val result = repairingService.patch(repairing.id.toString(), request)
 
         // THEN
         assertNotNull(result)
-        verify(repairingRepository).update(repairing.id.toString(), requestEntity)
+        verify(repairingRepository).patch(repairing.id.toString(), requestEntity)
     }
 
     @Test
-    fun `update should throw ResourceNotFoundException if repairing is not found`() {
+    fun `patch should throw ResourceNotFoundException if repairing is not found`() {
         // GIVEN
         val repairingId = "unknown"
 
         // WHEN // THEN
         assertThrows(
             NotFoundException::class.java,
-            { repairingService.update(repairingId, updateRepairingRequest()) }
+            { repairingService.patch(repairingId, updateRepairingRequest()) }
         )
     }
 

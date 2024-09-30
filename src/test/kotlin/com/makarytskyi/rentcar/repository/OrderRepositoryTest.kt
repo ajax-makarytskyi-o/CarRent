@@ -50,7 +50,7 @@ internal class OrderRepositoryTest : ContainerBase {
         val order2 = orderRepository.create(randomOrder(car2.id, user2.id))
 
         // WHEN
-        val orders = orderRepository.findAll()
+        val orders = orderRepository.findAll(0, 20)
 
         // THEN
         assertTrue(orders.any { it.id == order1.id })
@@ -58,7 +58,7 @@ internal class OrderRepositoryTest : ContainerBase {
     }
 
     @Test
-    fun `update should update order`() {
+    fun `patch should partially update order`() {
         // GIVEN
         val from = monthAfter
         val to = monthAndDayAfter
@@ -72,7 +72,7 @@ internal class OrderRepositoryTest : ContainerBase {
         )
 
         // WHEN
-        val updated = orderRepository.update(order.id.toString(), updateOrder)
+        val updated = orderRepository.patch(order.id.toString(), updateOrder)
 
         // THEN
         assertEquals(from, updated?.from)

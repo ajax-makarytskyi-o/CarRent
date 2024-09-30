@@ -86,27 +86,27 @@ internal class OrderServiceTest {
         val response = responseAggregatedOrder(order, car)
         val orders = listOf(order)
         val expected = listOf(response)
-        whenever(orderRepository.findAll()).thenReturn(orders)
+        whenever(orderRepository.findAll(0, 10)).thenReturn(orders)
 
         // WHEN
-        val result = orderService.findAll()
+        val result = orderService.findAll(0, 10)
 
         // THEN
         assertEquals(expected, result)
-        verify(orderRepository).findAll()
+        verify(orderRepository).findAll(0, 10)
     }
 
     @Test
     fun `findAll should return empty List of OrderResponse if repository return empty List`() {
         // GIVEN
-        whenever(orderRepository.findAll()).thenReturn(emptyList())
+        whenever(orderRepository.findAll(0, 10)).thenReturn(emptyList())
 
         // WHEN
-        val result = orderService.findAll()
+        val result = orderService.findAll(0, 10)
 
         // THEN
         assertEquals(emptyList(), result)
-        verify(orderRepository).findAll()
+        verify(orderRepository).findAll(0, 10)
     }
 
     @Test
@@ -204,7 +204,7 @@ internal class OrderServiceTest {
     }
 
     @Test
-    fun `update should return updated order with start date`() {
+    fun `patch should return updated order with start date`() {
         // GIVEN
         val car = randomCar()
         val user = randomUser()
@@ -216,18 +216,18 @@ internal class OrderServiceTest {
         val response = responseOrder(updatedOrder, car).copy(price = price)
         whenever(orderRepository.findById(order.id.toString())).thenReturn(order)
         whenever(carRepository.findById(car.id.toString())).thenReturn(car)
-        whenever(orderRepository.update(order.id.toString(), requestEntity)).thenReturn(updatedOrder)
+        whenever(orderRepository.patch(order.id.toString(), requestEntity)).thenReturn(updatedOrder)
 
         // WHEN
-        val result = orderService.update(order.id.toString(), request)
+        val result = orderService.patch(order.id.toString(), request)
 
         // THEN
         assertEquals(response, result)
-        verify(orderRepository).update(order.id.toString(), requestEntity)
+        verify(orderRepository).patch(order.id.toString(), requestEntity)
     }
 
     @Test
-    fun `update should return updated order with end date`() {
+    fun `patch should return updated order with end date`() {
         // GIVEN
         val car = randomCar()
         val user = randomUser()
@@ -239,25 +239,25 @@ internal class OrderServiceTest {
         val response = responseOrder(updatedOrder, car).copy(price = price)
         whenever(orderRepository.findById(order.id.toString())).thenReturn(order)
         whenever(carRepository.findById(car.id.toString())).thenReturn(car)
-        whenever(orderRepository.update(order.id.toString(), requestEntity)).thenReturn(updatedOrder)
+        whenever(orderRepository.patch(order.id.toString(), requestEntity)).thenReturn(updatedOrder)
 
         // WHEN
-        val result = orderService.update(order.id.toString(), request)
+        val result = orderService.patch(order.id.toString(), request)
 
         // THEN
         assertEquals(response, result)
-        verify(orderRepository).update(order.id.toString(), requestEntity)
+        verify(orderRepository).patch(order.id.toString(), requestEntity)
     }
 
     @Test
-    fun `update should throw ResourceNotFoundException if order is not found`() {
+    fun `patch should throw ResourceNotFoundException if order is not found`() {
         // GIVEN
         val orderId = "unknown"
 
         // WHEN // THEN
         assertThrows(
             NotFoundException::class.java,
-            { orderService.update(orderId, updateOrderRequest()) }
+            { orderService.patch(orderId, updateOrderRequest()) }
         )
     }
 

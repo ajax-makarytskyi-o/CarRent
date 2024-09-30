@@ -65,27 +65,27 @@ internal class CarServiceTest {
         val response = responseCar(car)
         val mongoCars: List<MongoCar> = listOf(car)
         val expected = listOf(response)
-        whenever(carRepository.findAll()).thenReturn(mongoCars)
+        whenever(carRepository.findAll(0, 10)).thenReturn(mongoCars)
 
         // WHEN
-        val result = carService.findAll()
+        val result = carService.findAll(0, 10)
 
         // THEN
         assertEquals(expected, result)
-        verify(carRepository).findAll()
+        verify(carRepository).findAll(0, 10)
     }
 
     @Test
     fun `findAll should return empty List of CarResponse if repository return empty List`() {
         // GIVEN
-        whenever(carRepository.findAll()).thenReturn(emptyList())
+        whenever(carRepository.findAll(0, 10)).thenReturn(emptyList())
 
         // WHEN
-        val result = carService.findAll()
+        val result = carService.findAll(0, 10)
 
         // THEN
         assertEquals(emptyList(), result)
-        verify(carRepository).findAll()
+        verify(carRepository).findAll(0, 10)
     }
 
     @Test
@@ -106,31 +106,31 @@ internal class CarServiceTest {
     }
 
     @Test
-    fun `update should return updated car`() {
+    fun `patch should return updated car`() {
         // GIVEN
         val oldCar = randomCar()
         val updateCarRequest = updateCarRequest()
         val updateCarEntity = updateCarEntity(updateCarRequest)
         val updatedCar = updatedCar(oldCar, updateCarRequest)
-        whenever(carRepository.update(oldCar.id.toString(), updateCarEntity)).thenReturn(updatedCar)
+        whenever(carRepository.patch(oldCar.id.toString(), updateCarEntity)).thenReturn(updatedCar)
 
         // WHEN
-        val result = carService.update(oldCar.id.toString(), updateCarRequest)
+        val result = carService.patch(oldCar.id.toString(), updateCarRequest)
 
         // THEN
         assertNotNull(result)
         assertEquals(updateCarRequest.price, result.price)
-        verify(carRepository).update(oldCar.id.toString(), updateCarEntity)
+        verify(carRepository).patch(oldCar.id.toString(), updateCarEntity)
     }
 
     @Test
-    fun `update should throw ResourceNotFoundException if car is not found`() {
+    fun `patch should throw ResourceNotFoundException if car is not found`() {
         // GIVEN
         val carId = "unknown"
         val updateCarRequest = updateCarRequest()
 
         // WHEN // THEN
-        assertThrows(NotFoundException::class.java, { carService.update(carId, updateCarRequest) })
+        assertThrows(NotFoundException::class.java, { carService.patch(carId, updateCarRequest) })
     }
 
     @Test

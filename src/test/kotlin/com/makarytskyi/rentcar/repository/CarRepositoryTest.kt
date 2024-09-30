@@ -37,7 +37,7 @@ internal class CarRepositoryTest : ContainerBase {
         val insertedCar2 = carRepository.create(randomCar())
 
         // WHEN
-        val cars = carRepository.findAll()
+        val cars = carRepository.findAll(0, 20)
 
         // THEN
         assertTrue(cars.any { it.brand == insertedCar1.brand && it.plate == insertedCar1.plate })
@@ -45,7 +45,7 @@ internal class CarRepositoryTest : ContainerBase {
     }
 
     @Test
-    fun `update should update car`() {
+    fun `patch should partially update car`() {
         // GIVEN
         val price = BigDecimal("600")
         val color = MongoCar.CarColor.BLUE
@@ -56,7 +56,7 @@ internal class CarRepositoryTest : ContainerBase {
         )
 
         // WHEN
-        val updated = carRepository.update(updateCar.id.toString(), updateCar)
+        val updated = carRepository.patch(updateCar.id.toString(), updateCar)
 
         // THENs
         assertEquals(price, updated?.price)

@@ -66,27 +66,27 @@ internal class UserServiceTest {
         val response = responseUser(user)
         val mongoUsers: List<MongoUser> = listOf(user)
         val expected = listOf(response)
-        whenever(userRepository.findAll()).thenReturn(mongoUsers)
+        whenever(userRepository.findAll(0, 10)).thenReturn(mongoUsers)
 
         // WHEN
-        val result = userService.findAll()
+        val result = userService.findAll(0, 10)
 
         // THEN
         assertEquals(expected, result)
-        verify(userRepository).findAll()
+        verify(userRepository).findAll(0, 10)
     }
 
     @Test
     fun `findAll should return empty List of UserResponse if repository return empty List`() {
         // GIVEN
-        whenever(userRepository.findAll()).thenReturn(emptyList())
+        whenever(userRepository.findAll(0, 10)).thenReturn(emptyList())
 
         // WHEN
-        val result = userService.findAll()
+        val result = userService.findAll(0, 10)
 
         // THEN
         assertEquals(emptyList(), result)
-        verify(userRepository).findAll()
+        verify(userRepository).findAll(0, 10)
     }
 
     @Test
@@ -107,29 +107,29 @@ internal class UserServiceTest {
     }
 
     @Test
-    fun `update should return updated user`() {
+    fun `patch should return updated user`() {
         // GIVEN
         val user = randomUser()
         val request = updateUserRequest()
         val requestEntity = updateUserEntity(request)
         val updatedUser = updatedUser(user, request)
-        whenever(userRepository.update(user.id.toString(), requestEntity)).thenReturn(updatedUser)
+        whenever(userRepository.patch(user.id.toString(), requestEntity)).thenReturn(updatedUser)
 
         // WHEN
-        val result = userService.update(user.id.toString(), request)
+        val result = userService.patch(user.id.toString(), request)
 
         // THEN
         assertNotNull(result)
-        verify(userRepository).update(user.id.toString(), requestEntity)
+        verify(userRepository).patch(user.id.toString(), requestEntity)
     }
 
     @Test
-    fun `update should throw ResourceNotFoundException if user is not found`() {
+    fun `patch should throw ResourceNotFoundException if user is not found`() {
         // GIVEN
         val userId = "unknown"
 
         // WHEN // THEN
-        assertThrows(NotFoundException::class.java, { userService.update(userId, updateUserRequest()) })
+        assertThrows(NotFoundException::class.java, { userService.patch(userId, updateUserRequest()) })
     }
 
     @Test

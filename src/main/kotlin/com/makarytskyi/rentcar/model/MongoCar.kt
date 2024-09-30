@@ -18,11 +18,11 @@ data class MongoCar(
     val plate: String? = null,
     var color: CarColor? = null,
 ) {
-    companion object {
-        const val COLLECTION_NAME = "cars"
-    }
-
     enum class CarColor {
         RED, GREEN, BLUE, BLACK, WHITE, GREY, YELLOW
+    }
+
+    companion object {
+        const val COLLECTION_NAME = "cars"
     }
 }

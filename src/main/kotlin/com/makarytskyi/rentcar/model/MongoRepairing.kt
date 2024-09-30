@@ -17,11 +17,11 @@ data class MongoRepairing(
     val price: BigDecimal?,
     val status: RepairingStatus?,
 ) {
-    companion object {
-        const val COLLECTION_NAME = "repairings"
-    }
-
     enum class RepairingStatus {
         PENDING, IN_PROGRESS, COMPLETED
+    }
+
+    companion object {
+        const val COLLECTION_NAME = "repairings"
     }
 }

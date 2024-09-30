@@ -42,7 +42,7 @@ internal class RepairingRepositoryTest : ContainerBase {
         val repairing2 = repairingRepository.create(randomRepairing(car2.id))
 
         // WHEN
-        val allRepairings = repairingRepository.findAll()
+        val allRepairings = repairingRepository.findAll(0, 20)
 
         // THEN
         assertTrue(allRepairings.any { it.car?.id == repairing1.carId && it.id == repairing1.id })
@@ -50,7 +50,7 @@ internal class RepairingRepositoryTest : ContainerBase {
     }
 
     @Test
-    fun `update should update price of repairing`() {
+    fun `patch should partially update repairing`() {
         // GIVEN
         val price = BigDecimal("300")
         val status = MongoRepairing.RepairingStatus.COMPLETED
@@ -63,7 +63,7 @@ internal class RepairingRepositoryTest : ContainerBase {
         )
 
         // WHEN
-        val updated = repairingRepository.update(repairing.id.toString(), updateRepairing)
+        val updated = repairingRepository.patch(repairing.id.toString(), updateRepairing)
 
         // THEN
         assertEquals(price, updated?.price)

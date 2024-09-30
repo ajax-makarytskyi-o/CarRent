@@ -35,18 +35,6 @@ class OrderMigration {
 
     @RollbackExecution
     fun rollbackOrderCollection(mongoTemplate: MongoTemplate) {
-        val indexOps = mongoTemplate.indexOps(MongoOrder.COLLECTION_NAME)
-        val indexes = indexOps.indexInfo
-        if (indexes.any { it.name == "orders_carId_index" }) {
-            indexOps.dropIndex("orders_carId_index")
-            log.info("Index 'orders_carId_index' for collection {} was rolled back", MongoOrder.COLLECTION_NAME)
-        }
-
-        if (indexes.any { it.name == "orders_userId_index" }) {
-            indexOps.dropIndex("orders_userId_index")
-            log.info("Index 'orders_userId_index' for collection {} was rolled back", MongoOrder.COLLECTION_NAME)
-        }
-
         if (mongoTemplate.collectionExists(MongoOrder.COLLECTION_NAME)) {
             mongoTemplate.dropCollection(MongoOrder.COLLECTION_NAME)
             log.info("Collection {} was dropped", MongoOrder.COLLECTION_NAME)

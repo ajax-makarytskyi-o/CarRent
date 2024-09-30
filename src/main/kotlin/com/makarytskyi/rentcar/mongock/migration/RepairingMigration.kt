@@ -38,22 +38,6 @@ class RepairingMigration {
 
     @RollbackExecution
     fun rollbackRepairingCollection(mongoTemplate: MongoTemplate) {
-        val indexOps = mongoTemplate.indexOps(MongoRepairing.COLLECTION_NAME)
-        val indexes = indexOps.indexInfo
-
-        if (indexes.any { it.name == "repairings_status_carId_index" }) {
-            indexOps.dropIndex("repairings_status_carId_index")
-            log.info(
-                "Index 'repairings_status_carId_index' for collection {} was rolled back",
-                MongoRepairing.COLLECTION_NAME
-            )
-        }
-
-        if (indexes.any { it.name == "repairings_carId_index" }) {
-            indexOps.dropIndex("repairings_carId_index")
-            log.info("Index 'repairings_carId_index' for collection {} was rolled back", MongoRepairing.COLLECTION_NAME)
-        }
-
         if (mongoTemplate.collectionExists(MongoRepairing.COLLECTION_NAME)) {
             mongoTemplate.dropCollection(MongoRepairing.COLLECTION_NAME)
             log.info("Collection {} was dropped", MongoRepairing.COLLECTION_NAME)

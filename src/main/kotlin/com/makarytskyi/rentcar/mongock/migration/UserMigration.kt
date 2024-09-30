@@ -43,25 +43,6 @@ class UserMigration {
 
     @RollbackExecution
     fun rollbackUserCollection(mongoTemplate: MongoTemplate) {
-        val indexOps = mongoTemplate.indexOps(MongoUser.COLLECTION_NAME)
-
-        val indexes = indexOps.indexInfo
-
-        if (indexes.any { it.name == "users_name_index" }) {
-            indexOps.dropIndex("users_name_index")
-            log.info("Index 'users_name_index' for collection {} was rolled back", MongoUser.COLLECTION_NAME)
-        }
-
-        if (indexes.any { it.name == "users_email_index" }) {
-            indexOps.dropIndex("users_email_index")
-            log.info("Index 'users_email_index' for collection {} was rolled back", MongoUser.COLLECTION_NAME)
-        }
-
-        if (indexes.any { it.name == "users_phoneNumber_index" }) {
-            indexOps.dropIndex("users_phoneNumber_index")
-            log.info("Index 'users_phoneNumber_index' for collection {} was rolled back", MongoUser.COLLECTION_NAME)
-        }
-
         if (mongoTemplate.collectionExists(MongoUser.COLLECTION_NAME)) {
             mongoTemplate.dropCollection(MongoUser.COLLECTION_NAME)
             log.info("Collection {} was dropped", MongoUser.COLLECTION_NAME)

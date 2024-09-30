@@ -37,19 +37,6 @@ class CarMigration {
 
     @RollbackExecution
     fun rollbackCarCollection(mongoTemplate: MongoTemplate) {
-        val indexOps = mongoTemplate.indexOps(MongoCar.COLLECTION_NAME)
-        val indexes = indexOps.indexInfo
-
-        if (indexes.any { it.name == "cars_brand_model_index" }) {
-            indexOps.dropIndex("cars_brand_model_index")
-            log.info("Index 'cars_brand_model_index' for collection {} was rolled back", MongoCar.COLLECTION_NAME)
-        }
-
-        if (indexes.any { it.name == "cars_plate_index" }) {
-            indexOps.dropIndex("cars_plate_index")
-            log.info("Index 'cars_plate_index' for collection {} was rolled back", MongoCar.COLLECTION_NAME)
-        }
-
         if (mongoTemplate.collectionExists(MongoCar.COLLECTION_NAME)) {
             mongoTemplate.dropCollection(MongoCar.COLLECTION_NAME)
             log.info("Collection {} was dropped", MongoCar.COLLECTION_NAME)

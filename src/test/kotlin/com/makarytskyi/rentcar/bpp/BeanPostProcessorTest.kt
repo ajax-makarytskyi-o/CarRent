@@ -21,7 +21,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 @ExtendWith(MockitoExtension::class)
-internal class BeanPostProcessorTests {
+internal class BeanPostProcessorTest {
 
     @Mock
     lateinit var repository: CarRepository

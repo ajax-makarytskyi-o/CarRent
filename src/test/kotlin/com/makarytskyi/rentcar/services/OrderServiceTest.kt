@@ -36,7 +36,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @ExtendWith(MockitoExtension::class)
-internal class OrderServiceTests {
+internal class OrderServiceTest {
     @Mock
     lateinit var orderRepository: OrderRepository
 

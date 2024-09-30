@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-internal class RepairingRepositoryTests : ContainerBase {
+internal class RepairingRepositoryTest : ContainerBase {
 
     @Autowired
     lateinit var repairingRepository: RepairingRepository

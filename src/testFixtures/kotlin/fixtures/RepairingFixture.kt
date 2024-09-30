@@ -8,45 +8,29 @@ import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus
-import com.makarytskyi.rentcar.model.aggregated.AggregatedMongoRepairing
-import java.util.Calendar
-import java.util.Date
-import kotlin.random.Random
+import com.makarytskyi.rentcar.model.projection.AggregatedMongoRepairing
+import fixtures.Utils.getDateFromNow
+import fixtures.Utils.randomPrice
 import org.bson.types.ObjectId
 
 object RepairingFixture {
-    val repairingId = ObjectId()
-    val createdRepairingId = ObjectId()
-    var tommorow = Calendar.getInstance()
-    var monthAfter = Calendar.getInstance()
+    var tomorrow = getDateFromNow(1)
+    var monthAfter = getDateFromNow(30)
 
-    init {
-        tommorow.add(Calendar.DAY_OF_YEAR, 1)
-        monthAfter.add(Calendar.MONTH, 1)
-    }
-
-    fun unexistingRepairing(carId: ObjectId?) = MongoRepairing(
-        id = null,
+    fun randomRepairing(carId: ObjectId?) = MongoRepairing(
+        id = ObjectId(),
         carId = carId,
-        date = Date.from(tommorow.toInstant()),
-        price = Random.nextInt(300),
+        date = tomorrow,
+        price = randomPrice(),
         status = RepairingStatus.PENDING,
     )
 
-    fun existingRepairing(mongoCar: MongoCar) = MongoRepairing(
-        id = repairingId,
-        carId = mongoCar.id,
-        date = Date.from(tommorow.toInstant()),
-        price = Random.nextInt(300),
-        status = RepairingStatus.PENDING,
-    )
-
-    fun existingAggregatedRepairing(mongoCar: MongoCar) = AggregatedMongoRepairing(
-        id = repairingId,
-        car = mongoCar,
-        date = Date.from(tommorow.toInstant()),
-        price = Random.nextInt(300),
-        status = RepairingStatus.PENDING,
+    fun emptyRepairing() = MongoRepairing(
+        id = null,
+        carId = null,
+        date = null,
+        price = null,
+        status = null,
     )
 
     fun responseRepairing(mongoRepairing: MongoRepairing) = RepairingResponse(
@@ -57,9 +41,17 @@ object RepairingFixture {
         status = mongoRepairing.status,
     )
 
+    fun emptyRepairingResponse() = RepairingResponse(
+        id = "",
+        carId = "",
+        date = null,
+        price = null,
+        status = null,
+    )
+
     fun responseAggregatedRepairing(mongoRepairing: AggregatedMongoRepairing) = AggregatedRepairingResponse(
         id = mongoRepairing.id.toString(),
-        car = mongoRepairing.car?.let { CarResponse.from(it) },
+        car = CarResponse.from(mongoRepairing.car ?: MongoCar()),
         date = mongoRepairing.date,
         price = mongoRepairing.price,
         status = mongoRepairing.status,
@@ -67,8 +59,8 @@ object RepairingFixture {
 
     fun createRepairingRequest(mongoCar: MongoCar) = CreateRepairingRequest(
         carId = mongoCar.id.toString(),
-        date = Date.from(monthAfter.toInstant()),
-        price = Random.nextInt(300),
+        date = monthAfter,
+        price = randomPrice(),
         status = RepairingStatus.IN_PROGRESS,
     )
 
@@ -80,10 +72,10 @@ object RepairingFixture {
         status = request.status,
     )
 
-    fun createdRepairing(mongoRepairing: MongoRepairing) = mongoRepairing.copy(id = createdRepairingId)
+    fun createdRepairing(mongoRepairing: MongoRepairing) = mongoRepairing.copy(id = ObjectId())
 
     fun updateRepairingRequest() = UpdateRepairingRequest(
-        price = Random.nextInt(300),
+        price = randomPrice(),
         status = RepairingStatus.COMPLETED,
     )
 
@@ -98,19 +90,27 @@ object RepairingFixture {
     fun updatedRepairing(oldMongoRepairing: MongoRepairing, request: UpdateRepairingRequest) =
         oldMongoRepairing.copy(price = request.price, status = request.status)
 
-    fun randomRepairing(carId: ObjectId?) = MongoRepairing(
-        id = ObjectId(),
-        carId = carId,
-        date = Date.from(tommorow.toInstant()),
-        price = Random.nextInt(300),
-        status = RepairingStatus.PENDING,
-    )
-
     fun randomAggregatedRepairing(car: MongoCar?) = AggregatedMongoRepairing(
         id = ObjectId(),
         car = car,
-        date = Date.from(tommorow.toInstant()),
-        price = Random.nextInt(300),
+        date = tomorrow,
+        price = randomPrice(),
         status = RepairingStatus.PENDING,
+    )
+
+    fun emptyAggregatedRepairing() = AggregatedMongoRepairing(
+        id = null,
+        car = null,
+        date = null,
+        price = null,
+        status = null,
+    )
+
+    fun emptyAggregatedRepairingResponse() = AggregatedRepairingResponse(
+        id = "",
+        car = CarResponse.from(MongoCar()),
+        date = null,
+        price = null,
+        status = null,
     )
 }

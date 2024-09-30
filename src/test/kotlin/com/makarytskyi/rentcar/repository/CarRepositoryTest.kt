@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-internal class CarRepositoryTests : ContainerBase {
+internal class CarRepositoryTest : ContainerBase {
 
     @Autowired
     lateinit var carRepository: CarRepository

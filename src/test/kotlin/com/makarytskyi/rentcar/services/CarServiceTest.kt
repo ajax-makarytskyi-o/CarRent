@@ -25,7 +25,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @ExtendWith(MockitoExtension::class)
-internal class CarServiceTests {
+internal class CarServiceTest {
     @Mock
     lateinit var carRepository: CarRepository
 

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-internal class UserRepositoryTests : ContainerBase {
+internal class UserRepositoryTest : ContainerBase {
 
     @Autowired
     lateinit var userRepository: UserRepository

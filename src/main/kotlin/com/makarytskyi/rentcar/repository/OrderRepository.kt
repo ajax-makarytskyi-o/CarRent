@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.model.MongoOrder
-import com.makarytskyi.rentcar.model.aggregated.AggregatedMongoOrder
+import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
 import org.springframework.stereotype.Repository
 
 @Repository

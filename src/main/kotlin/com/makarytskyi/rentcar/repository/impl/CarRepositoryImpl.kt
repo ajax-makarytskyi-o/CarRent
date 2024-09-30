@@ -4,6 +4,7 @@ import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.repository.CarRepository
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.aggregation.Fields
 import org.springframework.data.mongodb.core.findAll
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.query.Criteria
@@ -15,33 +16,41 @@ import org.springframework.stereotype.Repository
 @Repository
 internal class CarRepositoryImpl(private val template: MongoTemplate) : CarRepository {
 
-    override fun findById(id: String): MongoCar? = template.findById<MongoCar>(id)
+    override fun findById(id: String): MongoCar? {
+        return template.findById<MongoCar>(id)
+    }
 
-    override fun create(mongoCar: MongoCar): MongoCar = template.insert(mongoCar)
+    override fun create(mongoCar: MongoCar): MongoCar {
+        return template.insert(mongoCar)
+    }
 
     override fun deleteById(id: String) {
-        val query = Query(Criteria.where("_id").isEqualTo(id))
+        val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         template.remove(query, MongoCar::class.java)
     }
 
-    override fun findAll(): List<MongoCar> = template.findAll<MongoCar>()
+    override fun findAll(): List<MongoCar> {
+        return template.findAll<MongoCar>()
+    }
 
     override fun findAllByBrand(brand: String): List<MongoCar> {
-        val query = Query(Criteria.where("brand").isEqualTo(brand))
+        val query = Query(Criteria.where(MongoCar::brand.name).isEqualTo(brand))
         return template.find(query, MongoCar::class.java)
     }
 
     override fun findAllByBrandAndModel(brand: String, model: String): List<MongoCar> {
-        val query = Query(Criteria.where("brand").isEqualTo(brand).and("model").isEqualTo(model))
+        val query = Query(
+            Criteria.where(MongoCar::brand.name).isEqualTo(brand).and(MongoCar::model.name).isEqualTo(model)
+        )
         return template.find(query, MongoCar::class.java)
     }
 
     override fun update(id: String, mongoCar: MongoCar): MongoCar? {
-        val query = Query(Criteria.where("_id").isEqualTo(id))
+        val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 
-        mongoCar.color?.let { update.set("color", it) }
-        mongoCar.price?.let { update.set("price", it) }
+        mongoCar.color?.let { update.set(MongoCar::color.name, it) }
+        mongoCar.price?.let { update.set(MongoCar::price.name, it) }
 
         val options = FindAndModifyOptions()
         options.returnNew(true)
@@ -50,7 +59,7 @@ internal class CarRepositoryImpl(private val template: MongoTemplate) : CarRepos
     }
 
     override fun findByPlate(plate: String): MongoCar? {
-        val query = Query(Criteria.where("plate").isEqualTo(plate))
+        val query = Query(Criteria.where(MongoCar::plate.name).isEqualTo(plate))
         return template.findOne(query, MongoCar::class.java)
     }
 }

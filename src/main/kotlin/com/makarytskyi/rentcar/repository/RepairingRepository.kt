@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.model.MongoRepairing
-import com.makarytskyi.rentcar.model.aggregated.AggregatedMongoRepairing
+import com.makarytskyi.rentcar.model.projection.AggregatedMongoRepairing
 import org.springframework.stereotype.Repository
 
 @Repository

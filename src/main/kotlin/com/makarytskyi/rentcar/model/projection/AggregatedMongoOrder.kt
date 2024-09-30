@@ -1,4 +1,4 @@
-package com.makarytskyi.rentcar.model.aggregated
+package com.makarytskyi.rentcar.model.projection
 
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoUser

@@ -1,12 +1,13 @@
 package com.makarytskyi.rentcar.dto.car
 
 import com.makarytskyi.rentcar.model.MongoCar
+import java.math.BigDecimal
 
 data class CarResponse(
     val id: String,
     val brand: String,
     val model: String,
-    val price: Int,
+    val price: BigDecimal,
     val year: Int?,
     val plate: String,
     val color: MongoCar.CarColor?,
@@ -17,7 +18,7 @@ data class CarResponse(
             mongoCar.id?.toString().orEmpty(),
             mongoCar.brand.orEmpty(),
             mongoCar.model.orEmpty(),
-            mongoCar.price ?: 0,
+            mongoCar.price ?: BigDecimal.ZERO,
             mongoCar.year,
             mongoCar.plate.orEmpty(),
             mongoCar.color,

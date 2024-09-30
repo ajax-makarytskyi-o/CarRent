@@ -1,5 +1,6 @@
 package com.makarytskyi.rentcar.model
 
+import java.math.BigDecimal
 import java.util.Date
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -13,7 +14,7 @@ data class MongoRepairing(
     val id: ObjectId? = null,
     val carId: ObjectId?,
     val date: Date?,
-    val price: Int?,
+    val price: BigDecimal?,
     val status: RepairingStatus?,
 ) {
     companion object {
@@ -21,6 +22,6 @@ data class MongoRepairing(
     }
 
     enum class RepairingStatus {
-        PENDING, IN_PROGRESS, COMPLETED;
+        PENDING, IN_PROGRESS, COMPLETED
     }
 }

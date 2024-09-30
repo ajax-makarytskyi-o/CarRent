@@ -4,6 +4,7 @@ import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
+import java.math.BigDecimal
 import java.util.Date
 import org.bson.types.ObjectId
 
@@ -12,7 +13,7 @@ data class CreateRepairingRequest(
     val carId: String,
     val date: Date?,
     @field:Min(0)
-    val price: Int?,
+    val price: BigDecimal?,
     val status: RepairingStatus?,
 ) {
 

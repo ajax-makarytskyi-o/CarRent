@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.dto.order
 
 import com.makarytskyi.rentcar.model.MongoOrder
-import java.time.ZoneId
+import java.math.BigDecimal
 import java.time.temporal.ChronoUnit
 import java.util.Date
 
@@ -11,17 +11,13 @@ data class OrderResponse(
     val userId: String,
     val from: Date?,
     val to: Date?,
-    val price: Long?
+    val price: BigDecimal?,
 ) {
 
     companion object {
-        fun from(mongoOrder: MongoOrder, carPrice: Int?): OrderResponse {
-            val daysBetween = ChronoUnit.DAYS.between(
-                mongoOrder.from?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate(),
-                mongoOrder.to?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
-            )
-
-            val calculatedPrice = carPrice?.let { daysBetween.times(it) } ?: 0
+        fun from(mongoOrder: MongoOrder, carPrice: BigDecimal?): OrderResponse {
+            val daysBetween = mongoOrder.from?.toInstant()?.until(mongoOrder.to?.toInstant(), ChronoUnit.DAYS) ?: 0
+            val calculatedPrice = carPrice?.multiply(daysBetween.toBigDecimal()) ?: BigDecimal.ZERO
 
             return OrderResponse(
                 mongoOrder.id?.toString().orEmpty(),
@@ -34,4 +30,3 @@ data class OrderResponse(
         }
     }
 }
-

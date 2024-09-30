@@ -10,10 +10,10 @@ import org.springframework.data.mongodb.core.mapping.Document
 data class MongoUser(
     @Id
     val id: ObjectId? = null,
-    val name: String?,
-    val email: String?,
-    val phoneNumber: String?,
-    val city: String?,
+    val name: String? = null,
+    val email: String? = null,
+    val phoneNumber: String? = null,
+    val city: String? = null,
 ) {
     companion object {
         const val COLLECTION_NAME = "users"

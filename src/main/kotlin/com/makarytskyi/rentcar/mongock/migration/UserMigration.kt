@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.index.Index
 
-@ChangeUnit(id = "userCollectionAndIndex", order = "002", author = "Makarytskyi Oleh")
+@ChangeUnit(id = "userCollectionAndIndex", order = "2", author = "makarytskyi.o@ajax.systems")
 class UserMigration {
 
     @Execution
@@ -23,19 +23,19 @@ class UserMigration {
         indexOps.ensureIndex(
             Index()
                 .on("name", Sort.Direction.ASC)
-                .named("name_index")
+                .named("users_name_index")
         )
 
         indexOps.ensureIndex(
             Index()
                 .on("email", Sort.Direction.ASC).unique()
-                .named("email_index")
+                .named("users_email_index")
         )
 
         indexOps.ensureIndex(
             Index()
                 .on("phoneNumber", Sort.Direction.ASC).unique()
-                .named("phoneNumber_index")
+                .named("users_phoneNumber_index")
         )
 
         log.info("Indexes for {} collection were created", MongoUser.COLLECTION_NAME)
@@ -44,11 +44,23 @@ class UserMigration {
     @RollbackExecution
     fun rollbackUserCollection(mongoTemplate: MongoTemplate) {
         val indexOps = mongoTemplate.indexOps(MongoUser.COLLECTION_NAME)
-        indexOps.dropIndex("name_index")
-        indexOps.dropIndex("email_index")
-        indexOps.dropIndex("phoneNumber_index")
 
-        log.info("Indexes for {} collection were rolled back", MongoUser.COLLECTION_NAME)
+        val indexes = indexOps.indexInfo
+
+        if (indexes.any { it.name == "users_name_index" }) {
+            indexOps.dropIndex("users_name_index")
+            log.info("Index 'users_name_index' for collection {} was rolled back", MongoUser.COLLECTION_NAME)
+        }
+
+        if (indexes.any { it.name == "users_email_index" }) {
+            indexOps.dropIndex("users_email_index")
+            log.info("Index 'users_email_index' for collection {} was rolled back", MongoUser.COLLECTION_NAME)
+        }
+
+        if (indexes.any { it.name == "users_phoneNumber_index" }) {
+            indexOps.dropIndex("users_phoneNumber_index")
+            log.info("Index 'users_phoneNumber_index' for collection {} was rolled back", MongoUser.COLLECTION_NAME)
+        }
 
         if (mongoTemplate.collectionExists(MongoUser.COLLECTION_NAME)) {
             mongoTemplate.dropCollection(MongoUser.COLLECTION_NAME)

@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.index.Index
 
-@ChangeUnit(id = "repairingCollectionAndIndex", order = "003", author = "Makarytskyi Oleh")
+@ChangeUnit(id = "repairingCollectionAndIndex", order = "3", author = "makarytskyi.o@ajax.systems")
 class RepairingMigration {
 
     @Execution
@@ -24,13 +24,13 @@ class RepairingMigration {
             Index()
                 .on("status", Sort.Direction.ASC)
                 .on("carId", Sort.Direction.ASC)
-                .named("status_carId_index")
+                .named("repairings_status_carId_index")
         )
 
         indexOps.ensureIndex(
             Index()
                 .on("carId", Sort.Direction.ASC)
-                .named("carId_index")
+                .named("repairings_carId_index")
         )
 
         log.info("Indexes for {} collection were created", MongoRepairing.COLLECTION_NAME)
@@ -39,10 +39,20 @@ class RepairingMigration {
     @RollbackExecution
     fun rollbackRepairingCollection(mongoTemplate: MongoTemplate) {
         val indexOps = mongoTemplate.indexOps(MongoRepairing.COLLECTION_NAME)
-        indexOps.dropIndex("status_carId_index")
-        indexOps.dropIndex("carId_index")
+        val indexes = indexOps.indexInfo
 
-        log.info("Indexes for {} collection were rolled back", MongoRepairing.COLLECTION_NAME)
+        if (indexes.any { it.name == "repairings_status_carId_index" }) {
+            indexOps.dropIndex("repairings_status_carId_index")
+            log.info(
+                "Index 'repairings_status_carId_index' for collection {} was rolled back",
+                MongoRepairing.COLLECTION_NAME
+            )
+        }
+
+        if (indexes.any { it.name == "repairings_carId_index" }) {
+            indexOps.dropIndex("repairings_carId_index")
+            log.info("Index 'repairings_carId_index' for collection {} was rolled back", MongoRepairing.COLLECTION_NAME)
+        }
 
         if (mongoTemplate.collectionExists(MongoRepairing.COLLECTION_NAME)) {
             mongoTemplate.dropCollection(MongoRepairing.COLLECTION_NAME)

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
 internal class GlobalExceptionHandler {
-    @ExceptionHandler(ResourceNotFoundException::class)
+    @ExceptionHandler(NotFoundException::class)
     internal fun handleResourceNotFoundException(): ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(
             HttpStatus.NOT_FOUND.value(),

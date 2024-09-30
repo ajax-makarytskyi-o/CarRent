@@ -20,8 +20,8 @@ internal class RepairingServiceImpl(
     private val carRepository: CarRepository,
 ) : RepairingService {
 
-    override fun findAll(): List<AggregatedRepairingResponse> =
-        repairingRepository.findAll().map { AggregatedRepairingResponse.from(it) }.toList()
+    override fun findAll(page: Int, size: Int): List<AggregatedRepairingResponse> =
+        repairingRepository.findAll(page, size).map { AggregatedRepairingResponse.from(it) }.toList()
 
     override fun create(repairingRequest: CreateRepairingRequest): RepairingResponse {
         validateCarExists(repairingRequest.carId)
@@ -35,8 +35,8 @@ internal class RepairingServiceImpl(
 
     override fun deleteById(id: String) = repairingRepository.deleteById(id)
 
-    override fun update(id: String, repairingRequest: UpdateRepairingRequest): RepairingResponse =
-        repairingRepository.update(id, UpdateRepairingRequest.toEntity(repairingRequest))
+    override fun patch(id: String, repairingRequest: UpdateRepairingRequest): RepairingResponse =
+        repairingRepository.patch(id, UpdateRepairingRequest.toEntity(repairingRequest))
             ?.let { RepairingResponse.from(it) }
             ?: throw NotFoundException("Repairing with id $id is not found")
 

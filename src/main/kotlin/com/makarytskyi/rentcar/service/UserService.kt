@@ -6,7 +6,7 @@ import com.makarytskyi.rentcar.dto.user.UserResponse
 
 internal interface UserService {
 
-    fun findAll(): List<UserResponse>
+    fun findAll(page: Int, size: Int): List<UserResponse>
 
     fun create(createUserRequest: CreateUserRequest): UserResponse
 
@@ -14,7 +14,7 @@ internal interface UserService {
 
     fun deleteById(id: String)
 
-    fun update(id: String, userRequest: UpdateUserRequest): UserResponse
+    fun patch(id: String, userRequest: UpdateUserRequest): UserResponse
 
     fun getByEmail(email: String): UserResponse
 

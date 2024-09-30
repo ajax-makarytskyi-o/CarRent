@@ -5,6 +5,9 @@ import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
 import com.makarytskyi.rentcar.service.CarService
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
@@ -23,8 +27,11 @@ internal class CarController(private val service: CarService) {
     @GetMapping("/{id}")
     fun getById(@PathVariable id: String): CarResponse = service.getById(id)
 
-    @GetMapping
-    fun findAll(): List<CarResponse> = service.findAll()
+    @GetMapping()
+    fun findAll(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int
+    ): List<CarResponse> = service.findAll(page, size)
 
     @GetMapping("/brand/{brand}")
     fun findAllByBrand(@PathVariable brand: String): List<CarResponse> = service.findAllByBrand(brand)
@@ -42,8 +49,8 @@ internal class CarController(private val service: CarService) {
     fun delete(@PathVariable id: String) = service.deleteById(id)
 
     @PatchMapping("/{id}")
-    fun update(@PathVariable id: String, @Valid @RequestBody car: UpdateCarRequest): CarResponse =
-        service.update(id, car)
+    fun patch(@PathVariable id: String, @Valid @RequestBody car: UpdateCarRequest): CarResponse =
+        service.patch(id, car)
 
     @GetMapping("/plate/{plate}")
     fun getByPlate(@PathVariable plate: String): CarResponse = service.getByPlate(plate)

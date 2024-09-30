@@ -16,7 +16,8 @@ internal class CarServiceImpl(private val repository: CarRepository) : CarServic
     override fun getById(id: String): CarResponse = repository.findById(id)?.let { CarResponse.from(it) }
         ?: throw NotFoundException("Car with id $id is not found")
 
-    override fun findAll(): List<CarResponse> = repository.findAll().map { CarResponse.from(it) }
+    override fun findAll(page: Int, size: Int): List<CarResponse> =
+        repository.findAll(page, size).map { CarResponse.from(it) }
 
     override fun create(carRequest: CreateCarRequest): CarResponse {
         validatePlate(carRequest.plate)
@@ -32,8 +33,8 @@ internal class CarServiceImpl(private val repository: CarRepository) : CarServic
     override fun findAllByBrandAndModel(brand: String, model: String): List<CarResponse> =
         repository.findAllByBrandAndModel(brand, model).map { CarResponse.from(it) }
 
-    override fun update(id: String, carRequest: UpdateCarRequest): CarResponse =
-        repository.update(id, UpdateCarRequest.toEntity(carRequest))?.let { CarResponse.from(it) }
+    override fun patch(id: String, carRequest: UpdateCarRequest): CarResponse =
+        repository.patch(id, UpdateCarRequest.toEntity(carRequest))?.let { CarResponse.from(it) }
             ?: throw NotFoundException("Car with id $id is not found")
 
     override fun getByPlate(plate: String): CarResponse = repository.findByPlate(plate)?.let { CarResponse.from(it) }

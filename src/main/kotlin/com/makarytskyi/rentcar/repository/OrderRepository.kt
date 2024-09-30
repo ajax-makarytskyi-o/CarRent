@@ -9,7 +9,7 @@ internal interface OrderRepository {
 
     fun findById(id: String): AggregatedMongoOrder?
 
-    fun findAll(): List<AggregatedMongoOrder>
+    fun findAll(page: Int, size: Int): List<AggregatedMongoOrder>
 
     fun create(mongoOrder: MongoOrder): MongoOrder
 
@@ -19,7 +19,7 @@ internal interface OrderRepository {
 
     fun findByCarId(carId: String): List<MongoOrder>
 
-    fun update(id: String, mongoOrder: MongoOrder): MongoOrder?
+    fun patch(id: String, mongoOrder: MongoOrder): MongoOrder?
 
     fun findByCarIdAndUserId(carId: String, userId: String): List<MongoOrder>
 }

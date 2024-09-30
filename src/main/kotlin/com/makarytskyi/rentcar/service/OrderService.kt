@@ -9,7 +9,7 @@ internal interface OrderService {
 
     fun getById(id: String): AggregatedOrderResponse
 
-    fun findAll(): List<AggregatedOrderResponse>
+    fun findAll(page: Int, size: Int): List<AggregatedOrderResponse>
 
     fun create(createOrderRequest: CreateOrderRequest): OrderResponse
 
@@ -21,5 +21,5 @@ internal interface OrderService {
 
     fun findByCarAndUser(carId: String, userId: String): List<OrderResponse>
 
-    fun update(id: String, orderRequest: UpdateOrderRequest): OrderResponse
+    fun patch(id: String, orderRequest: UpdateOrderRequest): OrderResponse
 }

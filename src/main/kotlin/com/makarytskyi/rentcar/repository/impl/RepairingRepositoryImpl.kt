@@ -38,12 +38,15 @@ internal class RepairingRepositoryImpl(private val template: MongoTemplate) : Re
         return results.mappedResults.firstOrNull()
     }
 
-    override fun findAll(): List<AggregatedMongoRepairing> {
+    override fun findAll(page: Int, size: Int): List<AggregatedMongoRepairing> {
+        val skipAmount = page * size
+        val skip = Aggregation.skip(skipAmount.toLong())
+        val limit = Aggregation.limit(size.toLong())
         val lookup = Aggregation.lookup().from(MongoCar.COLLECTION_NAME).localField(MongoRepairing::carId.name)
             .foreignField("_id").`as`("car")
         val unwind = Aggregation.unwind("car")
         val project = Aggregation.project().andExclude(MongoRepairing::carId.name)
-        val aggregation = newAggregation(lookup, unwind, project)
+        val aggregation = newAggregation(skip, limit, lookup, unwind, project)
         val results: AggregationResults<AggregatedMongoRepairing> =
             template.aggregate(aggregation, MongoRepairing.COLLECTION_NAME, AggregatedMongoRepairing::class.java)
         return results.mappedResults
@@ -54,7 +57,7 @@ internal class RepairingRepositoryImpl(private val template: MongoTemplate) : Re
         template.remove(query, MongoRepairing::class.java)
     }
 
-    override fun update(id: String, mongoRepairing: MongoRepairing): MongoRepairing? {
+    override fun patch(id: String, mongoRepairing: MongoRepairing): MongoRepairing? {
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 

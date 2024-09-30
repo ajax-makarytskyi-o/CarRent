@@ -40,7 +40,10 @@ internal class OrderRepositoryImpl(private val template: MongoTemplate) : OrderR
         return results.mappedResults.firstOrNull()
     }
 
-    override fun findAll(): List<AggregatedMongoOrder> {
+    override fun findAll(page: Int, size: Int): List<AggregatedMongoOrder> {
+        val skipAmount = page * size
+        val skip = Aggregation.skip(skipAmount.toLong())
+        val limit = Aggregation.limit(size.toLong())
         val lookupCars = Aggregation.lookup(MongoCar.COLLECTION_NAME, MongoOrder::carId.name, "_id", "car")
         val lookupUsers = Aggregation.lookup(MongoUser.COLLECTION_NAME, MongoOrder::userId.name, "_id", "user")
 
@@ -49,7 +52,7 @@ internal class OrderRepositoryImpl(private val template: MongoTemplate) : OrderR
             .addField("user").withValue(ArrayOperators.ArrayElemAt.arrayOf("\$user").elementAt(0)).build()
 
         val project = Aggregation.project().andExclude(MongoOrder::carId.name, MongoOrder::userId.name)
-        val aggregation = newAggregation(lookupCars, lookupUsers, addFields, project)
+        val aggregation = newAggregation(skip, limit, lookupCars, lookupUsers, addFields, project)
         val results: AggregationResults<AggregatedMongoOrder> =
             template.aggregate(aggregation, MongoOrder.COLLECTION_NAME, AggregatedMongoOrder::class.java)
         return results.mappedResults
@@ -78,7 +81,7 @@ internal class OrderRepositoryImpl(private val template: MongoTemplate) : OrderR
         return template.find(query, MongoOrder::class.java)
     }
 
-    override fun update(id: String, mongoOrder: MongoOrder): MongoOrder? {
+    override fun patch(id: String, mongoOrder: MongoOrder): MongoOrder? {
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 

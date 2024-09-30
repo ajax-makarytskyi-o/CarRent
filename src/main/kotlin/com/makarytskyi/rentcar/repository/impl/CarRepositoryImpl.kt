@@ -2,10 +2,10 @@ package com.makarytskyi.rentcar.repository.impl
 
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.repository.CarRepository
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Fields
-import org.springframework.data.mongodb.core.findAll
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -29,8 +29,9 @@ internal class CarRepositoryImpl(private val template: MongoTemplate) : CarRepos
         template.remove(query, MongoCar::class.java)
     }
 
-    override fun findAll(): List<MongoCar> {
-        return template.findAll<MongoCar>()
+    override fun findAll(page: Int, size: Int): List<MongoCar> {
+        val query = Query().with(PageRequest.of(page, size))
+        return template.find(query, MongoCar::class.java)
     }
 
     override fun findAllByBrand(brand: String): List<MongoCar> {
@@ -45,7 +46,7 @@ internal class CarRepositoryImpl(private val template: MongoTemplate) : CarRepos
         return template.find(query, MongoCar::class.java)
     }
 
-    override fun update(id: String, mongoCar: MongoCar): MongoCar? {
+    override fun patch(id: String, mongoCar: MongoCar): MongoCar? {
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 

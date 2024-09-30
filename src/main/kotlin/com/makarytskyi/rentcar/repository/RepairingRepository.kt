@@ -11,11 +11,11 @@ internal interface RepairingRepository {
 
     fun findById(id: String): AggregatedMongoRepairing?
 
-    fun findAll(): List<AggregatedMongoRepairing>
+    fun findAll(page: Int, size: Int): List<AggregatedMongoRepairing>
 
     fun deleteById(id: String)
 
-    fun update(id: String, mongoRepairing: MongoRepairing): MongoRepairing?
+    fun patch(id: String, mongoRepairing: MongoRepairing): MongoRepairing?
 
     fun findByStatus(status: MongoRepairing.RepairingStatus): List<MongoRepairing>
 

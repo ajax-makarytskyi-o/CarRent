@@ -8,7 +8,7 @@ import com.makarytskyi.rentcar.model.MongoRepairing
 
 internal interface RepairingService {
 
-    fun findAll(): List<AggregatedRepairingResponse>
+    fun findAll(page: Int, size: Int): List<AggregatedRepairingResponse>
 
     fun create(repairingRequest: CreateRepairingRequest): RepairingResponse
 
@@ -16,7 +16,7 @@ internal interface RepairingService {
 
     fun deleteById(id: String)
 
-    fun update(id: String, repairingRequest: UpdateRepairingRequest): RepairingResponse
+    fun patch(id: String, repairingRequest: UpdateRepairingRequest): RepairingResponse
 
     fun findByStatus(status: MongoRepairing.RepairingStatus): List<RepairingResponse>
 

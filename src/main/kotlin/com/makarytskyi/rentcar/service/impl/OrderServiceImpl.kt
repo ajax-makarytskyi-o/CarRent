@@ -26,8 +26,8 @@ internal class OrderServiceImpl(
         orderRepository.findById(id)?.let { AggregatedOrderResponse.from(it) }
             ?: throw NotFoundException("Order with id $id is not found")
 
-    override fun findAll(): List<AggregatedOrderResponse> =
-        orderRepository.findAll().map { AggregatedOrderResponse.from(it) }
+    override fun findAll(page: Int, size: Int): List<AggregatedOrderResponse> =
+        orderRepository.findAll(page, size).map { AggregatedOrderResponse.from(it) }
             .toList()
 
     override fun create(createOrderRequest: CreateOrderRequest): OrderResponse {
@@ -55,14 +55,14 @@ internal class OrderServiceImpl(
         orderRepository.findByCarIdAndUserId(carId, userId)
             .map { OrderResponse.from(it, getCarPrice(it.carId.toString())) }
 
-    override fun update(id: String, orderRequest: UpdateOrderRequest): OrderResponse {
+    override fun patch(id: String, orderRequest: UpdateOrderRequest): OrderResponse {
         val order = orderRepository.findById(id) ?: throw NotFoundException("Order with $id is not found")
         val newFrom = orderRequest.from ?: order.from
         val newTo = orderRequest.to ?: order.to
         validateDates(newFrom!!, newTo!!)
         validateCarAvailability(order.car?.id.toString(), newFrom, newTo)
 
-        return orderRepository.update(id, UpdateOrderRequest.toEntity(orderRequest))
+        return orderRepository.patch(id, UpdateOrderRequest.toEntity(orderRequest))
             ?.let { OrderResponse.from(it, order.car?.price) }
             ?: throw NotFoundException("Order with $id is not found")
     }

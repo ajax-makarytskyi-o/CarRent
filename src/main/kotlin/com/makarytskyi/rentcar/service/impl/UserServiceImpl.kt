@@ -13,7 +13,8 @@ import org.springframework.stereotype.Service
 @Service
 internal class UserServiceImpl(private val userRepository: UserRepository) : UserService {
 
-    override fun findAll(): List<UserResponse> = userRepository.findAll().map { UserResponse.from(it) }
+    override fun findAll(page: Int, size: Int): List<UserResponse> =
+        userRepository.findAll(page, size).map { UserResponse.from(it) }
 
     override fun create(createUserRequest: CreateUserRequest): UserResponse {
         validateAvailabilityEmail(createUserRequest.email)
@@ -26,10 +27,10 @@ internal class UserServiceImpl(private val userRepository: UserRepository) : Use
 
     override fun deleteById(id: String) = userRepository.deleteById(id)
 
-    override fun update(id: String, userRequest: UpdateUserRequest): UserResponse {
+    override fun patch(id: String, userRequest: UpdateUserRequest): UserResponse {
         userRequest.phoneNumber?.let { validateAvailabilityPhoneNumber(it) }
 
-        return userRepository.update(id, UpdateUserRequest.toEntity(userRequest))
+        return userRepository.patch(id, UpdateUserRequest.toEntity(userRequest))
             ?.let { UserResponse.from(it) }
             ?: throw NotFoundException("User with id $id is not found")
     }

@@ -8,13 +8,13 @@ internal interface CarRepository {
 
     fun findById(id: String): MongoCar?
 
-    fun findAll(): List<MongoCar>
+    fun findAll(page: Int, size: Int): List<MongoCar>
 
     fun create(mongoCar: MongoCar): MongoCar
 
     fun deleteById(id: String)
 
-    fun update(id: String, mongoCar: MongoCar): MongoCar?
+    fun patch(id: String, mongoCar: MongoCar): MongoCar?
 
     fun findByPlate(plate: String): MongoCar?
 

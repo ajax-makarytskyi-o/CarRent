@@ -2,10 +2,10 @@ package com.makarytskyi.rentcar.repository.impl
 
 import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.repository.UserRepository
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Fields
-import org.springframework.data.mongodb.core.findAll
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -24,8 +24,9 @@ internal class UserRepositoryImpl(private val template: MongoTemplate) : UserRep
         return template.findById<MongoUser>(id)
     }
 
-    override fun findAll(): List<MongoUser> {
-        return template.findAll<MongoUser>()
+    override fun findAll(page: Int, size: Int): List<MongoUser> {
+        val query = Query().with(PageRequest.of(page, size))
+        return template.find(query, MongoUser::class.java)
     }
 
     override fun deleteById(id: String) {
@@ -33,7 +34,7 @@ internal class UserRepositoryImpl(private val template: MongoTemplate) : UserRep
         template.remove(query, MongoUser::class.java)
     }
 
-    override fun update(id: String, mongoUser: MongoUser): MongoUser? {
+    override fun patch(id: String, mongoUser: MongoUser): MongoUser? {
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 

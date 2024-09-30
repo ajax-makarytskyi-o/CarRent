@@ -5,6 +5,8 @@ import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
 import com.makarytskyi.rentcar.service.UserService
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Max
+import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
@@ -24,7 +27,10 @@ internal class UserController(private val service: UserService) {
     fun getById(@PathVariable id: String): UserResponse = service.getById(id)
 
     @GetMapping()
-    fun findAll(): List<UserResponse> = service.findAll()
+    fun findAll(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int
+    ): List<UserResponse> = service.findAll(page, size)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -35,8 +41,8 @@ internal class UserController(private val service: UserService) {
     fun deleteById(@PathVariable id: String) = service.deleteById(id)
 
     @PatchMapping("/{id}")
-    fun update(@PathVariable id: String, @Valid @RequestBody user: UpdateUserRequest): UserResponse =
-        service.update(id, user)
+    fun patch(@PathVariable id: String, @Valid @RequestBody user: UpdateUserRequest): UserResponse =
+        service.patch(id, user)
 
     @GetMapping("/email/{email}")
     fun getByEmail(@PathVariable email: String): UserResponse = service.getByEmail(email)

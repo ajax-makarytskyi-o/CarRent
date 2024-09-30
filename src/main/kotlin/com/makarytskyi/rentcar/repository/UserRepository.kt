@@ -10,11 +10,11 @@ internal interface UserRepository {
 
     fun findById(id: String): MongoUser?
 
-    fun findAll(): List<MongoUser>
+    fun findAll(page: Int, size: Int): List<MongoUser>
 
     fun deleteById(id: String)
 
-    fun update(id: String, mongoUser: MongoUser): MongoUser?
+    fun patch(id: String, mongoUser: MongoUser): MongoUser?
 
     fun findByPhoneNumber(phoneNumber: String): MongoUser?
 

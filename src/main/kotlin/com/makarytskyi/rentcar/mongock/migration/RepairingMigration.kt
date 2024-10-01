@@ -24,13 +24,11 @@ class RepairingMigration {
             Index()
                 .on("status", Sort.Direction.ASC)
                 .on("carId", Sort.Direction.ASC)
-                .named("repairings_status_carId_index")
         )
 
         indexOps.ensureIndex(
             Index()
                 .on("carId", Sort.Direction.ASC)
-                .named("repairings_carId_index")
         )
 
         log.info("Indexes for {} collection were created", MongoRepairing.COLLECTION_NAME)

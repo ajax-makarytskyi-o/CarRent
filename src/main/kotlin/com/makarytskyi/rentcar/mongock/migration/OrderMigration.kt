@@ -23,12 +23,10 @@ class OrderMigration {
         indexOps.ensureIndex(
             Index()
                 .on("carId", Sort.Direction.ASC)
-                .named("orders_carId_index")
         )
         indexOps.ensureIndex(
             Index()
                 .on("userId", Sort.Direction.ASC)
-                .named("orders_userId_index")
         )
         log.info("Indexes for {} collection were created", MongoOrder.COLLECTION_NAME)
     }

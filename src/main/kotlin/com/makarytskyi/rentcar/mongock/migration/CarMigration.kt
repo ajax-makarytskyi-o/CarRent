@@ -24,13 +24,11 @@ class CarMigration {
             Index()
                 .on("brand", Sort.Direction.ASC)
                 .on("model", Sort.Direction.ASC)
-                .named("cars_brand_model_index")
         )
 
         indexOps.ensureIndex(
             Index()
                 .on("plate", Sort.Direction.ASC).unique()
-                .named("cars_plate_index")
         )
         log.info("Indexes for {} collection were created", MongoCar.COLLECTION_NAME)
     }

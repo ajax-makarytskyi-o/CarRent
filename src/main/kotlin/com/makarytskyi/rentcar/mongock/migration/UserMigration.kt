@@ -23,19 +23,16 @@ class UserMigration {
         indexOps.ensureIndex(
             Index()
                 .on("name", Sort.Direction.ASC)
-                .named("users_name_index")
         )
 
         indexOps.ensureIndex(
             Index()
                 .on("email", Sort.Direction.ASC).unique()
-                .named("users_email_index")
         )
 
         indexOps.ensureIndex(
             Index()
                 .on("phoneNumber", Sort.Direction.ASC).unique()
-                .named("users_phoneNumber_index")
         )
 
         log.info("Indexes for {} collection were created", MongoUser.COLLECTION_NAME)

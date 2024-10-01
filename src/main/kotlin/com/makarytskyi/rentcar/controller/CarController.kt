@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
@@ -21,10 +22,13 @@ import org.springframework.web.bind.annotation.RestController
 internal class CarController(private val service: CarService) {
 
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): CarResponse = service.getById(id)
+    fun getById(@PathVariable id: String): CarResponse = service.getById(id)
 
-    @GetMapping
-    fun findAll(): List<CarResponse> = service.findAll()
+    @GetMapping()
+    fun findAll(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int
+    ): List<CarResponse> = service.findAll(page, size)
 
     @GetMapping("/brand/{brand}")
     fun findAllByBrand(@PathVariable brand: String): List<CarResponse> = service.findAllByBrand(brand)
@@ -42,8 +46,8 @@ internal class CarController(private val service: CarService) {
     fun delete(@PathVariable id: String) = service.deleteById(id)
 
     @PatchMapping("/{id}")
-    fun update(@PathVariable id: String, @Valid @RequestBody car: UpdateCarRequest): CarResponse =
-        service.update(id, car)
+    fun patch(@PathVariable id: String, @Valid @RequestBody car: UpdateCarRequest): CarResponse =
+        service.patch(id, car)
 
     @GetMapping("/plate/{plate}")
     fun getByPlate(@PathVariable plate: String): CarResponse = service.getByPlate(plate)

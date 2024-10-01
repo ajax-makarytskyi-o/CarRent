@@ -1,22 +1,23 @@
 package com.makarytskyi.rentcar.repository
 
-import com.makarytskyi.rentcar.model.User
+import com.makarytskyi.rentcar.model.MongoUser
+import com.makarytskyi.rentcar.model.patch.MongoUserPatch
 import org.springframework.stereotype.Repository
 
 @Repository
 internal interface UserRepository {
 
-    fun create(user: User): User
+    fun create(mongoUser: MongoUser): MongoUser
 
-    fun findById(id: String): User?
+    fun findById(id: String): MongoUser?
 
-    fun findAll(): List<User>
+    fun findAll(page: Int, size: Int): List<MongoUser>
 
     fun deleteById(id: String)
 
-    fun update(id: String, user: User): User?
+    fun patch(id: String, userPatch: MongoUserPatch): MongoUser?
 
-    fun findByPhoneNumber(phoneNumber: String): User?
+    fun findByPhoneNumber(phoneNumber: String): MongoUser?
 
-    fun findByEmail(email: String): User?
+    fun findByEmail(email: String): MongoUser?
 }

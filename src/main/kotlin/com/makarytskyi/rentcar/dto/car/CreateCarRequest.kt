@@ -1,10 +1,11 @@
 package com.makarytskyi.rentcar.dto.car
 
-import com.makarytskyi.rentcar.model.Car
+import com.makarytskyi.rentcar.model.MongoCar
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
+import java.math.BigDecimal
 
 data class CreateCarRequest(
     @field:NotBlank
@@ -14,16 +15,16 @@ data class CreateCarRequest(
     @field:Size(max = 30)
     val model: String,
     @field:Min(0)
-    val price: Int,
+    val price: BigDecimal,
     val year: Int?,
     @field:NotNull
     @field:Size(max = 12)
     val plate: String,
-    val color: Car.CarColor?,
+    val color: MongoCar.CarColor?,
 ) {
 
     companion object {
-        fun toEntity(carRequest: CreateCarRequest): Car = Car(
+        fun toEntity(carRequest: CreateCarRequest): MongoCar = MongoCar(
             brand = carRequest.brand,
             model = carRequest.model,
             price = carRequest.price,

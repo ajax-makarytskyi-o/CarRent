@@ -1,26 +1,27 @@
 package com.makarytskyi.rentcar.dto.car
 
-import com.makarytskyi.rentcar.model.Car
+import com.makarytskyi.rentcar.model.MongoCar
+import java.math.BigDecimal
 
 data class CarResponse(
     val id: String,
     val brand: String,
     val model: String,
-    val price: Int,
+    val price: BigDecimal,
     val year: Int?,
     val plate: String,
-    val color: Car.CarColor?,
+    val color: MongoCar.CarColor?,
 ) {
 
     companion object {
-        fun from(car: Car): CarResponse = CarResponse(
-            car.id!!,
-            car.brand ?: "none",
-            car.model ?: "none",
-            car.price ?: 0,
-            car.year,
-            car.plate ?: "none",
-            car.color,
+        fun from(mongoCar: MongoCar): CarResponse = CarResponse(
+            mongoCar.id?.toString().orEmpty(),
+            mongoCar.brand.orEmpty(),
+            mongoCar.model.orEmpty(),
+            mongoCar.price ?: BigDecimal.ZERO,
+            mongoCar.year,
+            mongoCar.plate.orEmpty(),
+            mongoCar.color,
         )
     }
 }

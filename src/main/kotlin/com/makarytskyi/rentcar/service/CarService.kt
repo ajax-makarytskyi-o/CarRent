@@ -8,7 +8,7 @@ internal interface CarService {
 
     fun getById(id: String): CarResponse
 
-    fun findAll(): List<CarResponse>
+    fun findAll(page: Int, size: Int): List<CarResponse>
 
     fun create(carRequest: CreateCarRequest): CarResponse
 
@@ -18,7 +18,7 @@ internal interface CarService {
 
     fun findAllByBrandAndModel(brand: String, model: String): List<CarResponse>
 
-    fun update(id: String, carRequest: UpdateCarRequest): CarResponse
+    fun patch(id: String, carRequest: UpdateCarRequest): CarResponse
 
     fun getByPlate(plate: String): CarResponse
 }

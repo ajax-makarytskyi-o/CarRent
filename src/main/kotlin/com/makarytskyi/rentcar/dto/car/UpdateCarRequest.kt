@@ -1,22 +1,19 @@
 package com.makarytskyi.rentcar.dto.car
 
-import com.makarytskyi.rentcar.model.Car
+import com.makarytskyi.rentcar.model.MongoCar
+import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import jakarta.validation.constraints.Min
+import java.math.BigDecimal
 
 data class UpdateCarRequest(
     @field:Min(0)
-    val price: Int?,
-    val color: Car.CarColor?,
+    val price: BigDecimal?,
+    val color: MongoCar.CarColor?,
 ) {
 
     companion object {
-        fun toEntity(carRequest: UpdateCarRequest) = Car(
-            id = null,
-            brand = null,
-            model = null,
+        fun toPatch(carRequest: UpdateCarRequest) = MongoCarPatch(
             price = carRequest.price,
-            year = null,
-            plate = null,
             color = carRequest.color,
         )
     }

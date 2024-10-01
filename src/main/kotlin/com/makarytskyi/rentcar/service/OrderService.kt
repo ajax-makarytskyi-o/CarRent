@@ -1,14 +1,15 @@
 package com.makarytskyi.rentcar.service
 
+import com.makarytskyi.rentcar.dto.order.AggregatedOrderResponse
 import com.makarytskyi.rentcar.dto.order.CreateOrderRequest
 import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
 
 internal interface OrderService {
 
-    fun getById(id: String): OrderResponse
+    fun getById(id: String): AggregatedOrderResponse
 
-    fun findAll(): List<OrderResponse>
+    fun findAll(page: Int, size: Int): List<AggregatedOrderResponse>
 
     fun create(createOrderRequest: CreateOrderRequest): OrderResponse
 
@@ -20,5 +21,5 @@ internal interface OrderService {
 
     fun findByCarAndUser(carId: String, userId: String): List<OrderResponse>
 
-    fun update(id: String, orderRequest: UpdateOrderRequest): OrderResponse
+    fun patch(id: String, orderRequest: UpdateOrderRequest): OrderResponse
 }

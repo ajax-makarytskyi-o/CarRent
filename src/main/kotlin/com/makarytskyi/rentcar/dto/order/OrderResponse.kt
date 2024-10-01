@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.dto.order
 
-import com.makarytskyi.rentcar.model.Order
-import java.time.ZoneId
+import com.makarytskyi.rentcar.model.MongoOrder
+import java.math.BigDecimal
 import java.time.temporal.ChronoUnit
 import java.util.Date
 
@@ -11,27 +11,22 @@ data class OrderResponse(
     val userId: String,
     val from: Date?,
     val to: Date?,
-    val price: Long?
+    val price: BigDecimal?,
 ) {
 
     companion object {
-        fun from(order: Order, carPrice: Int?): OrderResponse {
-            val daysBetween = ChronoUnit.DAYS.between(
-                order.from?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate(),
-                order.to?.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDate()
-            )
-
-            val calculatedPrice = carPrice?.let { daysBetween.times(it) } ?: 0
+        fun from(mongoOrder: MongoOrder, carPrice: BigDecimal?): OrderResponse {
+            val daysBetween = mongoOrder.from?.toInstant()?.until(mongoOrder.to?.toInstant(), ChronoUnit.DAYS) ?: 0
+            val calculatedPrice = carPrice?.multiply(daysBetween.toBigDecimal()) ?: BigDecimal.ZERO
 
             return OrderResponse(
-                order.id!!,
-                order.carId ?: "none",
-                order.userId ?: "none",
-                order.from,
-                order.to,
+                mongoOrder.id?.toString().orEmpty(),
+                mongoOrder.carId?.toString().orEmpty(),
+                mongoOrder.userId?.toString().orEmpty(),
+                mongoOrder.from,
+                mongoOrder.to,
                 price = calculatedPrice,
             )
         }
     }
 }
-

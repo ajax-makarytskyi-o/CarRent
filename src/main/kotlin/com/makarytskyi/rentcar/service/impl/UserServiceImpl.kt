@@ -4,7 +4,7 @@ import com.makarytskyi.rentcar.annotation.InvocationTracker
 import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
-import com.makarytskyi.rentcar.exception.ResourceNotFoundException
+import com.makarytskyi.rentcar.exception.NotFoundException
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.service.UserService
 import org.springframework.stereotype.Service
@@ -13,7 +13,8 @@ import org.springframework.stereotype.Service
 @Service
 internal class UserServiceImpl(private val userRepository: UserRepository) : UserService {
 
-    override fun findAll(): List<UserResponse> = userRepository.findAll().map { UserResponse.from(it) }
+    override fun findAll(page: Int, size: Int): List<UserResponse> =
+        userRepository.findAll(page, size).map { UserResponse.from(it) }
 
     override fun create(createUserRequest: CreateUserRequest): UserResponse {
         validateAvailabilityEmail(createUserRequest.email)
@@ -22,25 +23,25 @@ internal class UserServiceImpl(private val userRepository: UserRepository) : Use
     }
 
     override fun getById(id: String): UserResponse = userRepository.findById(id)?.let { UserResponse.from(it) }
-        ?: throw ResourceNotFoundException("User with id $id is not found")
+        ?: throw NotFoundException("User with id $id is not found")
 
     override fun deleteById(id: String) = userRepository.deleteById(id)
 
-    override fun update(id: String, userRequest: UpdateUserRequest): UserResponse {
+    override fun patch(id: String, userRequest: UpdateUserRequest): UserResponse {
         userRequest.phoneNumber?.let { validateAvailabilityPhoneNumber(it) }
 
-        return userRepository.update(id, UpdateUserRequest.toEntity(userRequest))
+        return userRepository.patch(id, UpdateUserRequest.toPatch(userRequest))
             ?.let { UserResponse.from(it) }
-            ?: throw ResourceNotFoundException("User with id $id is not found")
+            ?: throw NotFoundException("User with id $id is not found")
     }
 
     override fun getByEmail(email: String): UserResponse = userRepository.findByEmail(email)
         ?.let { UserResponse.from(it) }
-        ?: throw ResourceNotFoundException("User with email $email is not found")
+        ?: throw NotFoundException("User with email $email is not found")
 
     override fun getByPhoneNumber(phoneNumber: String): UserResponse =
         userRepository.findByPhoneNumber(phoneNumber)?.let { UserResponse.from(it) }
-            ?: throw ResourceNotFoundException("User with phone number $phoneNumber is not found")
+            ?: throw NotFoundException("User with phone number $phoneNumber is not found")
 
     private fun validateAvailabilityEmail(email: String) =
         require(userRepository.findByEmail(email) == null) { "User with email $email is already exist" }

@@ -6,6 +6,9 @@ spring:
     mongodb:
       uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${DATABASE}?authSource=admin
 
+mongock:
+  migration-scan-package: com.makarytskyi.rentcar.mongock.migration
+
 server:
   servlet:
     contextPath: /api/v1

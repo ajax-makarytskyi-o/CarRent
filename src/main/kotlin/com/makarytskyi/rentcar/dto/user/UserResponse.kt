@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.dto.user
 
-import com.makarytskyi.rentcar.model.User
+import com.makarytskyi.rentcar.model.MongoUser
 
 data class UserResponse(
     val id: String,
@@ -11,12 +11,12 @@ data class UserResponse(
 ) {
 
     companion object {
-        fun from(user: User): UserResponse = UserResponse(
-            user.id!!,
-            user.name ?: "none",
-            user.email ?: "none",
-            user.phoneNumber ?: "none",
-            user.city ?: "none",
+        fun from(mongoUser: MongoUser): UserResponse = UserResponse(
+            mongoUser.id?.toString().orEmpty(),
+            mongoUser.name.orEmpty(),
+            mongoUser.email.orEmpty(),
+            mongoUser.phoneNumber.orEmpty(),
+            mongoUser.city.orEmpty(),
         )
     }
 }

@@ -3,28 +3,26 @@ package fixtures
 import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
-import com.makarytskyi.rentcar.model.User
-import kotlin.random.Random
+import com.makarytskyi.rentcar.model.MongoUser
+import com.makarytskyi.rentcar.model.patch.MongoUserPatch
+import fixtures.Utils.generateString
 import org.bson.types.ObjectId
 
 object UserFixture {
-    val userId = ObjectId().toHexString()
-    val createdUserId = ObjectId().toHexString()
-
-    fun existingUser() = User(
-        id = userId,
-        name = generateString(10),
-        email = "${generateString(8)}@gmail.com",
-        phoneNumber = generateString(10),
-        city = generateString(8),
+    fun responseUser(mongoUser: MongoUser) = UserResponse(
+        id = mongoUser.id.toString(),
+        name = mongoUser.name!!,
+        email = mongoUser.email!!,
+        phoneNumber = mongoUser.phoneNumber!!,
+        city = mongoUser.city!!,
     )
 
-    fun responseUser(user: User) = UserResponse(
-        id = user.id ?: userId,
-        name = user.name ?: generateString(10),
-        email = user.email ?: "${generateString(8)}@gmail.com",
-        phoneNumber = user.phoneNumber ?: generateString(10),
-        city = user.city ?: generateString(8),
+    fun emptyResponseUser() = UserResponse(
+        id = "",
+        name = "",
+        email = "",
+        phoneNumber = "",
+        city = "",
     )
 
     fun createUserRequest() = CreateUserRequest(
@@ -34,7 +32,7 @@ object UserFixture {
         city = generateString(8),
     )
 
-    fun createUserEntity(request: CreateUserRequest) = User(
+    fun createUserEntity(request: CreateUserRequest) = MongoUser(
         id = null,
         name = request.name,
         email = request.email,
@@ -42,15 +40,7 @@ object UserFixture {
         city = request.city,
     )
 
-    fun createdUser(user: User) = user.copy(id = createdUserId)
-
-    fun createdUserResponse(user: User) = UserResponse(
-        id = user.id ?: createdUserId,
-        name = user.name ?: generateString(10),
-        email = user.email ?: "${generateString(8)}@gmail.com",
-        phoneNumber = user.phoneNumber ?: generateString(10),
-        city = user.city ?: generateString(8),
-    )
+    fun createdUser(mongoUser: MongoUser) = mongoUser.copy(id = ObjectId())
 
     fun updateUserRequest() = UpdateUserRequest(
         name = generateString(10),
@@ -58,21 +48,26 @@ object UserFixture {
         city = generateString(8)
     )
 
-    fun updateUserEntity(request: UpdateUserRequest) = User(
-        id = null,
+    fun userPatch(request: UpdateUserRequest) = MongoUserPatch(
         name = request.name,
-        email = null,
         phoneNumber = request.phoneNumber,
         city = request.city,
     )
 
-    fun updatedUser(user: User, request: UpdateUserRequest) =
-        user.copy(name = request.name, phoneNumber = request.phoneNumber, city = request.city)
+    fun emptyUserPatch() = MongoUserPatch(
+        name = null,
+        phoneNumber = null,
+        city = null,
+    )
 
-    private fun generateString(length: Int): String {
-        val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-        return (1..length)
-            .map { charPool[Random.nextInt(charPool.size)] }
-            .joinToString("")
-    }
+    fun randomUser() = MongoUser(
+        id = ObjectId(),
+        name = generateString(10),
+        email = "${generateString(8)}@gmail.com",
+        phoneNumber = generateString(10),
+        city = generateString(8),
+    )
+
+    fun updatedUser(mongoUser: MongoUser, request: UpdateUserRequest) =
+        mongoUser.copy(name = request.name, phoneNumber = request.phoneNumber, city = request.city)
 }

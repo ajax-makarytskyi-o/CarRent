@@ -1,19 +1,19 @@
 package com.makarytskyi.rentcar.dto.repairing
 
-import com.makarytskyi.rentcar.model.Repairing
-import com.makarytskyi.rentcar.model.Repairing.RepairingStatus
+import com.makarytskyi.rentcar.model.MongoRepairing
+import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus
+import com.makarytskyi.rentcar.model.patch.MongoRepairingPatch
 import jakarta.validation.constraints.Min
+import java.math.BigDecimal
 
 data class UpdateRepairingRequest(
     @field:Min(0)
-    val price: Int?,
+    val price: BigDecimal?,
     val status: RepairingStatus?,
 ) {
 
     companion object {
-        fun toEntity(repairingRequest: UpdateRepairingRequest): Repairing = Repairing(
-            carId = null,
-            date = null,
+        fun toPatch(repairingRequest: UpdateRepairingRequest) = MongoRepairingPatch(
             price = repairingRequest.price,
             status = repairingRequest.status,
         )

@@ -1,24 +1,26 @@
 package com.makarytskyi.rentcar.repository
 
-import com.makarytskyi.rentcar.model.Repairing
+import com.makarytskyi.rentcar.model.MongoRepairing
+import com.makarytskyi.rentcar.model.patch.MongoRepairingPatch
+import com.makarytskyi.rentcar.model.projection.AggregatedMongoRepairing
 import org.springframework.stereotype.Repository
 
 @Repository
 internal interface RepairingRepository {
 
-    fun create(repairing: Repairing): Repairing
+    fun create(mongoRepairing: MongoRepairing): MongoRepairing
 
-    fun findById(id: String): Repairing?
+    fun findById(id: String): AggregatedMongoRepairing?
 
-    fun findAll(): List<Repairing>
+    fun findAll(page: Int, size: Int): List<AggregatedMongoRepairing>
 
     fun deleteById(id: String)
 
-    fun update(id: String, repairing: Repairing): Repairing?
+    fun patch(id: String, repairingPatch: MongoRepairingPatch): MongoRepairing?
 
-    fun findByStatus(status: Repairing.RepairingStatus): List<Repairing>
+    fun findByStatus(status: MongoRepairing.RepairingStatus): List<MongoRepairing>
 
-    fun findByCarId(carId: String): List<Repairing>
+    fun findByCarId(carId: String): List<MongoRepairing>
 
-    fun findByStatusAndCarId(status: Repairing.RepairingStatus, carId: String): List<Repairing>
+    fun findByStatusAndCarId(status: MongoRepairing.RepairingStatus, carId: String): List<MongoRepairing>
 }

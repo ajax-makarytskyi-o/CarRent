@@ -2,8 +2,7 @@ package com.makarytskyi.rentcar.bpp
 
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
-import com.makarytskyi.rentcar.bpp.InvocationTrackerBeanPostProcessor
-import com.makarytskyi.rentcar.exception.ResourceNotFoundException
+import com.makarytskyi.rentcar.exception.NotFoundException
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.service.CarService
 import com.makarytskyi.rentcar.service.impl.CarServiceImpl
@@ -22,7 +21,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 @ExtendWith(MockitoExtension::class)
-internal class BeanPostProcessorTests {
+internal class BeanPostProcessorTest {
 
     @Mock
     lateinit var repository: CarRepository
@@ -45,13 +44,13 @@ internal class BeanPostProcessorTests {
 
     @Test
     fun `beanPostProcessor should return proxy`() {
-        //GIVEN
+        // GIVEN
         postProcessor.postProcessBeforeInitialization(service, beanName)
 
-        //WHEN
+        // WHEN
         val proxyService = postProcessor.postProcessAfterInitialization(service, beanName)
 
-        //THEN
+        // THEN
         assertTrue(Proxy.isProxyClass(proxyService::class.java))
     }
 
@@ -59,37 +58,37 @@ internal class BeanPostProcessorTests {
     fun `proxied service should write in logger`() {
         postProcessor.postProcessBeforeInitialization(service, beanName)
 
-        //WHEN
+        // WHEN
         val proxyService = postProcessor.postProcessAfterInitialization(service, beanName) as CarService
-        proxyService.findAll()
+        proxyService.findAll(0, 10)
 
-        //THEN
+        // THEN
         Mockito.verify(mockAppender, Mockito.times(1)).doAppend(ArgumentMatchers.any(ILoggingEvent::class.java))
     }
 
     @Test
     fun `original object should not use logger`() {
-        //GIVEN
+        // GIVEN
         val service = CarServiceImpl(repository)
 
-        //WHEN
-        service.findAll()
+        // WHEN
+        service.findAll(0, 10)
 
-        //THEN
+        // THEN
         Mockito.verify(mockAppender, Mockito.times(0)).doAppend(ArgumentMatchers.any())
     }
 
     @Test
     fun `exception in proxied service should write error in logger`() {
-        //GIVEN
+        // GIVEN
         val id = "unexistingId"
 
-        //WHEN
+        // WHEN
         postProcessor.postProcessBeforeInitialization(service, beanName)
         val proxyService = postProcessor.postProcessAfterInitialization(service, beanName) as CarService
 
-        //THEN
-        assertThrows<ResourceNotFoundException> { proxyService.getById(id) }
+        // THEN
+        assertThrows<NotFoundException> { proxyService.getById(id) }
         Mockito.verify(mockAppender, Mockito.times(1)).doAppend(ArgumentMatchers.any(ILoggingEvent::class.java))
     }
 }

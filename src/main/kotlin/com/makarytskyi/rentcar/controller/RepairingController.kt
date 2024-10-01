@@ -1,9 +1,10 @@
 package com.makarytskyi.rentcar.controller
 
+import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
-import com.makarytskyi.rentcar.model.Repairing
+import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.service.RepairingService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
@@ -22,16 +24,19 @@ import org.springframework.web.bind.annotation.RestController
 internal class RepairingController(private val service: RepairingService) {
 
     @GetMapping()
-    fun findAll(): List<RepairingResponse> = service.findAll()
+    fun findAll(
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int
+    ): List<AggregatedRepairingResponse> = service.findAll(page, size)
 
     @GetMapping("/status/{status}/car/{carId}")
-    fun findByStatus(
-        @PathVariable status: Repairing.RepairingStatus,
-        @PathVariable carId: String
+    fun findByStatusAndCar(
+        @PathVariable status: MongoRepairing.RepairingStatus,
+        @PathVariable carId: String,
     ): List<RepairingResponse> = service.findByStatusAndCar(status, carId)
 
     @GetMapping("/status/{status}")
-    fun findByStatus(@PathVariable status: Repairing.RepairingStatus): List<RepairingResponse> =
+    fun findByStatus(@PathVariable status: MongoRepairing.RepairingStatus): List<RepairingResponse> =
         service.findByStatus(status)
 
     @GetMapping("/car/{carId}")
@@ -42,13 +47,13 @@ internal class RepairingController(private val service: RepairingService) {
     fun create(@Valid @RequestBody repairing: CreateRepairingRequest): RepairingResponse = service.create(repairing)
 
     @GetMapping("/{id}")
-    fun findById(@PathVariable id: String): RepairingResponse = service.getById(id)
+    fun getById(@PathVariable id: String): AggregatedRepairingResponse = service.getById(id)
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteById(@PathVariable id: String) = service.deleteById(id)
 
     @PatchMapping("/{id}")
-    fun update(@PathVariable id: String, @Valid @RequestBody repairing: UpdateRepairingRequest): RepairingResponse =
-        service.update(id, repairing)
+    fun patch(@PathVariable id: String, @Valid @RequestBody repairing: UpdateRepairingRequest): RepairingResponse =
+        service.patch(id, repairing)
 }

@@ -2,81 +2,82 @@ package fixtures
 
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
+import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
-import com.makarytskyi.rentcar.model.Car
+import com.makarytskyi.rentcar.model.MongoCar
 import fixtures.Utils.generateString
+import fixtures.Utils.randomPrice
+import java.math.BigDecimal
 import kotlin.random.Random
 import org.bson.types.ObjectId
 
 object CarFixture {
-    val carId: String = ObjectId().toHexString()
-    val newCarPrice = Random.nextInt(500)
-
-    fun existingCar() = Car(
-        id = carId,
+    fun randomCar() = MongoCar(
+        id = ObjectId(),
         brand = generateString(15),
         model = generateString(15),
-        price = Random.nextInt(500),
+        price = randomPrice(),
         year = Random.nextInt(1900, 2020),
         plate = generateString(6),
-        color = Car.CarColor.BLUE,
+        color = MongoCar.CarColor.BLUE
     )
 
-    fun responseCar(car: Car) = CarResponse(
-        id = carId,
-        brand = car.brand ?: generateString(15),
-        model = car.model ?: generateString(15),
-        price = car.price ?: Random.nextInt(500),
-        year = car.year ?: Random.nextInt(1900, 2020),
-        plate = car.plate ?: generateString(6),
-        color = Car.CarColor.BLUE,
+    fun responseCar(mongoCar: MongoCar) = CarResponse(
+        mongoCar.id.toString(),
+        mongoCar.brand!!,
+        mongoCar.model!!,
+        mongoCar.price!!,
+        mongoCar.year,
+        mongoCar.plate!!,
+        mongoCar.color,
+    )
+
+    fun emptyResponseCar() = CarResponse(
+        id = "",
+        brand = "",
+        model = "",
+        price = BigDecimal.ZERO,
+        year = null,
+        plate = "",
+        color = null,
     )
 
     fun createCarRequest() = CreateCarRequest(
         brand = generateString(15),
         model = generateString(15),
-        price = Random.nextInt(500),
+        price = randomPrice(),
         year = Random.nextInt(1900, 2020),
         plate = generateString(6),
-        color = Car.CarColor.RED,
+        color = MongoCar.CarColor.RED,
     )
 
-    fun createCarEntity(request: CreateCarRequest) = Car(
+    fun createCarEntity(request: CreateCarRequest) = MongoCar(
         id = null,
         brand = request.brand,
         model = request.model,
         price = request.price,
         year = request.year,
         plate = request.plate,
-        color = Car.CarColor.RED,
-    )
-
-    fun createdCar(car: Car) = car.copy(id = ObjectId().toHexString())
-
-    fun createdCarResponse(car: Car) = CarResponse(
-        id = car.id ?: ObjectId().toHexString(),
-        brand = car.brand ?: generateString(15),
-        model = car.model ?: generateString(15),
-        price = car.price ?: Random.nextInt(500),
-        year = car.year ?: Random.nextInt(1900, 2020),
-        plate = car.plate ?: generateString(6),
-        color = Car.CarColor.RED,
-    )
-
-    fun updateCarRequest() = UpdateCarRequest(
-        price = newCarPrice,
-        color = Car.CarColor.GREEN,
-    )
-
-    fun updateCarEntity(request: UpdateCarRequest) = Car(
-        id = null,
-        brand = null,
-        model = null,
-        price = request.price,
-        year = null,
-        plate = null,
         color = request.color,
     )
 
-    fun updatedCar(oldCar: Car, request: UpdateCarRequest) = oldCar.copy(price = request.price, color = request.color)
+    fun createdCar(mongoCar: MongoCar) = mongoCar.copy(id = ObjectId())
+
+    fun updateCarRequest() = UpdateCarRequest(
+        price = randomPrice(),
+        color = MongoCar.CarColor.GREEN,
+    )
+
+    fun carPatch(request: UpdateCarRequest) = MongoCarPatch(
+        price = request.price,
+        color = request.color,
+    )
+
+    fun emptyCarPatch() = MongoCarPatch(
+        price = null,
+        color = null,
+    )
+
+    fun updatedCar(oldMongoCar: MongoCar, request: UpdateCarRequest) =
+        oldMongoCar.copy(price = request.price, color = request.color)
 }

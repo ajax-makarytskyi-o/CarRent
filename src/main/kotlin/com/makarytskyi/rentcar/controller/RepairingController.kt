@@ -7,8 +7,6 @@ import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
 import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.service.RepairingService
 import jakarta.validation.Valid
-import jakarta.validation.constraints.Max
-import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping

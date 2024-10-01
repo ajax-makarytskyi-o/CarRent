@@ -3,6 +3,7 @@ package com.makarytskyi.rentcar.repository.impl
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.model.MongoUser
+import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
 import com.makarytskyi.rentcar.repository.OrderRepository
 import org.bson.types.ObjectId
@@ -81,12 +82,12 @@ internal class OrderRepositoryImpl(private val template: MongoTemplate) : OrderR
         return template.find(query, MongoOrder::class.java)
     }
 
-    override fun patch(id: String, mongoOrder: MongoOrder): MongoOrder? {
+    override fun patch(id: String, orderPatch: MongoOrderPatch): MongoOrder? {
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 
-        mongoOrder.from?.let { update.set(MongoOrder::from.name, it) }
-        mongoOrder.to?.let { update.set(MongoOrder::to.name, it) }
+        orderPatch.from?.let { update.set(MongoOrder::from.name, it) }
+        orderPatch.to?.let { update.set(MongoOrder::to.name, it) }
 
         val options = FindAndModifyOptions()
         options.returnNew(true)

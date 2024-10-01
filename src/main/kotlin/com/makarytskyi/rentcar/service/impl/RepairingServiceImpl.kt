@@ -36,7 +36,7 @@ internal class RepairingServiceImpl(
     override fun deleteById(id: String) = repairingRepository.deleteById(id)
 
     override fun patch(id: String, repairingRequest: UpdateRepairingRequest): RepairingResponse =
-        repairingRepository.patch(id, UpdateRepairingRequest.toEntity(repairingRequest))
+        repairingRepository.patch(id, UpdateRepairingRequest.toPatch(repairingRequest))
             ?.let { RepairingResponse.from(it) }
             ?: throw NotFoundException("Repairing with id $id is not found")
 

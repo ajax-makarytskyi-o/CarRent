@@ -30,7 +30,7 @@ internal class UserServiceImpl(private val userRepository: UserRepository) : Use
     override fun patch(id: String, userRequest: UpdateUserRequest): UserResponse {
         userRequest.phoneNumber?.let { validateAvailabilityPhoneNumber(it) }
 
-        return userRepository.patch(id, UpdateUserRequest.toEntity(userRequest))
+        return userRepository.patch(id, UpdateUserRequest.toPatch(userRequest))
             ?.let { UserResponse.from(it) }
             ?: throw NotFoundException("User with id $id is not found")
     }

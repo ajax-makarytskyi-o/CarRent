@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.model.MongoOrder
+import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
 import org.springframework.stereotype.Repository
 
@@ -19,7 +20,7 @@ internal interface OrderRepository {
 
     fun findByCarId(carId: String): List<MongoOrder>
 
-    fun patch(id: String, mongoOrder: MongoOrder): MongoOrder?
+    fun patch(id: String, orderPatch: MongoOrderPatch): MongoOrder?
 
     fun findByCarIdAndUserId(carId: String, userId: String): List<MongoOrder>
 }

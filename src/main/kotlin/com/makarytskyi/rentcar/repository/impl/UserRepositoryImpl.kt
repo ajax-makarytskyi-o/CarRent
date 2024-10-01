@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.repository.impl
 
 import com.makarytskyi.rentcar.model.MongoUser
+import com.makarytskyi.rentcar.model.patch.MongoUserPatch
 import com.makarytskyi.rentcar.repository.UserRepository
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.FindAndModifyOptions
@@ -34,13 +35,13 @@ internal class UserRepositoryImpl(private val template: MongoTemplate) : UserRep
         template.remove(query, MongoUser::class.java)
     }
 
-    override fun patch(id: String, mongoUser: MongoUser): MongoUser? {
+    override fun patch(id: String, userPatch: MongoUserPatch): MongoUser? {
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 
-        mongoUser.name?.let { update.set(MongoUser::name.name, it) }
-        mongoUser.phoneNumber?.let { update.set(MongoUser::phoneNumber.name, it) }
-        mongoUser.city?.let { update.set(MongoUser::city.name, it) }
+        userPatch.name?.let { update.set(MongoUser::name.name, it) }
+        userPatch.phoneNumber?.let { update.set(MongoUser::phoneNumber.name, it) }
+        userPatch.city?.let { update.set(MongoUser::city.name, it) }
 
         val options = FindAndModifyOptions()
         options.returnNew(true)

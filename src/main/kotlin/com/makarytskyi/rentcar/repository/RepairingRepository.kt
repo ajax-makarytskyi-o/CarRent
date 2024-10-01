@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.model.MongoRepairing
+import com.makarytskyi.rentcar.model.patch.MongoRepairingPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoRepairing
 import org.springframework.stereotype.Repository
 
@@ -15,7 +16,7 @@ internal interface RepairingRepository {
 
     fun deleteById(id: String)
 
-    fun patch(id: String, mongoRepairing: MongoRepairing): MongoRepairing?
+    fun patch(id: String, repairingPatch: MongoRepairingPatch): MongoRepairing?
 
     fun findByStatus(status: MongoRepairing.RepairingStatus): List<MongoRepairing>
 

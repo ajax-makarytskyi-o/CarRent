@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.model.MongoUser
+import com.makarytskyi.rentcar.model.patch.MongoUserPatch
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -14,7 +15,7 @@ internal interface UserRepository {
 
     fun deleteById(id: String)
 
-    fun patch(id: String, mongoUser: MongoUser): MongoUser?
+    fun patch(id: String, userPatch: MongoUserPatch): MongoUser?
 
     fun findByPhoneNumber(phoneNumber: String): MongoUser?
 

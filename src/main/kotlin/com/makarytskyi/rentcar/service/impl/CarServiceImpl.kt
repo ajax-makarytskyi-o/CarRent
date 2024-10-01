@@ -34,7 +34,7 @@ internal class CarServiceImpl(private val repository: CarRepository) : CarServic
         repository.findAllByBrandAndModel(brand, model).map { CarResponse.from(it) }
 
     override fun patch(id: String, carRequest: UpdateCarRequest): CarResponse =
-        repository.patch(id, UpdateCarRequest.toEntity(carRequest))?.let { CarResponse.from(it) }
+        repository.patch(id, UpdateCarRequest.toPatch(carRequest))?.let { CarResponse.from(it) }
             ?: throw NotFoundException("Car with id $id is not found")
 
     override fun getByPlate(plate: String): CarResponse = repository.findByPlate(plate)?.let { CarResponse.from(it) }

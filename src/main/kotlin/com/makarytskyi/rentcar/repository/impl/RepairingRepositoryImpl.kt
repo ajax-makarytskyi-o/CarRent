@@ -3,6 +3,7 @@ package com.makarytskyi.rentcar.repository.impl
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus
+import com.makarytskyi.rentcar.model.patch.MongoRepairingPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoRepairing
 import com.makarytskyi.rentcar.repository.RepairingRepository
 import org.bson.types.ObjectId
@@ -57,12 +58,12 @@ internal class RepairingRepositoryImpl(private val template: MongoTemplate) : Re
         template.remove(query, MongoRepairing::class.java)
     }
 
-    override fun patch(id: String, mongoRepairing: MongoRepairing): MongoRepairing? {
+    override fun patch(id: String, repairingPatch: MongoRepairingPatch): MongoRepairing? {
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 
-        mongoRepairing.price?.let { update.set(MongoRepairing::price.name, it) }
-        mongoRepairing.status?.let { update.set(MongoRepairing::status.name, it) }
+        repairingPatch.price?.let { update.set(MongoRepairing::price.name, it) }
+        repairingPatch.status?.let { update.set(MongoRepairing::status.name, it) }
 
         val options = FindAndModifyOptions()
         options.returnNew(true)

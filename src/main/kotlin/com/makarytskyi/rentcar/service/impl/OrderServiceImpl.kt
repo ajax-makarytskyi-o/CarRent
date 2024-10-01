@@ -62,7 +62,7 @@ internal class OrderServiceImpl(
         validateDates(newFrom!!, newTo!!)
         validateCarAvailability(order.car?.id.toString(), newFrom, newTo)
 
-        return orderRepository.patch(id, UpdateOrderRequest.toEntity(orderRequest))
+        return orderRepository.patch(id, UpdateOrderRequest.toPatch(orderRequest))
             ?.let { OrderResponse.from(it, order.car?.price) }
             ?: throw NotFoundException("Order with $id is not found")
     }

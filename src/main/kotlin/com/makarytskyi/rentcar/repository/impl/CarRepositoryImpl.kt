@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.repository.impl
 
 import com.makarytskyi.rentcar.model.MongoCar
+import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import com.makarytskyi.rentcar.repository.CarRepository
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.FindAndModifyOptions
@@ -46,12 +47,12 @@ internal class CarRepositoryImpl(private val template: MongoTemplate) : CarRepos
         return template.find(query, MongoCar::class.java)
     }
 
-    override fun patch(id: String, mongoCar: MongoCar): MongoCar? {
+    override fun patch(id: String, carPatch: MongoCarPatch): MongoCar? {
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 
-        mongoCar.color?.let { update.set(MongoCar::color.name, it) }
-        mongoCar.price?.let { update.set(MongoCar::price.name, it) }
+        carPatch.color?.let { update.set(MongoCar::color.name, it) }
+        carPatch.price?.let { update.set(MongoCar::price.name, it) }
 
         val options = FindAndModifyOptions()
         options.returnNew(true)

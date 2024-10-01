@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.dto.order
 
 import com.makarytskyi.rentcar.model.MongoOrder
+import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import java.util.Date
 
 data class UpdateOrderRequest(
@@ -9,10 +10,7 @@ data class UpdateOrderRequest(
 ) {
 
     companion object {
-        fun toEntity(orderRequest: UpdateOrderRequest) = MongoOrder(
-            id = null,
-            carId = null,
-            userId = null,
+        fun toPatch(orderRequest: UpdateOrderRequest) = MongoOrderPatch(
             orderRequest.from,
             orderRequest.to,
         )

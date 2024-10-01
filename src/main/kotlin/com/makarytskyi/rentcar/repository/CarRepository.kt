@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.model.MongoCar
+import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -14,7 +15,7 @@ internal interface CarRepository {
 
     fun deleteById(id: String)
 
-    fun patch(id: String, mongoCar: MongoCar): MongoCar?
+    fun patch(id: String, carPatch: MongoCarPatch): MongoCar?
 
     fun findByPlate(plate: String): MongoCar?
 

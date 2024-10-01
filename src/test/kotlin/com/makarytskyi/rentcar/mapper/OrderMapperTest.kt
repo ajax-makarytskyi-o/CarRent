@@ -9,13 +9,14 @@ import fixtures.OrderFixture.createOrderEntity
 import fixtures.OrderFixture.createOrderRequest
 import fixtures.OrderFixture.emptyAggregatedOrder
 import fixtures.OrderFixture.emptyOrder
+import fixtures.OrderFixture.emptyOrderPatch
 import fixtures.OrderFixture.emptyResponseAggregatedOrder
 import fixtures.OrderFixture.emptyResponseOrder
+import fixtures.OrderFixture.orderPatch
 import fixtures.OrderFixture.randomAggregatedOrder
 import fixtures.OrderFixture.randomOrder
 import fixtures.OrderFixture.responseAggregatedOrder
 import fixtures.OrderFixture.responseOrder
-import fixtures.OrderFixture.updateOrderEntity
 import fixtures.OrderFixture.updateOrderRequest
 import fixtures.UserFixture.randomUser
 import kotlin.test.Test
@@ -69,10 +70,10 @@ class OrderMapperTest {
     fun `update request return entity successfully`() {
         // GIVEN
         val request = updateOrderRequest()
-        val response = updateOrderEntity(request)
+        val response = orderPatch(request)
 
         // WHEN
-        val result = UpdateOrderRequest.toEntity(request)
+        val result = UpdateOrderRequest.toPatch(request)
 
         // THEN
         assertEquals(response, result)
@@ -82,10 +83,10 @@ class OrderMapperTest {
     fun `update request with null fields return entity with null fields`() {
         // GIVEN
         val request = UpdateOrderRequest(from = null, to = null)
-        val response = emptyOrder()
+        val response = emptyOrderPatch()
 
         // WHEN
-        val result = UpdateOrderRequest.toEntity(request)
+        val result = UpdateOrderRequest.toPatch(request)
 
         // THEN
         assertEquals(response, result)

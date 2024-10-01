@@ -1,7 +1,10 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.model.MongoCar
+import fixtures.CarFixture.carPatch
+import fixtures.CarFixture.emptyCarPatch
 import fixtures.CarFixture.randomCar
+import fixtures.CarFixture.updateCarRequest
 import java.math.BigDecimal
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -50,13 +53,10 @@ internal class CarRepositoryTest : ContainerBase {
         val price = BigDecimal("600")
         val color = MongoCar.CarColor.BLUE
         val car = carRepository.create(randomCar())
-        val updateCar = car.copy(
-            price = price,
-            color = color
-        )
+        val updateCar = emptyCarPatch().copy(price = price, color = color)
 
         // WHEN
-        val updated = carRepository.patch(updateCar.id.toString(), updateCar)
+        val updated = carRepository.patch(car.id.toString(), updateCar)
 
         // THENs
         assertEquals(price, updated?.price)

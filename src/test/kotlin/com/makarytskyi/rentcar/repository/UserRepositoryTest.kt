@@ -1,5 +1,6 @@
 package com.makarytskyi.rentcar.repository
 
+import fixtures.UserFixture.emptyUserPatch
 import fixtures.UserFixture.randomUser
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -50,14 +51,14 @@ internal class UserRepositoryTest : ContainerBase {
 
         val user = userRepository.create(randomUser())
 
-        val updateUser = user.copy(
+        val updateUser = emptyUserPatch().copy(
             name = name,
             phoneNumber = phoneNumber,
             city = city
         )
 
         // WHEN
-        val updated = userRepository.patch(updateUser.id.toString(), updateUser)
+        val updated = userRepository.patch(user.id.toString(), updateUser)
 
         // THEN
         assertEquals(name, updated?.name)

@@ -2,6 +2,7 @@ package fixtures
 
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
+import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
 import com.makarytskyi.rentcar.model.MongoCar
 import fixtures.Utils.generateString
@@ -67,14 +68,14 @@ object CarFixture {
         color = MongoCar.CarColor.GREEN,
     )
 
-    fun updateCarEntity(request: UpdateCarRequest) = MongoCar(
-        id = null,
-        brand = null,
-        model = null,
+    fun carPatch(request: UpdateCarRequest) = MongoCarPatch(
         price = request.price,
-        year = null,
-        plate = null,
         color = request.color,
+    )
+
+    fun emptyCarPatch() = MongoCarPatch(
+        price = null,
+        color = null,
     )
 
     fun updatedCar(oldMongoCar: MongoCar, request: UpdateCarRequest) =

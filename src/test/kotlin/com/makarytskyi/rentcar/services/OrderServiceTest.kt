@@ -11,12 +11,12 @@ import fixtures.OrderFixture.createOrderRequest
 import fixtures.OrderFixture.createdOrder
 import fixtures.OrderFixture.monthAfter
 import fixtures.OrderFixture.monthAndDayAfter
+import fixtures.OrderFixture.orderPatch
 import fixtures.OrderFixture.randomAggregatedOrder
 import fixtures.OrderFixture.randomOrder
 import fixtures.OrderFixture.responseAggregatedOrder
 import fixtures.OrderFixture.responseOrder
 import fixtures.OrderFixture.tomorrow
-import fixtures.OrderFixture.updateOrderEntity
 import fixtures.OrderFixture.updateOrderRequest
 import fixtures.OrderFixture.updatedOrder
 import fixtures.OrderFixture.yesterday
@@ -211,7 +211,7 @@ internal class OrderServiceTest {
         val order = randomAggregatedOrder(car, user)
         val price = car.price?.multiply(BigDecimal(1))
         val request = updateOrderRequest().copy(from = tomorrow, to = null)
-        val requestEntity = updateOrderEntity(request)
+        val requestEntity = orderPatch(request)
         val updatedOrder = updatedOrder(order, request)
         val response = responseOrder(updatedOrder, car).copy(price = price)
         whenever(orderRepository.findById(order.id.toString())).thenReturn(order)
@@ -234,7 +234,7 @@ internal class OrderServiceTest {
         val order = randomAggregatedOrder(car, user)
         val price = car.price?.multiply(BigDecimal(29))
         val request = updateOrderRequest().copy(from = null, to = monthAfter)
-        val requestEntity = updateOrderEntity(request)
+        val requestEntity = orderPatch(request)
         val updatedOrder = updatedOrder(order, request)
         val response = responseOrder(updatedOrder, car).copy(price = price)
         whenever(orderRepository.findById(order.id.toString())).thenReturn(order)

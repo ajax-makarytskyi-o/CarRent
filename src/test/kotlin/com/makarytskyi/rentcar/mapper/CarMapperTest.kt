@@ -4,12 +4,12 @@ import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
 import com.makarytskyi.rentcar.model.MongoCar
+import fixtures.CarFixture.carPatch
 import fixtures.CarFixture.createCarEntity
 import fixtures.CarFixture.createCarRequest
 import fixtures.CarFixture.emptyResponseCar
 import fixtures.CarFixture.randomCar
 import fixtures.CarFixture.responseCar
-import fixtures.CarFixture.updateCarEntity
 import fixtures.CarFixture.updateCarRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -75,10 +75,10 @@ class CarMapperTest {
     fun `update request mapper should return entity successfully`() {
         // GIVEN
         val request = updateCarRequest()
-        val entity = updateCarEntity(request)
+        val entity = carPatch(request)
 
         // WHEN
-        val result = UpdateCarRequest.toEntity(request)
+        val result = UpdateCarRequest.toPatch(request)
 
         // THEN
         assertEquals(entity, result)
@@ -92,10 +92,10 @@ class CarMapperTest {
             color = null,
         )
 
-        val entity = updateCarEntity(request)
+        val entity = carPatch(request)
 
         // WHEN
-        val result = UpdateCarRequest.toEntity(request)
+        val result = UpdateCarRequest.toPatch(request)
 
         // THEN
         assertEquals(entity, result)

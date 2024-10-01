@@ -13,9 +13,9 @@ import fixtures.RepairingFixture.emptyRepairing
 import fixtures.RepairingFixture.emptyRepairingResponse
 import fixtures.RepairingFixture.randomAggregatedRepairing
 import fixtures.RepairingFixture.randomRepairing
+import fixtures.RepairingFixture.repairingPatch
 import fixtures.RepairingFixture.responseAggregatedRepairing
 import fixtures.RepairingFixture.responseRepairing
-import fixtures.RepairingFixture.updateRepairingEntity
 import fixtures.RepairingFixture.updateRepairingRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -84,10 +84,10 @@ class RepairingMapperTest {
     fun `update request return entity successfully`() {
         // GIVEN
         val request = updateRepairingRequest()
-        val entity = updateRepairingEntity(request)
+        val entity = repairingPatch(request)
 
         // WHEN
-        val result = UpdateRepairingRequest.toEntity(request)
+        val result = UpdateRepairingRequest.toPatch(request)
 
         // THEN
         assertEquals(entity, result)
@@ -97,10 +97,10 @@ class RepairingMapperTest {
     fun `update request with null fields return entity with null fields`() {
         // GIVEN
         val request = updateRepairingRequest().copy(price = null, status = null)
-        val entity = updateRepairingEntity(request)
+        val entity = repairingPatch(request)
 
         // WHEN
-        val result = UpdateRepairingRequest.toEntity(request)
+        val result = UpdateRepairingRequest.toPatch(request)
 
         // THEN
         assertEquals(entity, result)

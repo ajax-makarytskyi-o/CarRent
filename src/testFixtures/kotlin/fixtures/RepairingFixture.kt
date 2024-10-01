@@ -8,6 +8,7 @@ import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus
+import com.makarytskyi.rentcar.model.patch.MongoRepairingPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoRepairing
 import fixtures.Utils.getDateFromNow
 import fixtures.Utils.randomPrice
@@ -29,6 +30,11 @@ object RepairingFixture {
         id = null,
         carId = null,
         date = null,
+        price = null,
+        status = null,
+    )
+
+    fun emptyRepairingPatch() = MongoRepairingPatch(
         price = null,
         status = null,
     )
@@ -79,10 +85,7 @@ object RepairingFixture {
         status = RepairingStatus.COMPLETED,
     )
 
-    fun updateRepairingEntity(request: UpdateRepairingRequest) = MongoRepairing(
-        id = null,
-        carId = null,
-        date = null,
+    fun repairingPatch(request: UpdateRepairingRequest) = MongoRepairingPatch(
         price = request.price,
         status = request.status,
     )

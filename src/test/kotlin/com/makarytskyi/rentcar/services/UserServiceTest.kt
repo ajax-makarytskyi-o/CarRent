@@ -9,9 +9,9 @@ import fixtures.UserFixture.createUserRequest
 import fixtures.UserFixture.createdUser
 import fixtures.UserFixture.randomUser
 import fixtures.UserFixture.responseUser
-import fixtures.UserFixture.updateUserEntity
 import fixtures.UserFixture.updateUserRequest
 import fixtures.UserFixture.updatedUser
+import fixtures.UserFixture.userPatch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -111,7 +111,7 @@ internal class UserServiceTest {
         // GIVEN
         val user = randomUser()
         val request = updateUserRequest()
-        val requestEntity = updateUserEntity(request)
+        val requestEntity = userPatch(request)
         val updatedUser = updatedUser(user, request)
         whenever(userRepository.patch(user.id.toString(), requestEntity)).thenReturn(updatedUser)
 

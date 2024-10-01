@@ -5,14 +5,15 @@ import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.RepairingRepository
 import com.makarytskyi.rentcar.service.impl.RepairingServiceImpl
 import fixtures.CarFixture.randomCar
+import fixtures.OrderFixture.orderPatch
 import fixtures.RepairingFixture.createRepairingEntity
 import fixtures.RepairingFixture.createRepairingRequest
 import fixtures.RepairingFixture.createdRepairing
 import fixtures.RepairingFixture.randomAggregatedRepairing
 import fixtures.RepairingFixture.randomRepairing
+import fixtures.RepairingFixture.repairingPatch
 import fixtures.RepairingFixture.responseAggregatedRepairing
 import fixtures.RepairingFixture.responseRepairing
-import fixtures.RepairingFixture.updateRepairingEntity
 import fixtures.RepairingFixture.updateRepairingRequest
 import fixtures.RepairingFixture.updatedRepairing
 import kotlin.test.Test
@@ -133,7 +134,7 @@ internal class RepairingServiceTest {
         val car = randomCar()
         val repairing = randomRepairing(car.id)
         val request = updateRepairingRequest()
-        val requestEntity = updateRepairingEntity(request)
+        val requestEntity = repairingPatch(request)
         val updatedRepairing = updatedRepairing(repairing, request)
         whenever(repairingRepository.patch(repairing.id.toString(), requestEntity)).thenReturn(updatedRepairing)
 

@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.repository
 
 import fixtures.CarFixture.randomCar
+import fixtures.OrderFixture.emptyOrderPatch
 import fixtures.OrderFixture.monthAfter
 import fixtures.OrderFixture.monthAndDayAfter
 import fixtures.OrderFixture.randomOrder
@@ -66,7 +67,7 @@ internal class OrderRepositoryTest : ContainerBase {
         val user = userRepository.create(randomUser())
         val order = orderRepository.create(randomOrder(car.id, user.id))
 
-        val updateOrder = order.copy(
+        val updateOrder = emptyOrderPatch().copy(
             from = from,
             to = to
         )

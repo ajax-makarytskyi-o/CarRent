@@ -9,6 +9,7 @@ import com.makarytskyi.rentcar.dto.user.UserResponse
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.model.MongoUser
+import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
 import fixtures.CarFixture.responseCar
 import fixtures.UserFixture.responseUser
@@ -35,6 +36,11 @@ object OrderFixture {
         id = null,
         carId = null,
         userId = null,
+        from = null,
+        to = null,
+    )
+
+    fun emptyOrderPatch() = MongoOrderPatch(
         from = null,
         to = null,
     )
@@ -113,10 +119,7 @@ object OrderFixture {
         to = twoDaysAfter,
     )
 
-    fun updateOrderEntity(request: UpdateOrderRequest) = MongoOrder(
-        id = null,
-        carId = null,
-        userId = null,
+    fun orderPatch(request: UpdateOrderRequest) = MongoOrderPatch(
         from = request.from,
         to = request.to,
     )

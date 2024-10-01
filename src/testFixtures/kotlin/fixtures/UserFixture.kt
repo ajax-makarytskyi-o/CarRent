@@ -4,6 +4,7 @@ import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
 import com.makarytskyi.rentcar.model.MongoUser
+import com.makarytskyi.rentcar.model.patch.MongoUserPatch
 import fixtures.Utils.generateString
 import org.bson.types.ObjectId
 
@@ -47,12 +48,16 @@ object UserFixture {
         city = generateString(8)
     )
 
-    fun updateUserEntity(request: UpdateUserRequest) = MongoUser(
-        id = null,
+    fun userPatch(request: UpdateUserRequest) = MongoUserPatch(
         name = request.name,
-        email = null,
         phoneNumber = request.phoneNumber,
         city = request.city,
+    )
+
+    fun emptyUserPatch() = MongoUserPatch(
+        name = null,
+        phoneNumber = null,
+        city = null,
     )
 
     fun randomUser() = MongoUser(

@@ -2,6 +2,8 @@ package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.model.MongoRepairing
 import fixtures.CarFixture.randomCar
+import fixtures.RepairingFixture.emptyRepairing
+import fixtures.RepairingFixture.emptyRepairingPatch
 import fixtures.RepairingFixture.randomRepairing
 import java.math.BigDecimal
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -57,7 +59,7 @@ internal class RepairingRepositoryTest : ContainerBase {
         val car = carRepository.create(randomCar())
         val repairing = repairingRepository.create(randomRepairing(car.id))
 
-        val updateRepairing = repairing.copy(
+        val updateRepairing = emptyRepairingPatch().copy(
             price = price,
             status = status
         )

@@ -9,8 +9,8 @@ import fixtures.UserFixture.createUserRequest
 import fixtures.UserFixture.emptyResponseUser
 import fixtures.UserFixture.randomUser
 import fixtures.UserFixture.responseUser
-import fixtures.UserFixture.updateUserEntity
 import fixtures.UserFixture.updateUserRequest
+import fixtures.UserFixture.userPatch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -75,10 +75,10 @@ class UserMapperTest {
     fun `update request mapper should return entity successfully`() {
         // GIVEN
         val request = updateUserRequest()
-        val entity = updateUserEntity(request)
+        val entity = userPatch(request)
 
         // WHEN
-        val result = UpdateUserRequest.toEntity(request)
+        val result = UpdateUserRequest.toPatch(request)
 
         // THEN
         assertEquals(entity, result)
@@ -92,10 +92,10 @@ class UserMapperTest {
             phoneNumber = null,
             city = null,
         )
-        val entity = updateUserEntity(request)
+        val entity = userPatch(request)
 
         // WHEN
-        val result = UpdateUserRequest.toEntity(request)
+        val result = UpdateUserRequest.toPatch(request)
 
         // THEN
         assertEquals(entity, result)

@@ -54,7 +54,6 @@ internal class InvocationTrackerBeanPostProcessor : BeanPostProcessor {
                     .addArgument { args?.joinToString(", ", "[ ", " ]") }
                     .log()
                 result
-
             } catch (e: InvocationTargetException) {
                 val endTime = System.currentTimeMillis()
 

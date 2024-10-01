@@ -1,12 +1,12 @@
-package fixtures
+package com.makarytskyi.rentcar.fixtures
 
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
-import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
+import com.makarytskyi.rentcar.fixtures.Utils.generateString
+import com.makarytskyi.rentcar.fixtures.Utils.randomPrice
 import com.makarytskyi.rentcar.model.MongoCar
-import fixtures.Utils.generateString
-import fixtures.Utils.randomPrice
+import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import java.math.BigDecimal
 import kotlin.random.Random
 import org.bson.types.ObjectId

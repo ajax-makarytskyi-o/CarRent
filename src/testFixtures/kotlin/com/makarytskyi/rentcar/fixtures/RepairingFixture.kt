@@ -1,17 +1,17 @@
-package fixtures
+package com.makarytskyi.rentcar.fixtures
 
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
+import com.makarytskyi.rentcar.fixtures.Utils.getDateFromNow
+import com.makarytskyi.rentcar.fixtures.Utils.randomPrice
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus
 import com.makarytskyi.rentcar.model.patch.MongoRepairingPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoRepairing
-import fixtures.Utils.getDateFromNow
-import fixtures.Utils.randomPrice
 import org.bson.types.ObjectId
 
 object RepairingFixture {

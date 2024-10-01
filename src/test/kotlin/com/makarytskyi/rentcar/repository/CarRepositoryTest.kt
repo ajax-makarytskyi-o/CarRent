@@ -1,10 +1,8 @@
 package com.makarytskyi.rentcar.repository
 
+import com.makarytskyi.rentcar.fixtures.CarFixture.emptyCarPatch
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.model.MongoCar
-import fixtures.CarFixture.carPatch
-import fixtures.CarFixture.emptyCarPatch
-import fixtures.CarFixture.randomCar
-import fixtures.CarFixture.updateCarRequest
 import java.math.BigDecimal
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals

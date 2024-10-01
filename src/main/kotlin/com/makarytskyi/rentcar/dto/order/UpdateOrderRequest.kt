@@ -1,6 +1,5 @@
 package com.makarytskyi.rentcar.dto.order
 
-import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import java.util.Date
 

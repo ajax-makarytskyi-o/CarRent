@@ -1,11 +1,11 @@
 package com.makarytskyi.rentcar.repository
 
-import fixtures.CarFixture.randomCar
-import fixtures.OrderFixture.emptyOrderPatch
-import fixtures.OrderFixture.monthAfter
-import fixtures.OrderFixture.monthAndDayAfter
-import fixtures.OrderFixture.randomOrder
-import fixtures.UserFixture.randomUser
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
+import com.makarytskyi.rentcar.fixtures.OrderFixture.emptyOrderPatch
+import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
+import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
+import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
+import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import kotlin.test.assertNotNull
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull

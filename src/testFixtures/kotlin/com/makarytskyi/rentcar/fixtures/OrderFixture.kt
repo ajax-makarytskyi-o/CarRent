@@ -1,4 +1,4 @@
-package fixtures
+package com.makarytskyi.rentcar.fixtures
 
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.order.AggregatedOrderResponse
@@ -6,14 +6,14 @@ import com.makarytskyi.rentcar.dto.order.CreateOrderRequest
 import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
+import com.makarytskyi.rentcar.fixtures.CarFixture.responseCar
+import com.makarytskyi.rentcar.fixtures.UserFixture.responseUser
+import com.makarytskyi.rentcar.fixtures.Utils.getDateFromNow
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
-import fixtures.CarFixture.responseCar
-import fixtures.UserFixture.responseUser
-import fixtures.Utils.getDateFromNow
 import java.math.BigDecimal
 import org.bson.types.ObjectId
 

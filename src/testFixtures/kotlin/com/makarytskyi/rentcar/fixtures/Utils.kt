@@ -1,4 +1,4 @@
-package fixtures
+package com.makarytskyi.rentcar.fixtures
 
 import java.math.BigDecimal
 import java.math.RoundingMode

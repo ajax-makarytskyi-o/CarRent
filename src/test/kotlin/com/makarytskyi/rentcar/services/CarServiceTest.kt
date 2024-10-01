@@ -1,17 +1,17 @@
 package com.makarytskyi.rentcar.services
 
 import com.makarytskyi.rentcar.exception.NotFoundException
+import com.makarytskyi.rentcar.fixtures.CarFixture.carPatch
+import com.makarytskyi.rentcar.fixtures.CarFixture.createCarEntity
+import com.makarytskyi.rentcar.fixtures.CarFixture.createCarRequest
+import com.makarytskyi.rentcar.fixtures.CarFixture.createdCar
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
+import com.makarytskyi.rentcar.fixtures.CarFixture.responseCar
+import com.makarytskyi.rentcar.fixtures.CarFixture.updateCarRequest
+import com.makarytskyi.rentcar.fixtures.CarFixture.updatedCar
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.service.impl.CarServiceImpl
-import fixtures.CarFixture.carPatch
-import fixtures.CarFixture.createCarEntity
-import fixtures.CarFixture.createCarRequest
-import fixtures.CarFixture.createdCar
-import fixtures.CarFixture.randomCar
-import fixtures.CarFixture.responseCar
-import fixtures.CarFixture.updateCarRequest
-import fixtures.CarFixture.updatedCar
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

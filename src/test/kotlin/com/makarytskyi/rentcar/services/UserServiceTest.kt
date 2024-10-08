@@ -141,4 +141,56 @@ internal class UserServiceTest {
         assertNotNull(userService.deleteById(userId))
         verify(userRepository).deleteById(userId)
     }
+
+    @Test
+    fun `getByPhoneNumber should return UserResponse when User exists`() {
+        // GIVEN
+        val user = randomUser()
+        val response = responseUser(user)
+        whenever(userRepository.findByPhoneNumber(user.phoneNumber.toString())).thenReturn(user)
+
+        // WHEN
+        val result = userService.getByPhoneNumber(user.phoneNumber.toString())
+
+        // THEN
+        assertEquals(response, result)
+        verify(userRepository).findByPhoneNumber(user.phoneNumber.toString())
+    }
+
+    @Test
+    fun `getByPhoneNumber should return throw ResourceNotFoundException`() {
+        // GIVEN
+        val phoneNumber = "000000000"
+        whenever(userRepository.findByPhoneNumber(phoneNumber)).thenReturn(null)
+
+        // WHEN // THEN
+        assertThrows(NotFoundException::class.java, { userService.getByPhoneNumber(phoneNumber) })
+        verify(userRepository).findByPhoneNumber(phoneNumber)
+    }
+
+    @Test
+    fun `findByEmail should return UserResponse when User exists`() {
+        // GIVEN
+        val user = randomUser()
+        val response = responseUser(user)
+        whenever(userRepository.findByEmail(user.email.toString())).thenReturn(user)
+
+        // WHEN
+        val result = userService.getByEmail(user.email.toString())
+
+        // THEN
+        assertEquals(response, result)
+        verify(userRepository).findByEmail(user.email.toString())
+    }
+
+    @Test
+    fun `getByEmail should return throw ResourceNotFoundException`() {
+        // GIVEN
+        val email = "unexistingEmail"
+        whenever(userRepository.findByEmail(email)).thenReturn(null)
+
+        // WHEN // THEN
+        assertThrows(NotFoundException::class.java, { userService.getByEmail(email) })
+        verify(userRepository).findByEmail(email)
+    }
 }

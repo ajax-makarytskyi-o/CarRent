@@ -143,7 +143,7 @@ internal class UserServiceTest {
     }
 
     @Test
-    fun `patch should throw IllegalArgumentException if user with specified phone number is already existing`() {
+    fun `patch should throw IllegalArgumentException if user with specified phone number already exists`() {
         // GIVEN
         val user = randomUser()
         val request = updateUserRequest()

@@ -3,14 +3,14 @@ package com.makarytskyi.rentcar.mapper
 import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
+import com.makarytskyi.rentcar.fixtures.UserFixture.createUserEntity
+import com.makarytskyi.rentcar.fixtures.UserFixture.createUserRequest
+import com.makarytskyi.rentcar.fixtures.UserFixture.emptyResponseUser
+import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
+import com.makarytskyi.rentcar.fixtures.UserFixture.responseUser
+import com.makarytskyi.rentcar.fixtures.UserFixture.updateUserRequest
+import com.makarytskyi.rentcar.fixtures.UserFixture.userPatch
 import com.makarytskyi.rentcar.model.MongoUser
-import fixtures.UserFixture.createUserEntity
-import fixtures.UserFixture.createUserRequest
-import fixtures.UserFixture.emptyResponseUser
-import fixtures.UserFixture.randomUser
-import fixtures.UserFixture.responseUser
-import fixtures.UserFixture.updateUserRequest
-import fixtures.UserFixture.userPatch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -1,6 +1,5 @@
 package com.makarytskyi.rentcar.dto.repairing
 
-import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus
 import com.makarytskyi.rentcar.model.patch.MongoRepairingPatch
 import jakarta.validation.constraints.Min

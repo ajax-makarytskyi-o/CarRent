@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.repository
 
-import fixtures.UserFixture.emptyUserPatch
-import fixtures.UserFixture.randomUser
+import com.makarytskyi.rentcar.fixtures.UserFixture.emptyUserPatch
+import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull

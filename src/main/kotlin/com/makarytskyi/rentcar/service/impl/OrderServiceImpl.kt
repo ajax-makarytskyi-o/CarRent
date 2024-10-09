@@ -81,8 +81,9 @@ internal class OrderServiceImpl(
 
         val carOrders = orderRepository.findByCarId(carId)
 
-        require(carOrders.none { it.from?.before(to) == true && it.to?.after(from) == true })
-        { "Order on these dates is already exist" }
+        require(carOrders.none { it.from?.before(to) == true && it.to?.after(from) == true }) {
+            "Order on these dates is already exist"
+        }
     }
 
     private fun getCarPrice(carId: String?): BigDecimal? = carId?.let { carRepository.findById(it)?.price }

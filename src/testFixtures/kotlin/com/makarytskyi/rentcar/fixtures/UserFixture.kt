@@ -1,11 +1,11 @@
-package fixtures
+package com.makarytskyi.rentcar.fixtures
 
 import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
+import com.makarytskyi.rentcar.fixtures.Utils.generateString
 import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.model.patch.MongoUserPatch
-import fixtures.Utils.generateString
 import org.bson.types.ObjectId
 
 object UserFixture {

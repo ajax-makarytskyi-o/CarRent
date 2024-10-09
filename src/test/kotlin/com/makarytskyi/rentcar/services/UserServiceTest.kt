@@ -1,17 +1,17 @@
 package com.makarytskyi.rentcar.services
 
 import com.makarytskyi.rentcar.exception.NotFoundException
+import com.makarytskyi.rentcar.fixtures.UserFixture.createUserEntity
+import com.makarytskyi.rentcar.fixtures.UserFixture.createUserRequest
+import com.makarytskyi.rentcar.fixtures.UserFixture.createdUser
+import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
+import com.makarytskyi.rentcar.fixtures.UserFixture.responseUser
+import com.makarytskyi.rentcar.fixtures.UserFixture.updateUserRequest
+import com.makarytskyi.rentcar.fixtures.UserFixture.updatedUser
+import com.makarytskyi.rentcar.fixtures.UserFixture.userPatch
 import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.service.impl.UserServiceImpl
-import fixtures.UserFixture.createUserEntity
-import fixtures.UserFixture.createUserRequest
-import fixtures.UserFixture.createdUser
-import fixtures.UserFixture.randomUser
-import fixtures.UserFixture.responseUser
-import fixtures.UserFixture.updateUserRequest
-import fixtures.UserFixture.updatedUser
-import fixtures.UserFixture.userPatch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -140,5 +140,16 @@ internal class UserServiceTest {
         // WHEN // THEN
         assertNotNull(userService.deleteById(userId))
         verify(userRepository).deleteById(userId)
+    }
+
+    @Test
+    fun `patch should throw IllegalArgumentException if user with specified phone number already exists`() {
+        // GIVEN
+        val user = randomUser()
+        val request = updateUserRequest()
+        whenever(userRepository.findByPhoneNumber(request.phoneNumber!!)).thenReturn(randomUser())
+
+        // WHEN // THEN
+        assertThrows(IllegalArgumentException::class.java, { userService.patch(user.id.toString(), request) })
     }
 }

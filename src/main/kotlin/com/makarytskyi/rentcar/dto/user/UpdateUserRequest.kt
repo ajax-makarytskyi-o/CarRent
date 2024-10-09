@@ -1,6 +1,5 @@
 package com.makarytskyi.rentcar.dto.user
 
-import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.model.patch.MongoUserPatch
 import jakarta.validation.constraints.Pattern
 

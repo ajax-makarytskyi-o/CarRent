@@ -47,7 +47,8 @@ internal class UserServiceImpl(private val userRepository: UserRepository) : Use
         require(userRepository.findByEmail(email) == null) { "User with email $email is already exist" }
 
     private fun validateAvailabilityPhoneNumber(phoneNumber: String) {
-        require(userRepository.findByPhoneNumber(phoneNumber) == null)
-        { "User with phone number $phoneNumber is already exist" }
+        require(userRepository.findByPhoneNumber(phoneNumber) == null) {
+            "User with phone number $phoneNumber is already exist"
+        }
     }
 }

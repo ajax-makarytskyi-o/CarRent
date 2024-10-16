@@ -20,8 +20,6 @@ import reactor.core.publisher.Mono
 internal class UserRepositoryImpl(private val template: ReactiveMongoTemplate) : UserRepository {
 
     override fun create(mongoUser: MongoUser): Mono<MongoUser> {
-        println("user create")
-
         return template.insert(mongoUser)
     }
 
@@ -40,7 +38,6 @@ internal class UserRepositoryImpl(private val template: ReactiveMongoTemplate) :
     }
 
     override fun patch(id: String, userPatch: MongoUserPatch): Mono<MongoUser> {
-        println("user patch")
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 

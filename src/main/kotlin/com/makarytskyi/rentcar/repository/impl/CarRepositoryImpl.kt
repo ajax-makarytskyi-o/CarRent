@@ -24,7 +24,6 @@ internal class CarRepositoryImpl(private val template: ReactiveMongoTemplate) : 
     }
 
     override fun create(mongoCar: MongoCar): Mono<MongoCar> {
-        println("car create")
         return template.insert(mongoCar)
     }
 
@@ -51,8 +50,6 @@ internal class CarRepositoryImpl(private val template: ReactiveMongoTemplate) : 
     }
 
     override fun patch(id: String, carPatch: MongoCarPatch): Mono<MongoCar> {
-        println("car patch")
-
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 

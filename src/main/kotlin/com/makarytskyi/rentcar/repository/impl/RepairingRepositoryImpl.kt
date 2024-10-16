@@ -24,8 +24,6 @@ import reactor.core.publisher.Mono
 internal class RepairingRepositoryImpl(private val template: ReactiveMongoTemplate) : RepairingRepository {
 
     override fun create(mongoRepairing: MongoRepairing): Mono<MongoRepairing> {
-        println("repair create")
-
         return template.insert(mongoRepairing)
     }
 
@@ -60,8 +58,6 @@ internal class RepairingRepositoryImpl(private val template: ReactiveMongoTempla
     }
 
     override fun patch(id: String, repairingPatch: MongoRepairingPatch): Mono<MongoRepairing> {
-        println("repair patch")
-
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 

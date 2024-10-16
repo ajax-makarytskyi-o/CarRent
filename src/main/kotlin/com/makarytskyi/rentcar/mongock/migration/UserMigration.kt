@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.index.Index
+import org.springframework.data.mongodb.core.index.PartialIndexFilter
+import org.springframework.data.mongodb.core.query.Criteria
 
 @ChangeUnit(id = "userCollectionAndIndex", order = "2", author = "makarytskyi.o@ajax.systems")
 class UserMigration {
@@ -32,7 +34,9 @@ class UserMigration {
 
         indexOps.ensureIndex(
             Index()
-                .on("phoneNumber", Sort.Direction.ASC).unique()
+                .on("phoneNumber", Sort.Direction.ASC)
+                .unique()
+                .partial(PartialIndexFilter.of(Criteria.where("phoneNumber").exists(true)))
         )
 
         log.info("Indexes for {} collection were created", MongoUser.COLLECTION_NAME)

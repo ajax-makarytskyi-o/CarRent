@@ -21,64 +21,72 @@ import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.service.impl.OrderServiceImpl
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import java.math.BigDecimal
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.bson.types.ObjectId
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.test.StepVerifier
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class OrderServiceTest {
-    @Mock
+    @MockK
     lateinit var orderRepository: OrderRepository
 
-    @Mock
+    @MockK
     lateinit var carRepository: CarRepository
 
-    @Mock
+    @MockK
     lateinit var userRepository: UserRepository
 
-    @InjectMocks
+    @InjectMockKs
     lateinit var orderService: OrderServiceImpl
 
     @Test
-    fun `getById should return OrderResponse when Order exists`() {
+    fun `getById should return order response when order exists`() {
         // GIVEN
         val car = randomCar()
         val user = randomUser()
         val order = randomAggregatedOrder(car, user)
         val response = responseAggregatedOrder(order, car)
-        whenever(orderRepository.findById(order.id.toString())).thenReturn(order)
+        every { orderRepository.findFullById(order.id.toString()) }.returns(Mono.just(order))
 
         // WHEN
         val result = orderService.getById(order.id.toString())
 
         // THEN
-        assertEquals(response, result)
-        verify(orderRepository).findById(order.id.toString())
+        StepVerifier.create(result)
+            .assertNext {
+                assertEquals(response, it)
+            }
+            .verifyComplete()
+
+        verify { orderRepository.findFullById(order.id.toString()) }
     }
 
     @Test
     fun `getById should return throw ResourceNotFoundException`() {
         // GIVEN
         val orderId = ObjectId()
-        whenever(orderRepository.findById(orderId.toString())).thenReturn(null)
+        every { orderRepository.findFullById(orderId.toString()) }.returns(Mono.empty())
 
         // WHEN // THEN
-        assertThrows(NotFoundException::class.java, { orderService.getById(orderId.toString()) })
-        verify(orderRepository).findById(orderId.toString())
+        StepVerifier.create(orderService.getById(orderId.toString()))
+            .verifyError(NotFoundException::class.java)
+
+        verify { orderRepository.findFullById(orderId.toString()) }
     }
 
     @Test
-    fun `findAll should return List of OrderResponse`() {
+    fun `findAll should return order responses`() {
         // GIVEN
         val car = randomCar()
         val user = randomUser()
@@ -86,27 +94,34 @@ internal class OrderServiceTest {
         val response = responseAggregatedOrder(order, car)
         val orders = listOf(order)
         val expected = listOf(response)
-        whenever(orderRepository.findAll(0, 10)).thenReturn(orders)
+        every { orderRepository.findFullAll(0, 10) }.returns(Flux.fromIterable(orders))
 
         // WHEN
         val result = orderService.findAll(0, 10)
 
         // THEN
-        assertEquals(expected, result)
-        verify(orderRepository).findAll(0, 10)
+        StepVerifier.create(result.collectList())
+            .assertNext {
+                assertTrue(it.containsAll(expected))
+            }
+            .verifyComplete()
+
+        verify { orderRepository.findFullAll(0, 10) }
     }
 
     @Test
-    fun `findAll should return empty List of OrderResponse if repository return empty List`() {
+    fun `findAll should not return anything if repository didn't return anything`() {
         // GIVEN
-        whenever(orderRepository.findAll(0, 10)).thenReturn(emptyList())
+        every { orderRepository.findFullAll(0, 10) }.returns(Flux.empty())
 
         // WHEN
         val result = orderService.findAll(0, 10)
 
         // THEN
-        assertEquals(emptyList(), result)
-        verify(orderRepository).findAll(0, 10)
+        StepVerifier.create(result)
+            .verifyComplete()
+
+        verify { orderRepository.findFullAll(0, 10) }
     }
 
     @Test
@@ -118,16 +133,22 @@ internal class OrderServiceTest {
         val requestEntity = createOrderEntity(request)
         val createdOrder = createdOrder(requestEntity)
         val response = responseOrder(createdOrder, car)
-        whenever(orderRepository.create(requestEntity)).thenReturn(createdOrder)
-        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
-        whenever(userRepository.findById(user.id.toString())).thenReturn(user)
+        every { orderRepository.create(requestEntity) }.returns(Mono.just(createdOrder))
+        every { carRepository.findById(car.id.toString()) }.returns(Mono.just(car))
+        every { userRepository.findById(user.id.toString()) }.returns(Mono.just(user))
+        every { orderRepository.findByCarId(car.id.toString()) }.returns(Flux.empty())
 
         // WHEN
         val result = orderService.create(request)
 
         // THEN
-        assertEquals(response, result)
-        verify(orderRepository).create(requestEntity)
+        StepVerifier.create(result)
+            .assertNext {
+                assertEquals(response, it)
+            }
+            .verifyComplete()
+
+        verify { orderRepository.create(requestEntity) }
     }
 
     @Test
@@ -135,11 +156,12 @@ internal class OrderServiceTest {
         // GIVEN
         val user = randomUser()
         val car = randomCar()
-        whenever(userRepository.findById(user.id.toString())).thenReturn(user)
-        whenever(carRepository.findById(car.id.toString())).thenReturn(null)
+        every { userRepository.findById(user.id.toString()) }.returns(Mono.just(user))
+        every { carRepository.findById(car.id.toString()) }.returns(Mono.empty())
 
         // WHEN // THEN
-        assertThrows(NotFoundException::class.java, { orderService.create(createOrderRequest(car, user)) })
+        StepVerifier.create(orderService.create(createOrderRequest(car, user)))
+            .verifyError(NotFoundException::class.java)
     }
 
     @Test
@@ -148,10 +170,11 @@ internal class OrderServiceTest {
         val car = randomCar()
         val user = randomUser()
         val request = createOrderRequest(car, user)
-        whenever(userRepository.findById(user.id.toString())).thenReturn(null)
+        every { userRepository.findById(user.id.toString()) }.returns(Mono.empty())
 
         // WHEN // THEN
-        assertThrows(IllegalArgumentException::class.java, { orderService.create(request) })
+        StepVerifier.create(orderService.create(request))
+            .verifyError(IllegalArgumentException::class.java)
     }
 
     @Test
@@ -159,10 +182,10 @@ internal class OrderServiceTest {
         // GIVEN
         val user = randomUser()
         val car = randomCar()
-        whenever(userRepository.findById(user.id.toString())).thenReturn(user)
-        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
-        whenever(orderRepository.findByCarId(car.id.toString())).thenReturn(
-            listOf(
+        every { userRepository.findById(user.id.toString()) }.returns(Mono.just(user))
+        every { carRepository.findById(car.id.toString()) }.returns(Mono.just(car))
+        every { orderRepository.findByCarId(car.id.toString()) }.returns(
+            Flux.just(
                 randomOrder(car.id, user.id).copy(
                     from = monthAfter,
                     to = monthAndDayAfter
@@ -171,8 +194,10 @@ internal class OrderServiceTest {
         )
 
         // WHEN // THEN
-        assertThrows(IllegalArgumentException::class.java, { orderService.create(createOrderRequest(car, user)) })
-        verify(orderRepository).findByCarId(car.id.toString())
+        StepVerifier.create(orderService.create(createOrderRequest(car, user)))
+            .verifyError(IllegalArgumentException::class.java)
+
+        verify { orderRepository.findByCarId(car.id.toString()) }
     }
 
     @Test
@@ -186,7 +211,8 @@ internal class OrderServiceTest {
         )
 
         // WHEN // THEN
-        assertThrows(IllegalArgumentException::class.java, { orderService.create(request) })
+        StepVerifier.create(orderService.create(request))
+            .verifyError(IllegalArgumentException::class.java)
     }
 
     @Test
@@ -200,7 +226,8 @@ internal class OrderServiceTest {
         )
 
         // WHEN // THEN
-        assertThrows(IllegalArgumentException::class.java, { orderService.create(request) })
+        StepVerifier.create(orderService.create(request))
+            .verifyError(IllegalArgumentException::class.java)
     }
 
     @Test
@@ -214,16 +241,22 @@ internal class OrderServiceTest {
         val requestEntity = orderPatch(request)
         val updatedOrder = updatedOrder(order, request)
         val response = responseOrder(updatedOrder, car).copy(price = price)
-        whenever(orderRepository.findById(order.id.toString())).thenReturn(order)
-        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
-        whenever(orderRepository.patch(order.id.toString(), requestEntity)).thenReturn(updatedOrder)
+        every { orderRepository.findFullById(order.id.toString()) }.returns(Mono.just(order))
+        every { carRepository.findById(car.id.toString()) }.returns(Mono.just(car))
+        every { orderRepository.findByCarId(car.id.toString()) }.returns(Flux.empty())
+        every { orderRepository.patch(order.id.toString(), requestEntity) }.returns(Mono.just(updatedOrder))
 
         // WHEN
         val result = orderService.patch(order.id.toString(), request)
 
         // THEN
-        assertEquals(response, result)
-        verify(orderRepository).patch(order.id.toString(), requestEntity)
+        StepVerifier.create(result)
+            .assertNext {
+                assertEquals(response, it)
+            }
+            .verifyComplete()
+
+        verify { orderRepository.patch(order.id.toString(), requestEntity) }
     }
 
     @Test
@@ -237,38 +270,46 @@ internal class OrderServiceTest {
         val requestEntity = orderPatch(request)
         val updatedOrder = updatedOrder(order, request)
         val response = responseOrder(updatedOrder, car).copy(price = price)
-        whenever(orderRepository.findById(order.id.toString())).thenReturn(order)
-        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
-        whenever(orderRepository.patch(order.id.toString(), requestEntity)).thenReturn(updatedOrder)
+        every { orderRepository.findFullById(order.id.toString()) }.returns(Mono.just(order))
+        every { carRepository.findById(car.id.toString()) }.returns(Mono.just(car))
+        every { orderRepository.findByCarId(car.id.toString()) }.returns(Flux.empty())
+        every { orderRepository.patch(order.id.toString(), requestEntity) }.returns(Mono.just(updatedOrder))
 
         // WHEN
         val result = orderService.patch(order.id.toString(), request)
 
         // THEN
-        assertEquals(response, result)
-        verify(orderRepository).patch(order.id.toString(), requestEntity)
+        StepVerifier.create(result)
+            .assertNext {
+                assertEquals(response, it)
+            }
+            .verifyComplete()
+
+        verify { orderRepository.patch(order.id.toString(), requestEntity) }
     }
 
     @Test
     fun `patch should throw ResourceNotFoundException if order is not found`() {
         // GIVEN
         val orderId = "unknown"
+        every { orderRepository.findFullById(orderId) }.returns(Mono.empty())
 
         // WHEN // THEN
-        assertThrows(
-            NotFoundException::class.java,
-            { orderService.patch(orderId, updateOrderRequest()) }
-        )
+        StepVerifier.create(orderService.patch(orderId, updateOrderRequest()))
+            .verifyError(NotFoundException::class.java)
     }
 
     @Test
     fun `deleteById should be successful`() {
         // GIVEN
         val orderId = "someId"
+        every { orderRepository.deleteById(orderId) }.returns(Mono.empty())
 
         // WHEN // THEN
-        assertNotNull(orderService.deleteById(orderId))
-        verify(orderRepository).deleteById(orderId)
+        StepVerifier.create(orderService.deleteById(orderId))
+            .verifyComplete()
+
+        verify { orderRepository.deleteById(orderId) }
     }
 
     @Test
@@ -278,28 +319,32 @@ internal class OrderServiceTest {
         val car = randomCar()
         val order = randomOrder(car.id, user.id)
         val orderResponse = responseOrder(order, car)
-        whenever(orderRepository.findByUserId(user.id.toString())).thenReturn(listOf(order))
-        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
+        every { orderRepository.findByUserId(user.id.toString()) }.returns(Flux.just(order))
+        every { carRepository.findById(car.id.toString()) }.returns(Mono.just(car))
 
         // WHEN
         val orders = orderService.findByUser(user.id.toString())
 
         // THEN
-        assertTrue(orders.isNotEmpty())
-        assertTrue(orders.contains(orderResponse))
+        StepVerifier.create(orders.collectList())
+            .assertNext {
+                assertTrue(it.contains(orderResponse))
+            }
+            .verifyComplete()
     }
 
     @Test
-    fun `findByUser should return empty list if user's orders don't exist`() {
+    fun `findByUser should not return anything if user's orders don't exist`() {
         // GIVEN
         val userId = ObjectId().toString()
-        whenever(orderRepository.findByUserId(userId)).thenReturn(listOf())
+        every { orderRepository.findByUserId(userId) }.returns(Flux.empty())
 
         // WHEN
         val orders = orderService.findByUser(userId)
 
         // THEN
-        assertTrue(orders.isEmpty())
+        StepVerifier.create(orders)
+            .verifyComplete()
     }
 
     @Test
@@ -309,28 +354,32 @@ internal class OrderServiceTest {
         val car = randomCar()
         val order = randomOrder(car.id, user.id)
         val orderResponse = responseOrder(order, car)
-        whenever(orderRepository.findByCarId(car.id.toString())).thenReturn(listOf(order))
-        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
+        every { orderRepository.findByCarId(car.id.toString()) }.returns(Flux.just(order))
+        every { carRepository.findById(car.id.toString()) }.returns(Mono.just(car))
 
         // WHEN
         val orders = orderService.findByCar(car.id.toString())
 
         // THEN
-        assertTrue(orders.isNotEmpty())
-        assertTrue(orders.contains(orderResponse))
+        StepVerifier.create(orders.collectList())
+            .assertNext {
+                assertTrue(it.contains(orderResponse))
+            }
+            .verifyComplete()
     }
 
     @Test
-    fun `findByCar should return empty list if orders on car don't exist`() {
+    fun `findByCar should not return anything if orders on car don't exist`() {
         // GIVEN
         val carId = ObjectId().toString()
-        whenever(orderRepository.findByCarId(carId)).thenReturn(listOf())
+        every { orderRepository.findByCarId(carId) }.returns(Flux.empty())
 
         // WHEN
         val orders = orderService.findByCar(carId)
 
         // THEN
-        assertTrue(orders.isEmpty())
+        StepVerifier.create(orders)
+            .verifyComplete()
     }
 
     @Test
@@ -340,28 +389,32 @@ internal class OrderServiceTest {
         val car = randomCar()
         val order = randomOrder(car.id, user.id)
         val orderResponse = responseOrder(order, car)
-        whenever(orderRepository.findByCarIdAndUserId(car.id.toString(), user.id.toString())).thenReturn(listOf(order))
-        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
+        every { orderRepository.findByCarIdAndUserId(car.id.toString(), user.id.toString()) }.returns(Flux.just(order))
+        every { carRepository.findById(car.id.toString()) }.returns(Mono.just(car))
 
         // WHEN
         val orders = orderService.findByCarAndUser(car.id.toString(), user.id.toString())
 
         // THEN
-        assertTrue(orders.isNotEmpty())
-        assertTrue(orders.contains(orderResponse))
+        StepVerifier.create(orders.collectList())
+            .assertNext {
+                assertTrue(it.contains(orderResponse))
+            }
+            .verifyComplete()
     }
 
     @Test
-    fun `findByCarAndUser should return empty list if such orders don't exist`() {
+    fun `findByCarAndUser should not return anything if such orders don't exist`() {
         // GIVEN
         val carId = ObjectId().toString()
         val userId = ObjectId().toString()
-        whenever(orderRepository.findByCarIdAndUserId(carId, userId)).thenReturn(listOf())
+        every { orderRepository.findByCarIdAndUserId(carId, userId) }.returns(Flux.empty())
 
         // WHEN
         val orders = orderService.findByCarAndUser(carId, userId)
 
         // THEN
-        assertTrue(orders.isEmpty())
+        StepVerifier.create(orders)
+            .verifyComplete()
     }
 }

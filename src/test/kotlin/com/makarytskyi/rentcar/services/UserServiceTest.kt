@@ -9,84 +9,97 @@ import com.makarytskyi.rentcar.fixtures.UserFixture.responseUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.updateUserRequest
 import com.makarytskyi.rentcar.fixtures.UserFixture.updatedUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.userPatch
-import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.service.impl.UserServiceImpl
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import org.bson.types.ObjectId
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.test.StepVerifier
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class UserServiceTest {
 
-    @Mock
+    @MockK
     lateinit var userRepository: UserRepository
 
-    @InjectMocks
+    @InjectMockKs
     lateinit var userService: UserServiceImpl
 
     @Test
-    fun `getById should return UserResponse when User exists`() {
+    fun `getById should return user response when user exists`() {
         // GIVEN
         val user = randomUser()
         val response = responseUser(user)
-        whenever(userRepository.findById(user.id.toString())).thenReturn(user)
+        every { userRepository.findById(user.id.toString()) }.returns(Mono.just(user))
 
         // WHEN
         val result = userService.getById(user.id.toString())
 
         // THEN
-        assertEquals(response, result)
-        verify(userRepository).findById(user.id.toString())
+        StepVerifier.create(result)
+            .assertNext {
+                assertEquals(response, it)
+            }
+            .verifyComplete()
+
+        verify { userRepository.findById(user.id.toString()) }
     }
 
     @Test
     fun `getById should return throw ResourceNotFoundException`() {
         // GIVEN
         val userId = ObjectId()
-        whenever(userRepository.findById(userId.toString())).thenReturn(null)
+        every { userRepository.findById(userId.toString()) }.returns(Mono.empty())
 
         // WHEN // THEN
-        assertThrows(NotFoundException::class.java, { userService.getById(userId.toString()) })
-        verify(userRepository).findById(userId.toString())
+        StepVerifier.create(userService.getById(userId.toString()))
+            .verifyError(NotFoundException::class.java)
+
+        verify { userRepository.findById(userId.toString()) }
     }
 
     @Test
-    fun `findAll should return List of UserResponse`() {
+    fun `findAll should return user responses`() {
         // GIVEN
         val user = randomUser()
         val response = responseUser(user)
-        val mongoUsers: List<MongoUser> = listOf(user)
-        val expected = listOf(response)
-        whenever(userRepository.findAll(0, 10)).thenReturn(mongoUsers)
+        every { userRepository.findAll(0, 10) }.returns(Flux.just(user))
 
         // WHEN
         val result = userService.findAll(0, 10)
 
         // THEN
-        assertEquals(expected, result)
-        verify(userRepository).findAll(0, 10)
+        StepVerifier.create(result.collectList())
+            .assertNext {
+                assertTrue(it.contains(response))
+            }
+            .verifyComplete()
+
+        verify { userRepository.findAll(0, 10) }
     }
 
     @Test
-    fun `findAll should return empty List of UserResponse if repository return empty List`() {
+    fun `findAll should not return anything if repository didn't return anything`() {
         // GIVEN
-        whenever(userRepository.findAll(0, 10)).thenReturn(emptyList())
+        every { userRepository.findAll(0, 10) }.returns(Flux.empty())
 
         // WHEN
         val result = userService.findAll(0, 10)
 
         // THEN
-        assertEquals(emptyList(), result)
-        verify(userRepository).findAll(0, 10)
+        StepVerifier.create(result)
+            .verifyComplete()
+
+        verify { userRepository.findAll(0, 10) }
     }
 
     @Test
@@ -96,14 +109,21 @@ internal class UserServiceTest {
         val createUserEntity = createUserEntity(request)
         val createdUser = createdUser(createUserEntity)
         val response = responseUser(createdUser)
-        whenever(userRepository.create(createUserEntity)).thenReturn(createdUser)
+        every { userRepository.findByEmail(request.email) }.returns(Mono.empty())
+        every { userRepository.findByPhoneNumber(request.phoneNumber!!) }.returns(Mono.empty())
+        every { userRepository.create(createUserEntity) }.returns(Mono.just(createdUser))
 
         // WHEN
         val result = userService.create(request)
 
         // THEN
-        assertEquals(response, result)
-        verify(userRepository).create(createUserEntity)
+        StepVerifier.create(result)
+            .assertNext {
+                assertEquals(response, it)
+            }
+            .verifyComplete()
+
+        verify { userRepository.create(createUserEntity) }
     }
 
     @Test
@@ -113,33 +133,47 @@ internal class UserServiceTest {
         val request = updateUserRequest()
         val requestEntity = userPatch(request)
         val updatedUser = updatedUser(user, request)
-        whenever(userRepository.patch(user.id.toString(), requestEntity)).thenReturn(updatedUser)
+        val response = responseUser(updatedUser)
+        every { userRepository.patch(user.id.toString(), requestEntity) }.returns(Mono.just(updatedUser))
+        every { userRepository.findByPhoneNumber(request.phoneNumber!!) }.returns(Mono.empty())
 
         // WHEN
         val result = userService.patch(user.id.toString(), request)
 
         // THEN
-        assertNotNull(result)
-        verify(userRepository).patch(user.id.toString(), requestEntity)
+        StepVerifier.create(result)
+            .assertNext {
+                assertEquals(response, it)
+            }
+            .verifyComplete()
+
+        verify { userRepository.patch(user.id.toString(), requestEntity) }
     }
 
     @Test
     fun `patch should throw ResourceNotFoundException if user is not found`() {
         // GIVEN
         val userId = "unknown"
+        val request = updateUserRequest()
+        every { userRepository.findByPhoneNumber(request.phoneNumber!!) }.returns(Mono.empty())
+        every { userRepository.patch(userId, userPatch(request)) }.returns(Mono.empty())
 
         // WHEN // THEN
-        assertThrows(NotFoundException::class.java, { userService.patch(userId, updateUserRequest()) })
+        StepVerifier.create(userService.patch(userId, request))
+            .verifyError(NotFoundException::class.java)
     }
 
     @Test
     fun `deleteById should not throw ResourceNotFoundException if user is not found`() {
         // GIVEN
         val userId = "unknown"
+        every { userRepository.deleteById(userId) }.returns(Mono.empty())
 
         // WHEN // THEN
-        assertNotNull(userService.deleteById(userId))
-        verify(userRepository).deleteById(userId)
+        StepVerifier.create(userService.deleteById(userId))
+            .verifyComplete()
+
+        verify { userRepository.deleteById(userId) }
     }
 
     @Test
@@ -147,9 +181,10 @@ internal class UserServiceTest {
         // GIVEN
         val user = randomUser()
         val request = updateUserRequest()
-        whenever(userRepository.findByPhoneNumber(request.phoneNumber!!)).thenReturn(randomUser())
+        every { userRepository.findByPhoneNumber(request.phoneNumber!!) }.returns(Mono.just(user))
 
         // WHEN // THEN
-        assertThrows(IllegalArgumentException::class.java, { userService.patch(user.id.toString(), request) })
+        StepVerifier.create(userService.patch(user.id.toString(), request))
+            .verifyError(IllegalArgumentException::class.java)
     }
 }

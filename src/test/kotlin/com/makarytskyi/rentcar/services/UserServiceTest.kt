@@ -23,8 +23,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.dao.DuplicateKeyException
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
+import reactor.kotlin.test.verifyError
 
 @ExtendWith(MockKExtension::class)
 internal class UserServiceTest {
@@ -40,7 +42,7 @@ internal class UserServiceTest {
         // GIVEN
         val user = randomUser()
         val response = responseUser(user)
-        every { userRepository.findById(user.id.toString()) }.returns(user.toMono())
+        every { userRepository.findById(user.id.toString()) } returns user.toMono()
 
         // WHEN
         val result = userService.getById(user.id.toString())
@@ -58,12 +60,12 @@ internal class UserServiceTest {
     fun `getById should return throw NotFoundException`() {
         // GIVEN
         val userId = ObjectId()
-        every { userRepository.findById(userId.toString()) }.returns(Mono.empty())
+        every { userRepository.findById(userId.toString()) } returns Mono.empty()
 
         // WHEN // THEN
         userService.getById(userId.toString())
             .test()
-            .verifyError(NotFoundException::class.java)
+            .verifyError<NotFoundException>()
 
         verify { userRepository.findById(userId.toString()) }
     }
@@ -73,7 +75,8 @@ internal class UserServiceTest {
         // GIVEN
         val user = randomUser()
         val response = responseUser(user)
-        every { userRepository.findAll(0, 10) }.returns(Flux.just(user))
+        val users = listOf(user)
+        every { userRepository.findAll(0, 10) } returns users.toFlux()
 
         // WHEN
         val result = userService.findAll(0, 10)
@@ -92,7 +95,7 @@ internal class UserServiceTest {
     @Test
     fun `findAll should return empty if repository returned empty`() {
         // GIVEN
-        every { userRepository.findAll(0, 10) }.returns(Flux.empty())
+        every { userRepository.findAll(0, 10) } returns Flux.empty()
 
         // WHEN
         val result = userService.findAll(0, 10)
@@ -112,7 +115,7 @@ internal class UserServiceTest {
         val createUserEntity = createUserEntity(request)
         val createdUser = createdUser(createUserEntity)
         val response = responseUser(createdUser)
-        every { userRepository.create(createUserEntity) }.returns(createdUser.toMono())
+        every { userRepository.create(createUserEntity) } returns createdUser.toMono()
 
         // WHEN
         val result = userService.create(request)
@@ -134,7 +137,7 @@ internal class UserServiceTest {
         val requestEntity = userPatch(request)
         val updatedUser = updatedUser(user, request)
         val response = responseUser(updatedUser)
-        every { userRepository.patch(user.id.toString(), requestEntity) }.returns(updatedUser.toMono())
+        every { userRepository.patch(user.id.toString(), requestEntity) } returns updatedUser.toMono()
 
         // WHEN
         val result = userService.patch(user.id.toString(), request)
@@ -153,12 +156,12 @@ internal class UserServiceTest {
         // GIVEN
         val userId = "unknown"
         val request = updateUserRequest()
-        every { userRepository.patch(userId, userPatch(request)) }.returns(Mono.empty())
+        every { userRepository.patch(userId, userPatch(request)) } returns Mono.empty()
 
         // WHEN // THEN
         userService.patch(userId, request)
             .test()
-            .verifyError(NotFoundException::class.java)
+            .verifyError<NotFoundException>()
 
         verify { userRepository.patch(userId, userPatch(request)) }
     }
@@ -167,7 +170,7 @@ internal class UserServiceTest {
     fun `deleteById should not throw NotFoundException if user is not found`() {
         // GIVEN
         val userId = "unknown"
-        every { userRepository.deleteById(userId) }.returns(Mono.empty())
+        every { userRepository.deleteById(userId) } returns Mono.empty()
 
         // WHEN // THEN
         userService.deleteById(userId)
@@ -182,13 +185,13 @@ internal class UserServiceTest {
         // GIVEN
         val user = randomUser()
         val request = updateUserRequest()
-        every { userRepository.patch(user.id.toString(), userPatch(request)) }
-            .returns(DuplicateKeyException("key email is duplicated").toMono())
+        every { userRepository.patch(user.id.toString(), userPatch(request)) } returns
+                DuplicateKeyException("key email is duplicated").toMono()
 
         // WHEN // THEN
         userService.patch(user.id.toString(), request)
             .test()
-            .verifyError(IllegalArgumentException::class.java)
+            .verifyError<IllegalArgumentException>()
 
         verify { userRepository.patch(user.id.toString(), userPatch(request)) }
     }

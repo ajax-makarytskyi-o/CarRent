@@ -1,5 +1,6 @@
 package com.makarytskyi.rentcar.bpp
 
+import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import com.makarytskyi.rentcar.exception.NotFoundException
@@ -10,6 +11,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.spyk
 import io.mockk.verify
 import java.lang.reflect.Proxy
 import kotlin.test.Test
@@ -18,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.ILoggerFactory
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -28,8 +29,7 @@ internal class BeanPostProcessorTest {
     @MockK
     lateinit var repository: CarRepository
 
-    @MockK(relaxed = true)
-    lateinit var mockAppender: Appender<ILoggingEvent>
+    private val mockAppender: Appender<ILoggingEvent> = spyk()
 
     @InjectMockKs
     lateinit var service: CarServiceImpl
@@ -37,7 +37,7 @@ internal class BeanPostProcessorTest {
     val beanName = "service"
     val postProcessor: InvocationTrackerBeanPostProcessor = InvocationTrackerBeanPostProcessor()
     val loggerFactory: ILoggerFactory = LoggerFactory.getILoggerFactory()
-    val rootLogger = loggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as ch.qos.logback.classic.Logger
+    val rootLogger = loggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger
 
     @BeforeEach
     fun before() {
@@ -63,7 +63,7 @@ internal class BeanPostProcessorTest {
     fun `proxied service should write in logger`() {
         // GIVEN
         postProcessor.postProcessBeforeInitialization(service, beanName)
-        every { repository.findAll(0, 10) }.returns(Flux.empty())
+        every { repository.findAll(0, 10) } returns Flux.empty()
 
         // WHEN
         val proxyService = postProcessor.postProcessAfterInitialization(service, beanName) as CarService
@@ -77,7 +77,7 @@ internal class BeanPostProcessorTest {
     fun `original object should not use logger`() {
         // GIVEN
         val service = CarServiceImpl(repository)
-        every { repository.findAll(0, 10) }.returns(Flux.empty())
+        every { repository.findAll(0, 10) } returns Flux.empty()
 
         // WHEN
         service.findAll(0, 10)
@@ -90,7 +90,7 @@ internal class BeanPostProcessorTest {
     fun `exception in proxied service should write error in logger`() {
         // GIVEN
         val id = "unexistingId"
-        every { repository.findById(id) }.returns(Mono.empty())
+        every { repository.findById(id) } returns Mono.empty()
 
         // WHEN
         postProcessor.postProcessBeforeInitialization(service, beanName)

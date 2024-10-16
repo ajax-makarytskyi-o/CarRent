@@ -80,10 +80,8 @@ internal class OrderServiceImpl(
             .flatMap { order -> getCarPrice(order.carId.toString()).map { OrderResponse.from(order, it) } }
 
     private fun validateDates(from: Date?, to: Date?) {
-        requireNotNull(from) { "Start date must be not null" }
-        requireNotNull(to) { "End date must be not null" }
-        require(to.after(from)) { "Start date must be before end date" }
-        require(from.after(Date())) { "Dates must be in future" }
+        require(to?.after(from) == true) { "Start date must be before end date" }
+        require(from?.after(Date()) == true) { "Dates must be in future" }
     }
 
     private fun validateUserExists(userId: String) = userRepository.findById(userId)

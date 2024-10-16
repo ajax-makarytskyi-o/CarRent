@@ -7,7 +7,6 @@ import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
 import com.makarytskyi.rentcar.exception.NotFoundException
 import com.makarytskyi.rentcar.model.MongoOrder
-import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
@@ -17,6 +16,8 @@ import java.util.Date
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toMono
 
 @InvocationTracker
 @Service
@@ -28,26 +29,27 @@ internal class OrderServiceImpl(
 
     override fun getById(id: String): Mono<AggregatedOrderResponse> =
         orderRepository.findFullById(id)
-            .switchIfEmpty(Mono.error(NotFoundException("Order with id $id is not found")))
+            .switchIfEmpty { Mono.error(NotFoundException("Order with id $id is not found")) }
             .map { AggregatedOrderResponse.from(it) }
 
     override fun findAll(page: Int, size: Int): Flux<AggregatedOrderResponse> =
         orderRepository.findFullAll(page, size).map { AggregatedOrderResponse.from(it) }
 
     override fun create(createOrderRequest: CreateOrderRequest): Mono<OrderResponse> {
-        return validateDates(createOrderRequest.from, createOrderRequest.to)
-            .cast(MongoUser::class.java)
-            .switchIfEmpty(Mono.defer { validateUserExists(createOrderRequest.userId) })
+        return createOrderRequest.toMono()
+            .flatMap {
+                validateDates(it.from, it.to)
+                validateUserExists(it.userId)
+            }
             .flatMap {
                 validateCarAvailability(
                     createOrderRequest.carId,
                     createOrderRequest.from,
                     createOrderRequest.to
-                )
+                ).thenReturn(it)
             }
-            .switchIfEmpty(Mono.defer { orderRepository.create(CreateOrderRequest.toEntity(createOrderRequest)) })
-            .zipWhen { getCarPrice(createOrderRequest.carId) }
-            .map { OrderResponse.from(it.t1, it.t2) }
+            .flatMap { orderRepository.create(CreateOrderRequest.toEntity(createOrderRequest)) }
+            .flatMap { order -> getCarPrice(createOrderRequest.carId).map { OrderResponse.from(order, it) } }
     }
 
     override fun deleteById(id: String): Mono<Unit> = orderRepository.deleteById(id)
@@ -67,33 +69,31 @@ internal class OrderServiceImpl(
 
     override fun patch(id: String, orderRequest: UpdateOrderRequest): Mono<OrderResponse> =
         orderRepository.findFullById(id)
-            .switchIfEmpty(Mono.error(NotFoundException("Order with $id is not found")))
+            .switchIfEmpty { Mono.error(NotFoundException("Order with $id is not found")) }
             .flatMap {
                 val from = orderRequest.from ?: it.from
                 val to = orderRequest.to ?: it.to
-                validateDates(from!!, to!!)
-                    .switchIfEmpty(Mono.defer { validateCarAvailability(it.car?.id.toString(), from, to) })
+                validateDates(from, to)
+                validateCarAvailability(it.car?.id.toString(), from, to)
             }
-            .switchIfEmpty(Mono.defer { orderRepository.patch(id, UpdateOrderRequest.toPatch(orderRequest)) })
-            .zipWhen { getCarPrice(it.carId.toString()) }
-            .map { OrderResponse.from(it.t1, it.t2) }
+            .switchIfEmpty { orderRepository.patch(id, UpdateOrderRequest.toPatch(orderRequest)) }
+            .flatMap { order -> getCarPrice(order.carId.toString()).map { OrderResponse.from(order, it) } }
 
-    private fun validateDates(from: Date, to: Date): Mono<MongoOrder> {
-        return when {
-            !to.after(from) -> Mono.error(IllegalArgumentException("Start date must be before end date"))
-            !from.after(Date()) -> Mono.error(IllegalArgumentException("Dates must be in future"))
-            else -> Mono.empty()
-        }
+    private fun validateDates(from: Date?, to: Date?) {
+        requireNotNull(from) { "Start date must be not null" }
+        requireNotNull(to) { "End date must be not null" }
+        require(to.after(from)) { "Start date must be before end date" }
+        require(from.after(Date())) { "Dates must be in future" }
     }
 
     private fun validateUserExists(userId: String) = userRepository.findById(userId)
-        .switchIfEmpty(Mono.error(IllegalArgumentException("User with id $userId is not found")))
+        .switchIfEmpty { Mono.error(IllegalArgumentException("User with id $userId is not found")) }
 
-    private fun validateCarAvailability(carId: String?, from: Date, to: Date): Mono<MongoOrder> {
+    private fun validateCarAvailability(carId: String?, from: Date?, to: Date?): Mono<MongoOrder> {
         return Mono.justOrEmpty(carId)
-            .switchIfEmpty(Mono.error(IllegalArgumentException("Car id should not be null")))
+            .switchIfEmpty { Mono.error(IllegalArgumentException("Car id should not be null")) }
             .flatMap { carRepository.findById(it) }
-            .switchIfEmpty(Mono.error(NotFoundException("Car with id $carId is not found")))
+            .switchIfEmpty { Mono.error(NotFoundException("Car with id $carId is not found")) }
             .flatMapMany { orderRepository.findByCarId(it.id.toString()) }
             .filter { it.from?.before(to) == true && it.to?.after(from) == true }
             .next()

@@ -15,6 +15,8 @@ import java.util.Date
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toMono
 
 @InvocationTracker
 @Service
@@ -27,21 +29,23 @@ internal class RepairingServiceImpl(
         repairingRepository.findFullAll(page, size).map { AggregatedRepairingResponse.from(it) }
 
     override fun create(repairingRequest: CreateRepairingRequest): Mono<RepairingResponse> =
-        validateDate(repairingRequest.date)
-            .cast(MongoCar::class.java)
-            .switchIfEmpty(Mono.defer { validateCarExists(repairingRequest.carId) })
+        repairingRequest.toMono()
+            .flatMap {
+                validateDate(it.date)
+                validateCarExists(it.carId)
+            }
             .flatMap { repairingRepository.create(CreateRepairingRequest.toEntity(repairingRequest)) }
             .map { RepairingResponse.from(it) }
 
     override fun getFullById(id: String): Mono<AggregatedRepairingResponse> = repairingRepository.findFullById(id)
-        .switchIfEmpty(Mono.error(NotFoundException("Repairing with id $id is not found")))
+        .switchIfEmpty { Mono.error(NotFoundException("Repairing with id $id is not found")) }
         .map { AggregatedRepairingResponse.from(it) }
 
     override fun deleteById(id: String): Mono<Unit> = repairingRepository.deleteById(id)
 
     override fun patch(id: String, repairingRequest: UpdateRepairingRequest): Mono<RepairingResponse> =
         repairingRepository.patch(id, UpdateRepairingRequest.toPatch(repairingRequest))
-            .switchIfEmpty(Mono.error(NotFoundException("Repairing with id $id is not found")))
+            .switchIfEmpty { Mono.error(NotFoundException("Repairing with id $id is not found")) }
             .map { RepairingResponse.from(it) }
 
     override fun findByStatus(status: MongoRepairing.RepairingStatus): Flux<RepairingResponse> =
@@ -54,8 +58,9 @@ internal class RepairingServiceImpl(
         repairingRepository.findByStatusAndCarId(status, carId).map { RepairingResponse.from(it) }
 
     private fun validateCarExists(carId: String): Mono<MongoCar> = carRepository.findById(carId)
-        .switchIfEmpty(Mono.error(NotFoundException("Car in repairing with $carId is not found")))
+        .switchIfEmpty { Mono.error(NotFoundException("Car in repairing with $carId is not found")) }
 
-    private fun validateDate(date: Date?): Mono<Date> = Mono.justOrEmpty(date).filter { it.before(Date()) }
-        .flatMap { Mono.error(IllegalArgumentException("Date must be in future")) }
+    private fun validateDate(date: Date?) {
+        require(date?.after(Date()) == true) { "Date must be in future" }
+    }
 }

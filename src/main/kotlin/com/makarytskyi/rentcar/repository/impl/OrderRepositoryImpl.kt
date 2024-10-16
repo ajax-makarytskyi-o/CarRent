@@ -65,6 +65,7 @@ internal class OrderRepositoryImpl(private val template: ReactiveMongoTemplate) 
     }
 
     override fun create(mongoOrder: MongoOrder): Mono<MongoOrder> {
+        println("order create")
         return template.insert(mongoOrder)
     }
 
@@ -88,6 +89,8 @@ internal class OrderRepositoryImpl(private val template: ReactiveMongoTemplate) 
     }
 
     override fun patch(id: String, orderPatch: MongoOrderPatch): Mono<MongoOrder> {
+        println("order patch")
+
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 

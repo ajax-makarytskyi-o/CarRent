@@ -18,42 +18,48 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/repairings")
 internal class RepairingController(private val service: RepairingService) {
 
     @GetMapping()
-    fun findAll(
+    fun findFullAll(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "20") size: Int
-    ): List<AggregatedRepairingResponse> = service.findAll(page, size)
+    ): Flux<AggregatedRepairingResponse> = service.findFullAll(page, size)
 
     @GetMapping("/status/{status}/car/{carId}")
     fun findByStatusAndCar(
         @PathVariable status: MongoRepairing.RepairingStatus,
         @PathVariable carId: String,
-    ): List<RepairingResponse> = service.findByStatusAndCar(status, carId)
+    ): Flux<RepairingResponse> = service.findByStatusAndCar(status, carId)
 
     @GetMapping("/status/{status}")
-    fun findByStatus(@PathVariable status: MongoRepairing.RepairingStatus): List<RepairingResponse> =
+    fun findByStatus(@PathVariable status: MongoRepairing.RepairingStatus): Flux<RepairingResponse> =
         service.findByStatus(status)
 
     @GetMapping("/car/{carId}")
-    fun findByCarId(@PathVariable carId: String): List<RepairingResponse> = service.findByCarId(carId)
+    fun findByCarId(@PathVariable carId: String): Flux<RepairingResponse> = service.findByCarId(carId)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun create(@Valid @RequestBody repairing: CreateRepairingRequest): RepairingResponse = service.create(repairing)
+    fun create(@Valid @RequestBody repairing: CreateRepairingRequest): Mono<RepairingResponse> =
+        service.create(repairing)
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: String): AggregatedRepairingResponse = service.getById(id)
+    fun getById(@PathVariable id: String): Mono<AggregatedRepairingResponse> = service.getFullById(id)
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun deleteById(@PathVariable id: String) = service.deleteById(id)
+    fun deleteById(@PathVariable id: String): Mono<Unit> = service.deleteById(id)
 
     @PatchMapping("/{id}")
-    fun patch(@PathVariable id: String, @Valid @RequestBody repairing: UpdateRepairingRequest): RepairingResponse =
+    fun patch(
+        @PathVariable id: String,
+        @Valid @RequestBody repairing: UpdateRepairingRequest
+    ): Mono<RepairingResponse> =
         service.patch(id, repairing)
 }

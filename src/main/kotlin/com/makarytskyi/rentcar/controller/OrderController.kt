@@ -17,37 +17,39 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/orders")
 internal class OrderController(private val service: OrderService) {
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: String): AggregatedOrderResponse = service.getById(id)
+    fun getFullById(@PathVariable id: String): Mono<AggregatedOrderResponse> = service.getById(id)
 
     @GetMapping()
-    fun findAll(
+    fun findFullAll(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "20") size: Int
-    ): List<AggregatedOrderResponse> = service.findAll(page, size)
+    ): Flux<AggregatedOrderResponse> = service.findAll(page, size)
 
     @GetMapping("/car/{carId}")
-    fun findByCar(@PathVariable carId: String): List<OrderResponse> = service.findByCar(carId)
+    fun findByCar(@PathVariable carId: String): Flux<OrderResponse> = service.findByCar(carId)
 
     @GetMapping("/user/{userId}")
-    fun findByUser(@PathVariable userId: String): List<OrderResponse> = service.findByUser(userId)
+    fun findByUser(@PathVariable userId: String): Flux<OrderResponse> = service.findByUser(userId)
 
     @GetMapping("/car/{carId}/user/{userId}")
-    fun findByCarAndUser(@PathVariable carId: String, @PathVariable userId: String): List<OrderResponse> =
+    fun findByCarAndUser(@PathVariable carId: String, @PathVariable userId: String): Flux<OrderResponse> =
         service.findByCarAndUser(carId, userId)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun create(@Valid @RequestBody order: CreateOrderRequest): OrderResponse = service.create(order)
+    fun create(@Valid @RequestBody order: CreateOrderRequest): Mono<OrderResponse> = service.create(order)
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun delete(@PathVariable id: String) = service.deleteById(id)
+    fun delete(@PathVariable id: String): Mono<Unit> = service.deleteById(id)
 
     @PatchMapping("/{id}")
     fun patch(@PathVariable id: String, @Valid @RequestBody order: UpdateOrderRequest) = service.patch(id, order)

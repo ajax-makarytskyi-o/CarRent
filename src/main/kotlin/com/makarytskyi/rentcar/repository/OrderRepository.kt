@@ -4,23 +4,25 @@ import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @Repository
 internal interface OrderRepository {
 
-    fun findById(id: String): AggregatedMongoOrder?
+    fun findFullById(id: String): Mono<AggregatedMongoOrder>
 
-    fun findAll(page: Int, size: Int): List<AggregatedMongoOrder>
+    fun findFullAll(page: Int, size: Int): Flux<AggregatedMongoOrder>
 
-    fun create(mongoOrder: MongoOrder): MongoOrder
+    fun create(mongoOrder: MongoOrder): Mono<MongoOrder>
 
-    fun deleteById(id: String)
+    fun deleteById(id: String): Mono<Unit>
 
-    fun findByUserId(userId: String): List<MongoOrder>
+    fun findByUserId(userId: String): Flux<MongoOrder>
 
-    fun findByCarId(carId: String): List<MongoOrder>
+    fun findByCarId(carId: String): Flux<MongoOrder>
 
-    fun patch(id: String, orderPatch: MongoOrderPatch): MongoOrder?
+    fun patch(id: String, orderPatch: MongoOrderPatch): Mono<MongoOrder>
 
-    fun findByCarIdAndUserId(carId: String, userId: String): List<MongoOrder>
+    fun findByCarIdAndUserId(carId: String, userId: String): Flux<MongoOrder>
 }

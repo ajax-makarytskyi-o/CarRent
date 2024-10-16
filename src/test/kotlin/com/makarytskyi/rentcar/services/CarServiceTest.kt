@@ -19,13 +19,13 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.extension.ExtendWith
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.test.StepVerifier
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
 
 @ExtendWith(MockKExtension::class)
 internal class CarServiceTest {
@@ -40,30 +40,30 @@ internal class CarServiceTest {
         // GIVEN
         val car = randomCar()
         val responseCar = responseCar(car)
-        every { carRepository.findById(car.id.toString()) }.returns(Mono.just(car))
+        every { carRepository.findById(car.id.toString()) }.returns(car.toMono())
 
         // WHEN
         val result = carService.getById(car.id.toString())
 
         // THEN
-        StepVerifier.create(result)
-            .assertNext {
-                assertEquals(responseCar, it)
-            }
+        result
+            .test()
+            .expectNext(responseCar)
             .verifyComplete()
 
         verify { carRepository.findById(car.id.toString()) }
     }
 
     @Test
-    fun `getById should return throw ResourceNotFoundException`() {
+    fun `getById should return throw NotFoundException`() {
         // GIVEN
         val carId = ObjectId()
         every { carRepository.findById(carId.toString()) }.returns(Mono.empty())
 
         // WHEN // THEN
-        StepVerifier.create(carService.getById(carId.toString()))
-            .expectError(NotFoundException::class.java)
+        carService.getById(carId.toString())
+            .test()
+            .verifyError(NotFoundException::class.java)
 
         verify { carRepository.findById(carId.toString()) }
     }
@@ -74,16 +74,16 @@ internal class CarServiceTest {
         val car = randomCar()
         val response = responseCar(car)
         val mongoCars: List<MongoCar> = listOf(car)
-        val expected = listOf(response)
         every { carRepository.findAll(0, 10) }.returns(Flux.fromIterable(mongoCars))
 
         // WHEN
         val result = carService.findAll(0, 10)
 
         // THEN
-        StepVerifier.create(result.collectList())
+        result.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.containsAll(expected))
+                assertTrue(it.contains(response), "Result should contain expected car response.")
             }
             .verifyComplete()
 
@@ -91,7 +91,7 @@ internal class CarServiceTest {
     }
 
     @Test
-    fun `findAll should not return anything if repository didn't return anything`() {
+    fun `findAll should return empty if repository returned empty`() {
         // GIVEN
         every { carRepository.findAll(0, 10) }.returns(Flux.empty())
 
@@ -99,7 +99,8 @@ internal class CarServiceTest {
         val result = carService.findAll(0, 10)
 
         // THEN
-        StepVerifier.create(result)
+        result
+            .test()
             .verifyComplete()
 
         verify { carRepository.findAll(0, 10) }
@@ -112,17 +113,15 @@ internal class CarServiceTest {
         val requestEntity = createCarEntity(request)
         val createdCar = createdCar(requestEntity)
         val carResponse = responseCar(createdCar)
-        every { carRepository.create(requestEntity) }.returns(Mono.just(createdCar))
-        every { carRepository.findByPlate(request.plate) }.returns(Mono.empty())
+        every { carRepository.create(requestEntity) }.returns(createdCar.toMono())
 
         // WHEN
         val result = carService.create(request)
 
         // THEN
-        StepVerifier.create(result)
-            .assertNext {
-                assertEquals(carResponse, it)
-            }
+        result
+            .test()
+            .expectNext(carResponse)
             .verifyComplete()
 
         verify { carRepository.create(requestEntity) }
@@ -135,15 +134,15 @@ internal class CarServiceTest {
         val updateCarRequest = updateCarRequest()
         val updateCarEntity = carPatch(updateCarRequest)
         val updatedCar = updatedCar(oldCar, updateCarRequest)
-        every { carRepository.patch(oldCar.id.toString(), updateCarEntity) }.returns(Mono.just(updatedCar))
+        every { carRepository.patch(oldCar.id.toString(), updateCarEntity) }.returns(updatedCar.toMono())
 
         // WHEN
         val result = carService.patch(oldCar.id.toString(), updateCarRequest)
 
         // THEN
-        StepVerifier.create(result)
+        result
+            .test()
             .assertNext {
-                assertNotNull(it)
                 assertEquals(updateCarRequest.price, it.price)
             }
             .verifyComplete()
@@ -152,41 +151,44 @@ internal class CarServiceTest {
     }
 
     @Test
-    fun `patch should throw ResourceNotFoundException if car is not found`() {
+    fun `patch should throw NotFoundException if car is not found`() {
         // GIVEN
         val carId = "unknown"
         val updateCarRequest = updateCarRequest()
         every { carRepository.patch(carId, carPatch(updateCarRequest)) }.returns(Mono.empty())
 
         // WHEN // THEN
-        StepVerifier.create(carService.patch(carId, updateCarRequest))
+        carService.patch(carId, updateCarRequest)
+            .test()
             .verifyError(NotFoundException::class.java)
+
+        verify { carRepository.patch(carId, carPatch(updateCarRequest)) }
     }
 
     @Test
-    fun `deleteById should not throw ResourceNotFoundException if car is not found`() {
+    fun `deleteById should not throw NotFoundException if car is not found`() {
         // GIVEN
         val carId = "unknown"
         every { carRepository.deleteById(carId) }.returns(Mono.empty())
 
         // WHEN // THEN
-        StepVerifier.create(carService.deleteById(carId))
+        carService.deleteById(carId)
+            .test()
             .verifyComplete()
 
         verify { carRepository.deleteById(carId) }
     }
 
     @Test
-    fun `findByPlate should throw ResourceNotFoundException if such car is not found`() {
+    fun `findByPlate should throw NotFoundException if such car is not found`() {
         // GIVEN
         val plate = "UNKNOWN"
-
-        // WHEN
         every { carRepository.findByPlate(plate) }.returns(Mono.empty())
 
-        // THEN
-        StepVerifier.create(carService.getByPlate(plate))
-            .expectError(NotFoundException::class.java)
+        // WHEN // THEN
+        carService.getByPlate(plate)
+            .test()
+            .verifyError(NotFoundException::class.java)
 
         verify { carRepository.findByPlate(plate) }
     }

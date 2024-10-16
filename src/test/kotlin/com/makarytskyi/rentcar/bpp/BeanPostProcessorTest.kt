@@ -53,17 +53,21 @@ internal class BeanPostProcessorTest {
         val proxyService = postProcessor.postProcessAfterInitialization(service, beanName)
 
         // THEN
-        assertTrue(Proxy.isProxyClass(proxyService::class.java))
+        assertTrue(
+            Proxy.isProxyClass(proxyService::class.java),
+            "Class returned by post processor should be proxy class."
+        )
     }
 
     @Test
     fun `proxied service should write in logger`() {
+        // GIVEN
         postProcessor.postProcessBeforeInitialization(service, beanName)
         every { repository.findAll(0, 10) }.returns(Flux.empty())
 
         // WHEN
         val proxyService = postProcessor.postProcessAfterInitialization(service, beanName) as CarService
-        proxyService.findAll(0, 10).blockLast()
+        proxyService.findAll(0, 10).blockFirst()
 
         // THEN
         verify(exactly = 1) { mockAppender.doAppend(any()) }

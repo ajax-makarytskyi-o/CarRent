@@ -116,4 +116,12 @@ object RepairingFixture {
         price = null,
         status = null,
     )
+
+    fun aggregatedRepairing(repairing: MongoRepairing?, car: MongoCar?) = AggregatedMongoRepairing(
+        id = repairing?.id,
+        car = car,
+        date = repairing?.date,
+        price = repairing?.price,
+        status = repairing?.status,
+    )
 }

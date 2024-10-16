@@ -21,13 +21,13 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.extension.ExtendWith
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.test.StepVerifier
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
 
 @ExtendWith(MockKExtension::class)
 internal class RepairingServiceTest {
@@ -47,30 +47,30 @@ internal class RepairingServiceTest {
         val car = randomCar()
         val repairing = randomAggregatedRepairing(car)
         val response = responseAggregatedRepairing(repairing)
-        every { repairingRepository.findFullById(repairing.id.toString()) }.returns(Mono.just(repairing))
+        every { repairingRepository.findFullById(repairing.id.toString()) }.returns(repairing.toMono())
 
         // WHEN
         val result = repairingService.getFullById(repairing.id.toString())
 
         // THEN
-        StepVerifier.create(result)
-            .assertNext {
-                assertEquals(response, it)
-            }
+        result
+            .test()
+            .expectNext(response)
             .verifyComplete()
 
         verify { repairingRepository.findFullById(repairing.id.toString()) }
     }
 
     @Test
-    fun `getById should return throw ResourceNotFoundException`() {
+    fun `getById should return throw NotFoundException`() {
         // GIVEN
         val repairingId = ObjectId().toString()
         every { repairingRepository.findFullById(repairingId) }.returns(Mono.empty())
 
         // WHEN // THEN
-        StepVerifier.create(repairingService.getFullById(repairingId))
-            .expectError(NotFoundException::class.java)
+        repairingService.getFullById(repairingId)
+            .test()
+            .verifyError(NotFoundException::class.java)
 
         verify { repairingRepository.findFullById(repairingId) }
     }
@@ -81,23 +81,24 @@ internal class RepairingServiceTest {
         val car = randomCar()
         val repairing = randomAggregatedRepairing(car)
         val response = responseAggregatedRepairing(repairing)
-        val expected = listOf(response)
         every { repairingRepository.findFullAll(0, 10) }.returns(Flux.just(repairing))
 
         // WHEN
         val result = repairingService.findFullAll(0, 10)
 
         // THEN
-        StepVerifier.create(result.collectList())
+        result.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.containsAll(expected))
+                assertTrue(it.contains(response), "Result should contain expected repairing response.")
             }
             .verifyComplete()
+
         verify { repairingRepository.findFullAll(0, 10) }
     }
 
     @Test
-    fun `findAll should not return anything if repository didn't return anything`() {
+    fun `findAll should return empty if repository returned empty`() {
         // GIVEN
         every { repairingRepository.findFullAll(0, 10) }.returns(Flux.empty())
 
@@ -105,8 +106,10 @@ internal class RepairingServiceTest {
         val result = repairingService.findFullAll(0, 10)
 
         // THEN
-        StepVerifier.create(result)
+        result
+            .test()
             .verifyComplete()
+
         verify { repairingRepository.findFullAll(0, 10) }
     }
 
@@ -118,17 +121,16 @@ internal class RepairingServiceTest {
         val requestEntity = createRepairingEntity(request)
         val createdRepairing = createdRepairing(requestEntity)
         val response = responseRepairing(createdRepairing)
-        every { repairingRepository.create(requestEntity) }.returns(Mono.just(createdRepairing))
-        every { carRepository.findById(car.id.toString()) }.returns(Mono.just(car))
+        every { repairingRepository.create(requestEntity) }.returns(createdRepairing.toMono())
+        every { carRepository.findById(car.id.toString()) }.returns(car.toMono())
 
         // WHEN
         val result = repairingService.create(request)
 
         // THEN
-        StepVerifier.create(result)
-            .assertNext {
-                assertEquals(response, it)
-            }
+        result
+            .test()
+            .expectNext(response)
             .verifyComplete()
 
         verify { repairingRepository.create(requestEntity) }
@@ -142,8 +144,11 @@ internal class RepairingServiceTest {
         every { carRepository.findById(car.id.toString()) }.returns(Mono.empty())
 
         // WHEN // THEN
-        StepVerifier.create(repairingService.create(request))
+        repairingService.create(request)
+            .test()
             .verifyError(NotFoundException::class.java)
+
+        verify { carRepository.findById(request.carId) }
     }
 
     @Test
@@ -154,16 +159,15 @@ internal class RepairingServiceTest {
         val request = updateRepairingRequest()
         val requestEntity = repairingPatch(request)
         val updatedRepairing = updatedRepairing(repairing, request)
-        every { repairingRepository.patch(repairing.id.toString(), requestEntity) }.returns(Mono.just(updatedRepairing))
+        every { repairingRepository.patch(repairing.id.toString(), requestEntity) }.returns(updatedRepairing.toMono())
 
         // WHEN
         val result = repairingService.patch(repairing.id.toString(), request)
 
         // THEN
-        StepVerifier.create(result)
-            .assertNext {
-                assertEquals(responseRepairing(updatedRepairing), it)
-            }
+        result
+            .test()
+            .expectNext(responseRepairing(updatedRepairing))
             .verifyComplete()
 
         verify { repairingRepository.patch(repairing.id.toString(), requestEntity) }
@@ -177,8 +181,11 @@ internal class RepairingServiceTest {
         every { repairingRepository.patch(repairingId, repairingPatch(request)) }.returns(Mono.empty())
 
         // WHEN // THEN
-        StepVerifier.create(repairingService.patch(repairingId, request))
+        repairingService.patch(repairingId, request)
+            .test()
             .verifyError(NotFoundException::class.java)
+
+        verify { repairingRepository.patch(repairingId, repairingPatch(request)) }
     }
 
     @Test
@@ -188,7 +195,8 @@ internal class RepairingServiceTest {
         every { repairingRepository.deleteById(repairingId) }.returns(Mono.empty())
 
         // WHEN // THEN
-        StepVerifier.create(repairingService.deleteById(repairingId))
+        repairingService.deleteById(repairingId)
+            .test()
             .verifyComplete()
 
         verify { repairingRepository.deleteById(repairingId) }

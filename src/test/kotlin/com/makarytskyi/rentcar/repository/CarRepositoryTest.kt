@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import reactor.test.StepVerifier
+import reactor.kotlin.test.test
 
 internal class CarRepositoryTest : ContainerBase {
 
@@ -26,9 +26,10 @@ internal class CarRepositoryTest : ContainerBase {
         val result = carRepository.create(car)
 
         // THEN
-        StepVerifier.create(result)
+        result
+            .test()
             .assertNext {
-                assertNotNull(it.id)
+                assertNotNull(it.id, "Car should have non-null id after saving")
                 assertEquals(car.copy(id = it.id), it)
             }
             .verifyComplete()
@@ -44,9 +45,13 @@ internal class CarRepositoryTest : ContainerBase {
         val cars = carRepository.findAll(0, 20)
 
         // THEN
-        StepVerifier.create(cars.collectList())
+        cars.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.containsAll(listOf(insertedCar1, insertedCar2)))
+                assertTrue(
+                    it.containsAll(listOf(insertedCar1, insertedCar2)),
+                    "Result should contain expected cars."
+                )
             }
             .verifyComplete()
     }
@@ -63,7 +68,8 @@ internal class CarRepositoryTest : ContainerBase {
         val updated = carRepository.patch(car?.id.toString(), updateCar)
 
         // THEN
-        StepVerifier.create(updated)
+        updated
+            .test()
             .assertNext {
                 assertEquals(price, it.price)
                 assertEquals(color, it.color)
@@ -82,7 +88,8 @@ internal class CarRepositoryTest : ContainerBase {
         val foundCar = carRepository.findByPlate(plate)
 
         // THEN
-        StepVerifier.create(foundCar)
+        foundCar
+            .test()
             .assertNext {
                 assertEquals(plate, it.plate)
             }
@@ -90,7 +97,7 @@ internal class CarRepositoryTest : ContainerBase {
     }
 
     @Test
-    fun `findByPlate should not return anything if cant find car by plate`() {
+    fun `findByPlate should return empty if cant find car by plate`() {
         // GIVEN
         val unexistingPlate = "wrongPlate"
 
@@ -98,7 +105,8 @@ internal class CarRepositoryTest : ContainerBase {
         val foundCar = carRepository.findByPlate(unexistingPlate)
 
         // THEN
-        StepVerifier.create(foundCar)
+        foundCar
+            .test()
             .verifyComplete()
     }
 
@@ -113,9 +121,10 @@ internal class CarRepositoryTest : ContainerBase {
         val foundCars = carRepository.findAllByBrand(brand)
 
         // THEN
-        StepVerifier.create(foundCars.collectList())
+        foundCars.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.containsAll(listOf(car1, car2)))
+                assertTrue(it.containsAll(listOf(car1, car2)), "Result should contain all expected cars.")
             }
             .verifyComplete()
     }
@@ -132,9 +141,10 @@ internal class CarRepositoryTest : ContainerBase {
         val foundCars = carRepository.findAllByBrandAndModel(brand, model)
 
         // THEN
-        StepVerifier.create(foundCars.collectList())
+        foundCars.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.containsAll(listOf(car1, car2)))
+                assertTrue(it.containsAll(listOf(car1, car2)), "Result should contain all expected cars.")
             }
             .verifyComplete()
     }
@@ -148,15 +158,14 @@ internal class CarRepositoryTest : ContainerBase {
         val foundCar = carRepository.findById(car?.id.toString())
 
         // THEN
-        StepVerifier.create(foundCar)
-            .assertNext {
-                assertEquals(car, it)
-            }
+        foundCar
+            .test()
+            .expectNext(car)
             .verifyComplete()
     }
 
     @Test
-    fun `findById should not return anything if cant find car by id`() {
+    fun `findById should return empty if cant find car by id`() {
         // GIVEN
         val unexistingId = ObjectId().toString()
 
@@ -164,7 +173,8 @@ internal class CarRepositoryTest : ContainerBase {
         val foundCar = carRepository.findById(unexistingId)
 
         // THEN
-        StepVerifier.create(foundCar)
+        foundCar
+            .test()
             .verifyComplete()
     }
 
@@ -177,7 +187,8 @@ internal class CarRepositoryTest : ContainerBase {
         carRepository.deleteById(car?.id.toString()).block()
 
         // THEN
-        StepVerifier.create(carRepository.findById(car?.id.toString()))
+        carRepository.findById(car?.id.toString())
+            .test()
             .verifyComplete()
     }
 }

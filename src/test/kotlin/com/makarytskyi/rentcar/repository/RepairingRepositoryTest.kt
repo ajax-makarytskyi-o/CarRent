@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
+import com.makarytskyi.rentcar.fixtures.RepairingFixture.aggregatedRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyRepairingPatch
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing
@@ -10,7 +11,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import reactor.test.StepVerifier
+import reactor.kotlin.test.test
 
 internal class RepairingRepositoryTest : ContainerBase {
 
@@ -30,9 +31,10 @@ internal class RepairingRepositoryTest : ContainerBase {
         val createdRepairing = repairingRepository.create(repairing)
 
         // THEN
-        StepVerifier.create(createdRepairing)
+        createdRepairing
+            .test()
             .assertNext {
-                assertNotNull(it.id)
+                assertNotNull(it.id, "Repairing should have non-null id after saving")
                 assertEquals(repairing.copy(id = it.id), it)
             }
             .verifyComplete()
@@ -43,18 +45,19 @@ internal class RepairingRepositoryTest : ContainerBase {
         // GIVEN
         val car1 = carRepository.create(randomCar()).block()
         val repairing1 = repairingRepository.create(randomRepairing(car1?.id)).block()
+        val fullRepairing1 = aggregatedRepairing(repairing1, car1)
+
         val car2 = carRepository.create(randomCar()).block()
         val repairing2 = repairingRepository.create(randomRepairing(car2?.id)).block()
+        val fullRepairing2 = aggregatedRepairing(repairing2, car2)
 
         // WHEN
         val allRepairings = repairingRepository.findFullAll(0, 20)
 
         // THEN
-        StepVerifier.create(allRepairings.collectList())
-            .assertNext { repairings ->
-                assertTrue(repairings.any { it.car?.id == repairing1?.carId && it.id == repairing1?.id })
-                assertTrue(repairings.any { it.car?.id == repairing2?.carId && it.id == repairing2?.id })
-            }
+        allRepairings.collectList()
+            .test()
+            .assertNext { it.containsAll(listOf(fullRepairing1, fullRepairing2)) }
             .verifyComplete()
     }
 
@@ -75,7 +78,8 @@ internal class RepairingRepositoryTest : ContainerBase {
         val updated = repairingRepository.patch(repairing?.id.toString(), updateRepairing)
 
         // THEN
-        StepVerifier.create(updated)
+        updated
+            .test()
             .assertNext {
                 assertEquals(price, it.price)
                 assertEquals(status, it.status)
@@ -94,9 +98,10 @@ internal class RepairingRepositoryTest : ContainerBase {
         val foundRepairings = repairingRepository.findByStatusAndCarId(status, car?.id.toString())
 
         // THEN
-        StepVerifier.create(foundRepairings.collectList())
+        foundRepairings.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.contains(repairing))
+                assertTrue(it.contains(repairing), "Result should contain expected repairing.")
             }
             .verifyComplete()
     }
@@ -111,7 +116,8 @@ internal class RepairingRepositoryTest : ContainerBase {
         repairingRepository.deleteById(repairing?.id.toString()).block()
 
         // THEN
-        StepVerifier.create(repairingRepository.findFullById(repairing?.id.toString()))
+        repairingRepository.findFullById(repairing?.id.toString())
+            .test()
             .verifyComplete()
     }
 
@@ -120,22 +126,20 @@ internal class RepairingRepositoryTest : ContainerBase {
         // GIVEN
         val car = carRepository.create(randomCar()).block()
         val repairing = repairingRepository.create(randomRepairing(car?.id)).block()
+        val fullRepairing = aggregatedRepairing(repairing, car)
 
         // WHEN
         val foundRepairing = repairingRepository.findFullById(repairing?.id.toString())
 
         // THEN
-        StepVerifier.create(foundRepairing)
-            .assertNext {
-                assertEquals(repairing?.id, it.id)
-                assertEquals(repairing?.carId, it.car?.id)
-                assertEquals(repairing?.date, it.date)
-            }
+        foundRepairing
+            .test()
+            .expectNext(fullRepairing)
             .verifyComplete()
     }
 
     @Test
-    fun `findById should not return anything if cant find repairing by id`() {
+    fun `findById should return empty if cant find repairing by id`() {
         // GIVEN
         val unexistingId = "unexistingId"
 
@@ -143,7 +147,8 @@ internal class RepairingRepositoryTest : ContainerBase {
         val foundRepairing = repairingRepository.findFullById(unexistingId)
 
         // THEN
-        StepVerifier.create(foundRepairing)
+        foundRepairing
+            .test()
             .verifyComplete()
     }
 
@@ -158,9 +163,10 @@ internal class RepairingRepositoryTest : ContainerBase {
         val repairings = repairingRepository.findByStatus(status)
 
         // THEN
-        StepVerifier.create(repairings.collectList())
+        repairings.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.contains(repairing))
+                assertTrue(it.contains(repairing), "Result should contain expected repairing.")
             }
             .verifyComplete()
     }
@@ -175,9 +181,10 @@ internal class RepairingRepositoryTest : ContainerBase {
         val repairings = repairingRepository.findByCarId(car?.id.toString())
 
         // THEN
-        StepVerifier.create(repairings.collectList())
+        repairings.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.contains(repairing))
+                assertTrue(it.contains(repairing), "Result should contain expected repairing.")
             }
             .verifyComplete()
     }

@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
+import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.emptyOrderPatch
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
@@ -11,7 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.springframework.beans.factory.annotation.Autowired
-import reactor.test.StepVerifier
+import reactor.kotlin.test.test
 
 internal class OrderRepositoryTest : ContainerBase {
 
@@ -35,9 +36,10 @@ internal class OrderRepositoryTest : ContainerBase {
         val createdOrder = orderRepository.create(order)
 
         // THEN
-        StepVerifier.create(createdOrder)
+        createdOrder
+            .test()
             .assertNext {
-                assertNotNull(it.id)
+                assertNotNull(it.id, "Order should have non-null id after saving")
                 assertEquals(order.copy(id = it.id), it)
             }
             .verifyComplete()
@@ -49,20 +51,20 @@ internal class OrderRepositoryTest : ContainerBase {
         val car1 = carRepository.create(randomCar()).block()
         val user1 = userRepository.create(randomUser()).block()
         val order1 = orderRepository.create(randomOrder(car1?.id, user1?.id)).block()
+        val fullOrder1 = aggregatedOrder(order1, car1, user1)
 
         val car2 = carRepository.create(randomCar()).block()
         val user2 = userRepository.create(randomUser()).block()
         val order2 = orderRepository.create(randomOrder(car2?.id, user2?.id)).block()
+        val fullOrder2 = aggregatedOrder(order2, car2, user2)
 
         // WHEN
         val allOrders = orderRepository.findFullAll(0, 20)
 
         // THEN
-        StepVerifier.create(allOrders.collectList())
-            .assertNext { orders ->
-                assertTrue(orders.any { it.id == order1?.id })
-                assertTrue(orders.any { it.id == order2?.id })
-            }
+        allOrders.collectList()
+            .test()
+            .assertNext { it.containsAll(listOf(fullOrder1, fullOrder2)) }
             .verifyComplete()
     }
 
@@ -84,7 +86,8 @@ internal class OrderRepositoryTest : ContainerBase {
         val updated = orderRepository.patch(order?.id.toString(), updateOrder)
 
         // THEN
-        StepVerifier.create(updated)
+        updated
+            .test()
             .assertNext {
                 assertEquals(from, it.from)
                 assertEquals(to, it.to)
@@ -98,22 +101,20 @@ internal class OrderRepositoryTest : ContainerBase {
         val car = carRepository.create(randomCar()).block()
         val user = userRepository.create(randomUser()).block()
         val order = orderRepository.create(randomOrder(car?.id, user?.id)).block()
+        val fullOrder = aggregatedOrder(order, car, user)
 
         // WHEN
         val foundOrder = orderRepository.findFullById(order?.id.toString())
 
         // THEN
-        StepVerifier.create(foundOrder)
-            .assertNext {
-                assertEquals(order?.id, it.id)
-                assertEquals(order?.carId, it.car?.id)
-                assertEquals(order?.userId, it.user?.id)
-            }
+        foundOrder
+            .test()
+            .expectNext(fullOrder)
             .verifyComplete()
     }
 
     @Test
-    fun `findById should not return anything if cant find order by id`() {
+    fun `findById should return empty if cant find order by id`() {
         // GIVEN
         val unexistingId = "unexistingId"
 
@@ -121,7 +122,8 @@ internal class OrderRepositoryTest : ContainerBase {
         val foundOrder = orderRepository.findFullById(unexistingId)
 
         // THEN
-        StepVerifier.create(foundOrder)
+        foundOrder
+            .test()
             .verifyComplete()
     }
 
@@ -136,7 +138,8 @@ internal class OrderRepositoryTest : ContainerBase {
         orderRepository.deleteById(order?.id.toString()).block()
 
         // THEN
-        StepVerifier.create(orderRepository.findFullById(order?.id.toString()))
+        orderRepository.findFullById(order?.id.toString())
+            .test()
             .verifyComplete()
     }
 
@@ -151,9 +154,10 @@ internal class OrderRepositoryTest : ContainerBase {
         val foundOrders = orderRepository.findByCarId(car?.id.toString())
 
         // THEN
-        StepVerifier.create(foundOrders.collectList())
+        foundOrders.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.contains(order))
+                assertTrue(it.contains(order), "Result should contain expected order.")
             }
             .verifyComplete()
     }
@@ -169,9 +173,10 @@ internal class OrderRepositoryTest : ContainerBase {
         val foundOrders = orderRepository.findByUserId(user?.id.toString())
 
         // THEN
-        StepVerifier.create(foundOrders.collectList())
+        foundOrders.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.contains(order))
+                assertTrue(it.contains(order), "Result should contain expected order.")
             }
             .verifyComplete()
     }
@@ -187,9 +192,10 @@ internal class OrderRepositoryTest : ContainerBase {
         val foundOrders = orderRepository.findByCarIdAndUserId(car?.id.toString(), user?.id.toString())
 
         // THEN
-        StepVerifier.create(foundOrders.collectList())
+        foundOrders.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.contains(order))
+                assertTrue(it.contains(order), "Result should contain expected order.")
             }
             .verifyComplete()
     }

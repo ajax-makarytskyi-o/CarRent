@@ -61,6 +61,14 @@ object OrderFixture {
         to = null,
     )
 
+    fun aggregatedOrder(order: MongoOrder?, car: MongoCar?, user: MongoUser?) = AggregatedMongoOrder(
+        id = order?.id,
+        car = car,
+        user = user,
+        from = order?.from,
+        to = order?.to,
+    )
+
     fun responseOrder(mongoOrder: MongoOrder, mongoCar: MongoCar) = OrderResponse(
         id = mongoOrder.id.toString(),
         carId = mongoOrder.carId.toString(),

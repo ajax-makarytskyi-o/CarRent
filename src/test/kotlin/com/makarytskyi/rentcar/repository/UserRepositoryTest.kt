@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import reactor.test.StepVerifier
+import reactor.kotlin.test.test
 
 internal class UserRepositoryTest : ContainerBase {
 
@@ -23,9 +23,10 @@ internal class UserRepositoryTest : ContainerBase {
         val user = userRepository.create(unexistingUser)
 
         // THEN
-        StepVerifier.create(user)
+        user
+            .test()
             .assertNext {
-                assertNotNull(it.id)
+                assertNotNull(it.id, "User should have non-null id after saving")
                 assertEquals(unexistingUser.copy(id = it.id), it)
             }
             .verifyComplete()
@@ -41,9 +42,13 @@ internal class UserRepositoryTest : ContainerBase {
         val allUsers = userRepository.findAll(0, 20)
 
         // THEN
-        StepVerifier.create(allUsers.collectList())
+        allUsers.collectList()
+            .test()
             .assertNext {
-                assertTrue(it.containsAll(listOf(insertedUser1, insertedUser2)))
+                assertTrue(
+                    it.containsAll(listOf(insertedUser1, insertedUser2)),
+                    "Result should contain all expected users."
+                )
             }
             .verifyComplete()
     }
@@ -67,7 +72,8 @@ internal class UserRepositoryTest : ContainerBase {
         val updated = userRepository.patch(user?.id.toString(), updateUser)
 
         // THEN
-        StepVerifier.create(updated)
+        updated
+            .test()
             .assertNext {
                 assertEquals(name, it.name)
                 assertEquals(phoneNumber, it.phoneNumber)
@@ -86,16 +92,14 @@ internal class UserRepositoryTest : ContainerBase {
         val foundUser = userRepository.findByPhoneNumber(phoneNumber)
 
         // THEN
-        StepVerifier.create(foundUser)
-            .assertNext {
-                assertEquals(user, it)
-                assertEquals(phoneNumber, it.phoneNumber)
-            }
+        foundUser
+            .test()
+            .expectNext(user)
             .verifyComplete()
     }
 
     @Test
-    fun `findByPhoneNumber should not return anything if cant find by phone number`() {
+    fun `findByPhoneNumber should return empty if cant find by phone number`() {
         // GIVEN
         val unexistingPhoneNumber = "00000000"
 
@@ -103,7 +107,8 @@ internal class UserRepositoryTest : ContainerBase {
         val user = userRepository.findByPhoneNumber(unexistingPhoneNumber)
 
         // THEN
-        StepVerifier.create(user)
+        user
+            .test()
             .verifyComplete()
     }
 
@@ -117,16 +122,14 @@ internal class UserRepositoryTest : ContainerBase {
         val foundUser = userRepository.findByEmail(email)
 
         // THEN
-        StepVerifier.create(foundUser)
-            .assertNext {
-                assertEquals(user, it)
-                assertEquals(email, it.email)
-            }
+        foundUser
+            .test()
+            .expectNext(user)
             .verifyComplete()
     }
 
     @Test
-    fun `findByEmail should not return anything if cant find by email`() {
+    fun `findByEmail should return empty if cant find by email`() {
         // GIVEN
         val unexistingEmail = "wrong@email.com"
 
@@ -134,7 +137,8 @@ internal class UserRepositoryTest : ContainerBase {
         val foundUser = userRepository.findByEmail(unexistingEmail)
 
         // THEN
-        StepVerifier.create(foundUser)
+        foundUser
+            .test()
             .verifyComplete()
     }
 
@@ -147,15 +151,14 @@ internal class UserRepositoryTest : ContainerBase {
         val foundUser = userRepository.findById(user?.id.toString())
 
         // THEN
-        StepVerifier.create(foundUser)
-            .assertNext {
-                assertEquals(user, it)
-            }
+        foundUser
+            .test()
+            .expectNext(user)
             .verifyComplete()
     }
 
     @Test
-    fun `findById should not return anything if cant find user by id`() {
+    fun `findById should return empty if cant find user by id`() {
         // GIVEN
         val unexistingId = "wrongId"
 
@@ -163,7 +166,8 @@ internal class UserRepositoryTest : ContainerBase {
         val foundUser = userRepository.findById(unexistingId)
 
         // THEN
-        StepVerifier.create(foundUser)
+        foundUser
+            .test()
             .verifyComplete()
     }
 
@@ -176,7 +180,8 @@ internal class UserRepositoryTest : ContainerBase {
         userRepository.deleteById(user?.id.toString()).block()
 
         // THEN
-        StepVerifier.create(userRepository.findById(user?.id.toString()))
+        userRepository.findById(user?.id.toString())
+            .test()
             .verifyComplete()
     }
 }

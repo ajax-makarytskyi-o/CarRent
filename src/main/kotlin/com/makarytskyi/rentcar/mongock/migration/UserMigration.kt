@@ -24,19 +24,19 @@ class UserMigration {
         val indexOps = mongoTemplate.indexOps(MongoUser.COLLECTION_NAME)
         indexOps.ensureIndex(
             Index()
-                .on("name", Sort.Direction.ASC)
+                .on(MongoUser::name.name, Sort.Direction.ASC)
         )
 
         indexOps.ensureIndex(
             Index()
-                .on("email", Sort.Direction.ASC).unique()
+                .on(MongoUser::email.name, Sort.Direction.ASC).unique()
         )
 
         indexOps.ensureIndex(
             Index()
-                .on("phoneNumber", Sort.Direction.ASC)
+                .on(MongoUser::phoneNumber.name, Sort.Direction.ASC)
                 .unique()
-                .partial(PartialIndexFilter.of(Criteria.where("phoneNumber").exists(true)))
+                .partial(PartialIndexFilter.of(Criteria.where(MongoUser::phoneNumber.name).exists(true)))
         )
 
         log.info("Indexes for {} collection were created", MongoUser.COLLECTION_NAME)

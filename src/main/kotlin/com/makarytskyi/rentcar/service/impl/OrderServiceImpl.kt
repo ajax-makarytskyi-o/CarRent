@@ -93,9 +93,12 @@ internal class OrderServiceImpl(
             .flatMap { carRepository.findById(it) }
             .switchIfEmpty { Mono.error(NotFoundException("Car with id $carId is not found")) }
             .flatMapMany { orderRepository.findByCarId(it.id.toString()) }
-            .filter { it.from?.before(to) == true && it.to?.after(from) == true }
+            .handle<MongoOrder> { order, sink ->
+                if (order.from?.before(to) == true && order.to?.after(from) == true) {
+                    sink.error(IllegalArgumentException("Order on these dates is already exist"))
+                }
+            }
             .next()
-            .flatMap { Mono.error(IllegalArgumentException("Order on these dates is already exist")) }
     }
 
     private fun getCarPrice(carId: String?): Mono<BigDecimal> =

@@ -22,13 +22,13 @@ class CarMigration {
         val indexOps = mongoTemplate.indexOps(MongoCar.COLLECTION_NAME)
         indexOps.ensureIndex(
             Index()
-                .on("brand", Sort.Direction.ASC)
-                .on("model", Sort.Direction.ASC)
+                .on(MongoCar::brand.name, Sort.Direction.ASC)
+                .on(MongoCar::model.name, Sort.Direction.ASC)
         )
 
         indexOps.ensureIndex(
             Index()
-                .on("plate", Sort.Direction.ASC).unique()
+                .on(MongoCar::plate.name, Sort.Direction.ASC).unique()
         )
         log.info("Indexes for {} collection were created", MongoCar.COLLECTION_NAME)
     }

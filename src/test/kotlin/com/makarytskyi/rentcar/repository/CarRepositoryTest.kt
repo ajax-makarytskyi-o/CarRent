@@ -4,10 +4,10 @@ import com.makarytskyi.rentcar.fixtures.CarFixture.emptyCarPatch
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.model.MongoCar
 import java.math.BigDecimal
+import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.test.test
@@ -48,10 +48,7 @@ internal class CarRepositoryTest : ContainerBase {
         cars.collectList()
             .test()
             .assertNext {
-                assertTrue(
-                    it.containsAll(listOf(insertedCar1, insertedCar2)),
-                    "Result should contain expected cars."
-                )
+                assertThat(it).containsAll(listOf(insertedCar1, insertedCar2))
             }
             .verifyComplete()
     }
@@ -61,11 +58,11 @@ internal class CarRepositoryTest : ContainerBase {
         // GIVEN
         val price = BigDecimal("600")
         val color = MongoCar.CarColor.BLUE
-        val car = carRepository.create(randomCar()).block()
+        val car = carRepository.create(randomCar()).block()!!
         val updateCar = emptyCarPatch().copy(price = price, color = color)
 
         // WHEN
-        val updated = carRepository.patch(car?.id.toString(), updateCar)
+        val updated = carRepository.patch(car.id.toString(), updateCar)
 
         // THEN
         updated
@@ -124,7 +121,7 @@ internal class CarRepositoryTest : ContainerBase {
         foundCars.collectList()
             .test()
             .assertNext {
-                assertTrue(it.containsAll(listOf(car1, car2)), "Result should contain all expected cars.")
+                assertThat(it).containsAll(listOf(car1, car2))
             }
             .verifyComplete()
     }
@@ -144,7 +141,7 @@ internal class CarRepositoryTest : ContainerBase {
         foundCars.collectList()
             .test()
             .assertNext {
-                assertTrue(it.containsAll(listOf(car1, car2)), "Result should contain all expected cars.")
+                assertThat(it).containsAll(listOf(car1, car2))
             }
             .verifyComplete()
     }
@@ -152,10 +149,10 @@ internal class CarRepositoryTest : ContainerBase {
     @Test
     fun `findById should return existing car by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()
+        val car = carRepository.create(randomCar()).block()!!
 
         // WHEN
-        val foundCar = carRepository.findById(car?.id.toString())
+        val foundCar = carRepository.findById(car.id.toString())
 
         // THEN
         foundCar
@@ -181,13 +178,13 @@ internal class CarRepositoryTest : ContainerBase {
     @Test
     fun `deleteById should delete car by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()
+        val car = carRepository.create(randomCar()).block()!!
 
         // WHEN
-        carRepository.deleteById(car?.id.toString()).block()
+        carRepository.deleteById(car.id.toString()).block()!!
 
         // THEN
-        carRepository.findById(car?.id.toString())
+        carRepository.findById(car.id.toString())
             .test()
             .verifyComplete()
     }

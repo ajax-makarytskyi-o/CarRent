@@ -28,7 +28,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import java.math.BigDecimal
 import kotlin.test.Test
-import kotlin.test.assertTrue
+import kotlin.test.assertContains
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.extension.ExtendWith
 import reactor.core.publisher.Flux
@@ -104,7 +104,7 @@ internal class OrderServiceTest {
         result.collectList()
             .test()
             .assertNext {
-                assertTrue(it.contains(response), "Result should contain expected order response.")
+                assertContains(it, response, "Result should contain expected order response.")
             }
             .verifyComplete()
 
@@ -345,7 +345,7 @@ internal class OrderServiceTest {
         foundOrders.collectList()
             .test()
             .assertNext {
-                assertTrue(it.contains(orderResponse), "Result should contain expected order response.")
+                assertContains(it, orderResponse, "Result should contain expected order response.")
             }
             .verifyComplete()
 
@@ -387,7 +387,7 @@ internal class OrderServiceTest {
         foundOrders.collectList()
             .test()
             .assertNext {
-                assertTrue(it.contains(orderResponse), "Result should contain expected order response.")
+                assertContains(it, orderResponse, "Result should contain expected order response.")
             }
             .verifyComplete()
 
@@ -429,7 +429,7 @@ internal class OrderServiceTest {
         foundOrders.collectList()
             .test()
             .assertNext {
-                assertTrue(it.contains(orderResponse), "Result should contain expected order response.")
+                assertContains(it, orderResponse, "Result should contain expected order response.")
             }
             .verifyComplete()
 

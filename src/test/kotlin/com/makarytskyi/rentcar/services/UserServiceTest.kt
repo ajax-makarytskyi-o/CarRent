@@ -17,7 +17,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kotlin.test.Test
-import kotlin.test.assertTrue
+import kotlin.test.assertContains
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.dao.DuplicateKeyException
@@ -85,7 +85,7 @@ internal class UserServiceTest {
         result.collectList()
             .test()
             .assertNext {
-                assertTrue(it.contains(response), "Result should contain expected user response.")
+                assertContains(it, response, "Result should contain expected user response.")
             }
             .verifyComplete()
 

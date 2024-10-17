@@ -6,9 +6,10 @@ import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyRepairingPatch
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing
 import java.math.BigDecimal
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.test.test
@@ -24,8 +25,8 @@ internal class RepairingRepositoryTest : ContainerBase {
     @Test
     fun `create should insert repairing and return it with id`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()
-        val repairing = randomRepairing(car?.id).copy(id = null)
+        val car = carRepository.create(randomCar()).block()!!
+        val repairing = randomRepairing(car.id).copy(id = null)
 
         // WHEN
         val createdRepairing = repairingRepository.create(repairing)
@@ -43,12 +44,12 @@ internal class RepairingRepositoryTest : ContainerBase {
     @Test
     fun `findAll should find all repairings`() {
         // GIVEN
-        val car1 = carRepository.create(randomCar()).block()
-        val repairing1 = repairingRepository.create(randomRepairing(car1?.id)).block()
+        val car1 = carRepository.create(randomCar()).block()!!
+        val repairing1 = repairingRepository.create(randomRepairing(car1.id)).block()!!
         val fullRepairing1 = aggregatedRepairing(repairing1, car1)
 
-        val car2 = carRepository.create(randomCar()).block()
-        val repairing2 = repairingRepository.create(randomRepairing(car2?.id)).block()
+        val car2 = carRepository.create(randomCar()).block()!!
+        val repairing2 = repairingRepository.create(randomRepairing(car2.id)).block()!!
         val fullRepairing2 = aggregatedRepairing(repairing2, car2)
 
         // WHEN
@@ -57,7 +58,9 @@ internal class RepairingRepositoryTest : ContainerBase {
         // THEN
         allRepairings.collectList()
             .test()
-            .assertNext { it.containsAll(listOf(fullRepairing1, fullRepairing2)) }
+            .assertNext {
+                assertThat(it).containsAll(listOf(fullRepairing1, fullRepairing2))
+            }
             .verifyComplete()
     }
 
@@ -66,8 +69,8 @@ internal class RepairingRepositoryTest : ContainerBase {
         // GIVEN
         val price = BigDecimal("300")
         val status = MongoRepairing.RepairingStatus.COMPLETED
-        val car = carRepository.create(randomCar()).block()
-        val repairing = repairingRepository.create(randomRepairing(car?.id)).block()
+        val car = carRepository.create(randomCar()).block()!!
+        val repairing = repairingRepository.create(randomRepairing(car.id)).block()!!
 
         val updateRepairing = emptyRepairingPatch().copy(
             price = price,
@@ -75,7 +78,7 @@ internal class RepairingRepositoryTest : ContainerBase {
         )
 
         // WHEN
-        val updated = repairingRepository.patch(repairing?.id.toString(), updateRepairing)
+        val updated = repairingRepository.patch(repairing.id.toString(), updateRepairing)
 
         // THEN
         updated
@@ -91,17 +94,17 @@ internal class RepairingRepositoryTest : ContainerBase {
     fun `findByStatusAndCarId should return repairings found by status and carId`() {
         // GIVEN
         val status = MongoRepairing.RepairingStatus.COMPLETED
-        val car = carRepository.create(randomCar()).block()
-        val repairing = repairingRepository.create(randomRepairing(car?.id).copy(status = status)).block()
+        val car = carRepository.create(randomCar()).block()!!
+        val repairing = repairingRepository.create(randomRepairing(car.id).copy(status = status)).block()
 
         // WHEN
-        val foundRepairings = repairingRepository.findByStatusAndCarId(status, car?.id.toString())
+        val foundRepairings = repairingRepository.findByStatusAndCarId(status, car.id.toString())
 
         // THEN
         foundRepairings.collectList()
             .test()
             .assertNext {
-                assertTrue(it.contains(repairing), "Result should contain expected repairing.")
+                assertContains(it, repairing, "Result should contain expected repairing.")
             }
             .verifyComplete()
     }
@@ -109,14 +112,14 @@ internal class RepairingRepositoryTest : ContainerBase {
     @Test
     fun `deleteById should delete repairing by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()
-        val repairing = repairingRepository.create(randomRepairing(car?.id)).block()
+        val car = carRepository.create(randomCar()).block()!!
+        val repairing = repairingRepository.create(randomRepairing(car.id)).block()!!
 
         // WHEN
-        repairingRepository.deleteById(repairing?.id.toString()).block()
+        repairingRepository.deleteById(repairing.id.toString()).block()
 
         // THEN
-        repairingRepository.findFullById(repairing?.id.toString())
+        repairingRepository.findFullById(repairing.id.toString())
             .test()
             .verifyComplete()
     }
@@ -124,12 +127,12 @@ internal class RepairingRepositoryTest : ContainerBase {
     @Test
     fun `findById should return existing repairing by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()
-        val repairing = repairingRepository.create(randomRepairing(car?.id)).block()
+        val car = carRepository.create(randomCar()).block()!!
+        val repairing = repairingRepository.create(randomRepairing(car.id)).block()!!
         val fullRepairing = aggregatedRepairing(repairing, car)
 
         // WHEN
-        val foundRepairing = repairingRepository.findFullById(repairing?.id.toString())
+        val foundRepairing = repairingRepository.findFullById(repairing.id.toString())
 
         // THEN
         foundRepairing
@@ -156,8 +159,8 @@ internal class RepairingRepositoryTest : ContainerBase {
     fun `findByStatus should return repairings found by status`() {
         // GIVEN
         val status = MongoRepairing.RepairingStatus.IN_PROGRESS
-        val car = carRepository.create(randomCar()).block()
-        val repairing = repairingRepository.create(randomRepairing(car?.id).copy(status = status)).block()
+        val car = carRepository.create(randomCar()).block()!!
+        val repairing = repairingRepository.create(randomRepairing(car.id).copy(status = status)).block()
 
         // WHEN
         val repairings = repairingRepository.findByStatus(status)
@@ -166,7 +169,7 @@ internal class RepairingRepositoryTest : ContainerBase {
         repairings.collectList()
             .test()
             .assertNext {
-                assertTrue(it.contains(repairing), "Result should contain expected repairing.")
+                assertContains(it, repairing, "Result should contain expected repairing.")
             }
             .verifyComplete()
     }
@@ -174,17 +177,17 @@ internal class RepairingRepositoryTest : ContainerBase {
     @Test
     fun `findByCarId should return repairings found by carId`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()
-        val repairing = repairingRepository.create(randomRepairing(car?.id)).block()
+        val car = carRepository.create(randomCar()).block()!!
+        val repairing = repairingRepository.create(randomRepairing(car.id)).block()
 
         // WHEN
-        val repairings = repairingRepository.findByCarId(car?.id.toString())
+        val repairings = repairingRepository.findByCarId(car.id.toString())
 
         // THEN
         repairings.collectList()
             .test()
             .assertNext {
-                assertTrue(it.contains(repairing), "Result should contain expected repairing.")
+                assertContains(it, repairing, "Result should contain expected repairing.")
             }
             .verifyComplete()
     }

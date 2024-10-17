@@ -2,7 +2,7 @@ package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.fixtures.UserFixture.emptyUserPatch
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
-import kotlin.test.assertTrue
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -45,10 +45,7 @@ internal class UserRepositoryTest : ContainerBase {
         allUsers.collectList()
             .test()
             .assertNext {
-                assertTrue(
-                    it.containsAll(listOf(insertedUser1, insertedUser2)),
-                    "Result should contain all expected users."
-                )
+                assertThat(it).containsAll(listOf(insertedUser1, insertedUser2))
             }
             .verifyComplete()
     }
@@ -60,7 +57,7 @@ internal class UserRepositoryTest : ContainerBase {
         val phoneNumber = "670185014"
         val city = "London"
 
-        val user = userRepository.create(randomUser()).block()
+        val user = userRepository.create(randomUser()).block()!!
 
         val updateUser = emptyUserPatch().copy(
             name = name,
@@ -69,7 +66,7 @@ internal class UserRepositoryTest : ContainerBase {
         )
 
         // WHEN
-        val updated = userRepository.patch(user?.id.toString(), updateUser)
+        val updated = userRepository.patch(user.id.toString(), updateUser)
 
         // THEN
         updated
@@ -145,10 +142,10 @@ internal class UserRepositoryTest : ContainerBase {
     @Test
     fun `findById should return user if found by id`() {
         // GIVEN
-        val user = userRepository.create(randomUser()).block()
+        val user = userRepository.create(randomUser()).block()!!
 
         // WHEN
-        val foundUser = userRepository.findById(user?.id.toString())
+        val foundUser = userRepository.findById(user.id.toString())
 
         // THEN
         foundUser
@@ -174,13 +171,13 @@ internal class UserRepositoryTest : ContainerBase {
     @Test
     fun `deleteById should delete user by id`() {
         // GIVEN
-        val user = userRepository.create(randomUser()).block()
+        val user = userRepository.create(randomUser()).block()!!
 
         // WHEN
-        userRepository.deleteById(user?.id.toString()).block()
+        userRepository.deleteById(user.id.toString()).block()
 
         // THEN
-        userRepository.findById(user?.id.toString())
+        userRepository.findById(user.id.toString())
             .test()
             .verifyComplete()
     }

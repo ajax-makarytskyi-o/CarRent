@@ -17,8 +17,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.extension.ExtendWith
 import reactor.core.publisher.Flux
@@ -84,7 +84,7 @@ internal class CarServiceTest {
         result.collectList()
             .test()
             .assertNext {
-                assertTrue(it.contains(response), "Result should contain expected car response.")
+                assertContains(it, response, "Result should contain expected car response.")
             }
             .verifyComplete()
 

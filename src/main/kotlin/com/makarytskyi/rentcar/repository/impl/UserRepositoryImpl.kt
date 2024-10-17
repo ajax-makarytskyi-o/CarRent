@@ -5,7 +5,7 @@ import com.makarytskyi.rentcar.model.patch.MongoUserPatch
 import com.makarytskyi.rentcar.repository.UserRepository
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.FindAndModifyOptions
-import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Fields
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.query.Criteria
@@ -13,29 +13,31 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @Repository
-internal class UserRepositoryImpl(private val template: MongoTemplate) : UserRepository {
+internal class UserRepositoryImpl(private val template: ReactiveMongoTemplate) : UserRepository {
 
-    override fun create(mongoUser: MongoUser): MongoUser {
+    override fun create(mongoUser: MongoUser): Mono<MongoUser> {
         return template.insert(mongoUser)
     }
 
-    override fun findById(id: String): MongoUser? {
+    override fun findById(id: String): Mono<MongoUser> {
         return template.findById<MongoUser>(id)
     }
 
-    override fun findAll(page: Int, size: Int): List<MongoUser> {
+    override fun findAll(page: Int, size: Int): Flux<MongoUser> {
         val query = Query().with(PageRequest.of(page, size))
         return template.find(query, MongoUser::class.java)
     }
 
-    override fun deleteById(id: String) {
+    override fun deleteById(id: String): Mono<Unit> {
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
-        template.remove(query, MongoUser::class.java)
+        return template.remove(query, MongoUser::class.java).thenReturn(Unit)
     }
 
-    override fun patch(id: String, userPatch: MongoUserPatch): MongoUser? {
+    override fun patch(id: String, userPatch: MongoUserPatch): Mono<MongoUser> {
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 
@@ -49,12 +51,12 @@ internal class UserRepositoryImpl(private val template: MongoTemplate) : UserRep
         return template.findAndModify(query, update, options, MongoUser::class.java)
     }
 
-    override fun findByPhoneNumber(phoneNumber: String): MongoUser? {
+    override fun findByPhoneNumber(phoneNumber: String): Mono<MongoUser> {
         val query = Query(Criteria.where(MongoUser::phoneNumber.name).isEqualTo(phoneNumber))
         return template.findOne(query, MongoUser::class.java)
     }
 
-    override fun findByEmail(email: String): MongoUser? {
+    override fun findByEmail(email: String): Mono<MongoUser> {
         val query = Query(Criteria.where(MongoUser::email.name).isEqualTo(email))
         return template.findOne(query, MongoUser::class.java)
     }

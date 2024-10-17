@@ -22,11 +22,11 @@ class OrderMigration {
         val indexOps = mongoTemplate.indexOps(MongoOrder.COLLECTION_NAME)
         indexOps.ensureIndex(
             Index()
-                .on("carId", Sort.Direction.ASC)
+                .on(MongoOrder::carId.name, Sort.Direction.ASC)
         )
         indexOps.ensureIndex(
             Index()
-                .on("userId", Sort.Direction.ASC)
+                .on(MongoOrder::userId.name, Sort.Direction.ASC)
         )
         log.info("Indexes for {} collection were created", MongoOrder.COLLECTION_NAME)
     }

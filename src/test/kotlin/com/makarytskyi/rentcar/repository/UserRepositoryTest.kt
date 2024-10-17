@@ -2,12 +2,12 @@ package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.fixtures.UserFixture.emptyUserPatch
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.kotlin.test.test
 
 internal class UserRepositoryTest : ContainerBase {
 
@@ -23,23 +23,31 @@ internal class UserRepositoryTest : ContainerBase {
         val user = userRepository.create(unexistingUser)
 
         // THEN
-        val foundUser = userRepository.findById(user.id.toString())
-        assertNotNull(foundUser)
-        assertNotNull(user.id)
+        user
+            .test()
+            .assertNext {
+                assertNotNull(it.id, "User should have non-null id after saving")
+                assertEquals(unexistingUser.copy(id = it.id), it)
+            }
+            .verifyComplete()
     }
 
     @Test
     fun `findAll should find all users`() {
         // GIVEN
-        val insertedUser1 = userRepository.create(randomUser())
-        val insertedUser2 = userRepository.create(randomUser())
+        val insertedUser1 = userRepository.create(randomUser()).block()
+        val insertedUser2 = userRepository.create(randomUser()).block()
 
         // WHEN
         val allUsers = userRepository.findAll(0, 20)
 
         // THEN
-        assertTrue(allUsers.any { it.email == insertedUser1.email && it.name == insertedUser1.name })
-        assertTrue(allUsers.any { it.email == insertedUser2.email && it.name == insertedUser2.name })
+        allUsers.collectList()
+            .test()
+            .assertNext {
+                assertThat(it).containsAll(listOf(insertedUser1, insertedUser2))
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -49,7 +57,7 @@ internal class UserRepositoryTest : ContainerBase {
         val phoneNumber = "670185014"
         val city = "London"
 
-        val user = userRepository.create(randomUser())
+        val user = userRepository.create(randomUser()).block()!!
 
         val updateUser = emptyUserPatch().copy(
             name = name,
@@ -61,27 +69,34 @@ internal class UserRepositoryTest : ContainerBase {
         val updated = userRepository.patch(user.id.toString(), updateUser)
 
         // THEN
-        assertEquals(name, updated?.name)
-        assertEquals(phoneNumber, updated?.phoneNumber)
-        assertEquals(city, updated?.city)
+        updated
+            .test()
+            .assertNext {
+                assertEquals(name, it.name)
+                assertEquals(phoneNumber, it.phoneNumber)
+                assertEquals(city, it.city)
+            }
+            .verifyComplete()
     }
 
     @Test
     fun `findByPhoneNumber should return user found by phone number`() {
         // GIVEN
         val phoneNumber = "15025025"
-        val user = userRepository.create(randomUser().copy(phoneNumber = phoneNumber))
+        val user = userRepository.create(randomUser().copy(phoneNumber = phoneNumber)).block()
 
         // WHEN
         val foundUser = userRepository.findByPhoneNumber(phoneNumber)
 
         // THEN
-        assertEquals(user, foundUser)
-        assertEquals(phoneNumber, foundUser?.phoneNumber)
+        foundUser
+            .test()
+            .expectNext(user)
+            .verifyComplete()
     }
 
     @Test
-    fun `findByPhoneNumber should return null if cant find by phone number`() {
+    fun `findByPhoneNumber should return empty if cant find by phone number`() {
         // GIVEN
         val unexistingPhoneNumber = "00000000"
 
@@ -89,25 +104,29 @@ internal class UserRepositoryTest : ContainerBase {
         val user = userRepository.findByPhoneNumber(unexistingPhoneNumber)
 
         // THEN
-        assertNull(user)
+        user
+            .test()
+            .verifyComplete()
     }
 
     @Test
     fun `findByEmail should return user found by email`() {
         // GIVEN
         val email = "testing@email.com"
-        val user = userRepository.create(randomUser().copy(email = email))
+        val user = userRepository.create(randomUser().copy(email = email)).block()
 
         // WHEN
         val foundUser = userRepository.findByEmail(email)
 
         // THEN
-        assertEquals(user, foundUser)
-        assertEquals(email, foundUser?.email)
+        foundUser
+            .test()
+            .expectNext(user)
+            .verifyComplete()
     }
 
     @Test
-    fun `findByEmail should return null if cant find by email`() {
+    fun `findByEmail should return empty if cant find by email`() {
         // GIVEN
         val unexistingEmail = "wrong@email.com"
 
@@ -115,23 +134,28 @@ internal class UserRepositoryTest : ContainerBase {
         val foundUser = userRepository.findByEmail(unexistingEmail)
 
         // THEN
-        assertNull(foundUser)
+        foundUser
+            .test()
+            .verifyComplete()
     }
 
     @Test
     fun `findById should return user if found by id`() {
         // GIVEN
-        val user = userRepository.create(randomUser())
+        val user = userRepository.create(randomUser()).block()!!
 
         // WHEN
         val foundUser = userRepository.findById(user.id.toString())
 
         // THEN
-        assertEquals(user, foundUser)
+        foundUser
+            .test()
+            .expectNext(user)
+            .verifyComplete()
     }
 
     @Test
-    fun `findById should return null if cant find user by id`() {
+    fun `findById should return empty if cant find user by id`() {
         // GIVEN
         val unexistingId = "wrongId"
 
@@ -139,20 +163,22 @@ internal class UserRepositoryTest : ContainerBase {
         val foundUser = userRepository.findById(unexistingId)
 
         // THEN
-        assertNull(foundUser)
+        foundUser
+            .test()
+            .verifyComplete()
     }
 
     @Test
     fun `deleteById should delete user by id`() {
         // GIVEN
-        val user = userRepository.create(randomUser())
+        val user = userRepository.create(randomUser()).block()!!
 
         // WHEN
-        userRepository.deleteById(user.id.toString())
+        userRepository.deleteById(user.id.toString()).block()
 
         // THEN
-        val result = userRepository.findById(user.id.toString())
-
-        assertNull(result)
+        userRepository.findById(user.id.toString())
+            .test()
+            .verifyComplete()
     }
 }

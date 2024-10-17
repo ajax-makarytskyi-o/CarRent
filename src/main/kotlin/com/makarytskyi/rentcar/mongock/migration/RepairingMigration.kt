@@ -22,13 +22,13 @@ class RepairingMigration {
         val indexOps = mongoTemplate.indexOps(MongoRepairing.COLLECTION_NAME)
         indexOps.ensureIndex(
             Index()
-                .on("status", Sort.Direction.ASC)
-                .on("carId", Sort.Direction.ASC)
+                .on(MongoRepairing::status.name, Sort.Direction.ASC)
+                .on(MongoRepairing::carId.name, Sort.Direction.ASC)
         )
 
         indexOps.ensureIndex(
             Index()
-                .on("carId", Sort.Direction.ASC)
+                .on(MongoRepairing::carId.name, Sort.Direction.ASC)
         )
 
         log.info("Indexes for {} collection were created", MongoRepairing.COLLECTION_NAME)

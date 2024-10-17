@@ -45,7 +45,7 @@ object OrderFixture {
         to = null,
     )
 
-    fun randomAggregatedOrder(car: MongoCar?, user: MongoUser?) = AggregatedMongoOrder(
+    fun randomAggregatedOrder(car: MongoCar, user: MongoUser) = AggregatedMongoOrder(
         id = ObjectId(),
         car = car,
         user = user,
@@ -59,6 +59,14 @@ object OrderFixture {
         user = null,
         from = null,
         to = null,
+    )
+
+    fun aggregatedOrder(order: MongoOrder, car: MongoCar, user: MongoUser) = AggregatedMongoOrder(
+        id = order.id,
+        car = car,
+        user = user,
+        from = order.from,
+        to = order.to,
     )
 
     fun responseOrder(mongoOrder: MongoOrder, mongoCar: MongoCar) = OrderResponse(

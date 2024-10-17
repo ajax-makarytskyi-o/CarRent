@@ -93,7 +93,7 @@ object RepairingFixture {
     fun updatedRepairing(oldMongoRepairing: MongoRepairing, request: UpdateRepairingRequest) =
         oldMongoRepairing.copy(price = request.price, status = request.status)
 
-    fun randomAggregatedRepairing(car: MongoCar?) = AggregatedMongoRepairing(
+    fun randomAggregatedRepairing(car: MongoCar) = AggregatedMongoRepairing(
         id = ObjectId(),
         car = car,
         date = tomorrow,
@@ -115,5 +115,13 @@ object RepairingFixture {
         date = null,
         price = null,
         status = null,
+    )
+
+    fun aggregatedRepairing(repairing: MongoRepairing, car: MongoCar) = AggregatedMongoRepairing(
+        id = repairing.id,
+        car = car,
+        date = repairing.date,
+        price = repairing.price,
+        status = repairing.status,
     )
 }

@@ -16,6 +16,7 @@ import java.util.Date
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
 
@@ -37,18 +38,20 @@ internal class OrderServiceImpl(
 
     override fun create(createOrderRequest: CreateOrderRequest): Mono<OrderResponse> {
         return createOrderRequest.toMono()
+            .doOnNext { validateDates(it.from, it.to) }
             .flatMap {
-                validateDates(it.from, it.to)
-                validateUserExists(it.userId)
+                Mono.zip(
+                    Mono.defer { validateUserExists(createOrderRequest.userId) }.subscribeOn(Schedulers.parallel()),
+                    Mono.defer {
+                        validateCarAvailability(
+                            createOrderRequest.carId,
+                            createOrderRequest.from,
+                            createOrderRequest.to
+                        )
+                    }.subscribeOn(Schedulers.parallel())
+                ).thenReturn(createOrderRequest)
             }
-            .flatMap {
-                validateCarAvailability(
-                    createOrderRequest.carId,
-                    createOrderRequest.from,
-                    createOrderRequest.to
-                ).thenReturn(it)
-            }
-            .flatMap { orderRepository.create(CreateOrderRequest.toEntity(createOrderRequest)) }
+            .flatMap { orderRepository.create(CreateOrderRequest.toEntity(it)) }
             .flatMap { order -> getCarPrice(createOrderRequest.carId).map { OrderResponse.from(order, it) } }
     }
 
@@ -74,9 +77,11 @@ internal class OrderServiceImpl(
                 val from = orderRequest.from ?: it.from
                 val to = orderRequest.to ?: it.to
                 validateDates(from, to)
-                validateCarAvailability(it.car?.id.toString(), from, to)
+                it.car?.let {
+                    validateCarAvailability(it.id.toString(), from, to).then(orderRequest.toMono())
+                } ?: IllegalArgumentException("Car id should not be null").toMono()
             }
-            .switchIfEmpty { orderRepository.patch(id, UpdateOrderRequest.toPatch(orderRequest)) }
+            .flatMap { orderRepository.patch(id, UpdateOrderRequest.toPatch(it)) }
             .flatMap { order -> getCarPrice(order.carId.toString()).map { OrderResponse.from(order, it) } }
 
     private fun validateDates(from: Date?, to: Date?) {
@@ -87,23 +92,17 @@ internal class OrderServiceImpl(
     private fun validateUserExists(userId: String) = userRepository.findById(userId)
         .switchIfEmpty { Mono.error(IllegalArgumentException("User with id $userId is not found")) }
 
-    private fun validateCarAvailability(carId: String?, from: Date?, to: Date?): Mono<MongoOrder> {
-        return Mono.justOrEmpty(carId)
-            .switchIfEmpty { Mono.error(IllegalArgumentException("Car id should not be null")) }
-            .flatMap { carRepository.findById(it) }
+    private fun validateCarAvailability(carId: String, from: Date?, to: Date?): Mono<MongoOrder> {
+        return carRepository.findById(carId)
             .switchIfEmpty { Mono.error(NotFoundException("Car with id $carId is not found")) }
             .flatMapMany { orderRepository.findByCarId(it.id.toString()) }
-            .handle<MongoOrder> { order, sink ->
-                if (order.from?.before(to) == true && order.to?.after(from) == true) {
-                    sink.error(IllegalArgumentException("Order on these dates is already exist"))
-                }
-            }
-            .next()
+            .filter { it.from?.before(to) == true && it.to?.after(from) == true }
+            .flatMap<MongoOrder> { Mono.error(IllegalArgumentException("Car is already booked on this time")) }
+            .toMono()
     }
 
-    private fun getCarPrice(carId: String?): Mono<BigDecimal> =
-        Mono.justOrEmpty(carId)
-            .flatMap { carRepository.findById(it) }
+    private fun getCarPrice(carId: String): Mono<BigDecimal> =
+        carRepository.findById(carId)
             .map { it.price ?: BigDecimal.ZERO }
             .defaultIfEmpty(BigDecimal.ZERO)
 }

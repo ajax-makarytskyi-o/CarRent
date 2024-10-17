@@ -30,10 +30,8 @@ internal class RepairingServiceImpl(
 
     override fun create(repairingRequest: CreateRepairingRequest): Mono<RepairingResponse> =
         repairingRequest.toMono()
-            .flatMap {
-                validateDate(it.date)
-                validateCarExists(it.carId)
-            }
+            .doOnNext { validateDate(it.date) }
+            .flatMap { validateCarExists(repairingRequest.carId) }
             .flatMap { repairingRepository.create(CreateRepairingRequest.toEntity(repairingRequest)) }
             .map { RepairingResponse.from(it) }
 

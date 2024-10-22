@@ -19,6 +19,8 @@ import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import reactor.kotlin.core.publisher.switchIfEmpty
 import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.core.util.function.component1
+import reactor.kotlin.core.util.function.component2
 
 @InvocationTracker
 @Service
@@ -41,17 +43,18 @@ internal class OrderServiceImpl(
             .doOnNext { validateDates(it.from, it.to) }
             .flatMap {
                 Mono.zip(
-                    Mono.defer { validateUserExists(createOrderRequest.userId) }.subscribeOn(Schedulers.parallel()),
+                    Mono.defer { validateUserExists(createOrderRequest.userId) }
+                        .subscribeOn(Schedulers.boundedElastic()),
                     Mono.defer {
                         validateCarAvailability(
                             createOrderRequest.carId,
                             createOrderRequest.from,
                             createOrderRequest.to
                         )
-                    }.subscribeOn(Schedulers.parallel())
-                ).thenReturn(createOrderRequest)
+                    }.subscribeOn(Schedulers.boundedElastic())
+                ).thenReturn(Unit)
             }
-            .flatMap { orderRepository.create(CreateOrderRequest.toEntity(it)) }
+            .flatMap { orderRepository.create(CreateOrderRequest.toEntity(createOrderRequest)) }
             .flatMap { order -> getCarPrice(createOrderRequest.carId).map { OrderResponse.from(order, it) } }
     }
 
@@ -59,16 +62,16 @@ internal class OrderServiceImpl(
 
     override fun findByUser(userId: String): Flux<OrderResponse> = orderRepository.findByUserId(userId)
         .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
-        .map { OrderResponse.from(it.t1, it.t2) }
+        .map { (order, carPrice) -> OrderResponse.from(order, carPrice) }
 
     override fun findByCar(carId: String): Flux<OrderResponse> = orderRepository.findByCarId(carId)
         .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
-        .map { OrderResponse.from(it.t1, it.t2) }
+        .map { (order, carPrice) -> OrderResponse.from(order, carPrice) }
 
     override fun findByCarAndUser(carId: String, userId: String): Flux<OrderResponse> =
         orderRepository.findByCarIdAndUserId(carId, userId)
             .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
-            .map { OrderResponse.from(it.t1, it.t2) }
+            .map { (order, carPrice) -> OrderResponse.from(order, carPrice) }
 
     override fun patch(id: String, orderRequest: UpdateOrderRequest): Mono<OrderResponse> =
         orderRepository.findFullById(id)

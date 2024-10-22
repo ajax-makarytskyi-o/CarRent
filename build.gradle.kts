@@ -33,10 +33,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.mongock:mongock-springboot-v3:5.4.4")
     implementation("io.mongock:mongodb-springdata-v4-driver:5.4.4")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     testImplementation("org.testcontainers:mongodb:1.19.0")
+    testImplementation("io.projectreactor:reactor-test:3.6.10")
+    testImplementation("io.mockk:mockk:1.13.12")
 }
 
 kotlin {

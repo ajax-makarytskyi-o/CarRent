@@ -9,84 +9,103 @@ import com.makarytskyi.rentcar.fixtures.UserFixture.responseUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.updateUserRequest
 import com.makarytskyi.rentcar.fixtures.UserFixture.updatedUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.userPatch
-import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.service.impl.UserServiceImpl
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.springframework.dao.DuplicateKeyException
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toFlux
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
+import reactor.kotlin.test.verifyError
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class UserServiceTest {
 
-    @Mock
+    @MockK
     lateinit var userRepository: UserRepository
 
-    @InjectMocks
+    @InjectMockKs
     lateinit var userService: UserServiceImpl
 
     @Test
-    fun `getById should return UserResponse when User exists`() {
+    fun `getById should return user response when user exists`() {
         // GIVEN
         val user = randomUser()
         val response = responseUser(user)
-        whenever(userRepository.findById(user.id.toString())).thenReturn(user)
+        every { userRepository.findById(user.id.toString()) } returns user.toMono()
 
         // WHEN
         val result = userService.getById(user.id.toString())
 
         // THEN
-        assertEquals(response, result)
-        verify(userRepository).findById(user.id.toString())
+        result
+            .test()
+            .expectNext(response)
+            .verifyComplete()
+
+        verify { userRepository.findById(user.id.toString()) }
     }
 
     @Test
-    fun `getById should return throw ResourceNotFoundException`() {
+    fun `getById should return throw NotFoundException`() {
         // GIVEN
         val userId = ObjectId()
-        whenever(userRepository.findById(userId.toString())).thenReturn(null)
+        every { userRepository.findById(userId.toString()) } returns Mono.empty()
 
         // WHEN // THEN
-        assertThrows(NotFoundException::class.java, { userService.getById(userId.toString()) })
-        verify(userRepository).findById(userId.toString())
+        userService.getById(userId.toString())
+            .test()
+            .verifyError<NotFoundException>()
+
+        verify { userRepository.findById(userId.toString()) }
     }
 
     @Test
-    fun `findAll should return List of UserResponse`() {
+    fun `findAll should return user responses`() {
         // GIVEN
         val user = randomUser()
         val response = responseUser(user)
-        val mongoUsers: List<MongoUser> = listOf(user)
-        val expected = listOf(response)
-        whenever(userRepository.findAll(0, 10)).thenReturn(mongoUsers)
+        val users = listOf(user)
+        every { userRepository.findAll(0, 10) } returns users.toFlux()
 
         // WHEN
         val result = userService.findAll(0, 10)
 
         // THEN
-        assertEquals(expected, result)
-        verify(userRepository).findAll(0, 10)
+        result.collectList()
+            .test()
+            .assertNext {
+                assertThat(it).contains(response)
+            }
+            .verifyComplete()
+
+        verify { userRepository.findAll(0, 10) }
     }
 
     @Test
-    fun `findAll should return empty List of UserResponse if repository return empty List`() {
+    fun `findAll should return empty if repository returned empty`() {
         // GIVEN
-        whenever(userRepository.findAll(0, 10)).thenReturn(emptyList())
+        every { userRepository.findAll(0, 10) } returns Flux.empty()
 
         // WHEN
         val result = userService.findAll(0, 10)
 
         // THEN
-        assertEquals(emptyList(), result)
-        verify(userRepository).findAll(0, 10)
+        result
+            .test()
+            .verifyComplete()
+
+        verify { userRepository.findAll(0, 10) }
     }
 
     @Test
@@ -96,14 +115,18 @@ internal class UserServiceTest {
         val createUserEntity = createUserEntity(request)
         val createdUser = createdUser(createUserEntity)
         val response = responseUser(createdUser)
-        whenever(userRepository.create(createUserEntity)).thenReturn(createdUser)
+        every { userRepository.create(createUserEntity) } returns createdUser.toMono()
 
         // WHEN
         val result = userService.create(request)
 
         // THEN
-        assertEquals(response, result)
-        verify(userRepository).create(createUserEntity)
+        result
+            .test()
+            .expectNext(response)
+            .verifyComplete()
+
+        verify { userRepository.create(createUserEntity) }
     }
 
     @Test
@@ -113,33 +136,48 @@ internal class UserServiceTest {
         val request = updateUserRequest()
         val requestEntity = userPatch(request)
         val updatedUser = updatedUser(user, request)
-        whenever(userRepository.patch(user.id.toString(), requestEntity)).thenReturn(updatedUser)
+        val response = responseUser(updatedUser)
+        every { userRepository.patch(user.id.toString(), requestEntity) } returns updatedUser.toMono()
 
         // WHEN
         val result = userService.patch(user.id.toString(), request)
 
         // THEN
-        assertNotNull(result)
-        verify(userRepository).patch(user.id.toString(), requestEntity)
+        result
+            .test()
+            .expectNext(response)
+            .verifyComplete()
+
+        verify { userRepository.patch(user.id.toString(), requestEntity) }
     }
 
     @Test
-    fun `patch should throw ResourceNotFoundException if user is not found`() {
+    fun `patch should throw NotFoundException if user is not found`() {
         // GIVEN
         val userId = "unknown"
+        val request = updateUserRequest()
+        every { userRepository.patch(userId, userPatch(request)) } returns Mono.empty()
 
         // WHEN // THEN
-        assertThrows(NotFoundException::class.java, { userService.patch(userId, updateUserRequest()) })
+        userService.patch(userId, request)
+            .test()
+            .verifyError<NotFoundException>()
+
+        verify { userRepository.patch(userId, userPatch(request)) }
     }
 
     @Test
-    fun `deleteById should not throw ResourceNotFoundException if user is not found`() {
+    fun `deleteById should not throw NotFoundException if user is not found`() {
         // GIVEN
         val userId = "unknown"
+        every { userRepository.deleteById(userId) } returns Mono.empty()
 
         // WHEN // THEN
-        assertNotNull(userService.deleteById(userId))
-        verify(userRepository).deleteById(userId)
+        userService.deleteById(userId)
+            .test()
+            .verifyComplete()
+
+        verify { userRepository.deleteById(userId) }
     }
 
     @Test
@@ -147,9 +185,14 @@ internal class UserServiceTest {
         // GIVEN
         val user = randomUser()
         val request = updateUserRequest()
-        whenever(userRepository.findByPhoneNumber(request.phoneNumber!!)).thenReturn(randomUser())
+        every { userRepository.patch(user.id.toString(), userPatch(request)) } returns
+                DuplicateKeyException("key email is duplicated").toMono()
 
         // WHEN // THEN
-        assertThrows(IllegalArgumentException::class.java, { userService.patch(user.id.toString(), request) })
+        userService.patch(user.id.toString(), request)
+            .test()
+            .verifyError<IllegalArgumentException>()
+
+        verify { userRepository.patch(user.id.toString(), userPatch(request)) }
     }
 }

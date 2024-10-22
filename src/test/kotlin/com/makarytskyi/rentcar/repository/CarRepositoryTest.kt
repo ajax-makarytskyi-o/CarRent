@@ -4,13 +4,13 @@ import com.makarytskyi.rentcar.fixtures.CarFixture.emptyCarPatch
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.model.MongoCar
 import java.math.BigDecimal
+import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.kotlin.test.test
 
 internal class CarRepositoryTest : ContainerBase {
 
@@ -20,29 +20,37 @@ internal class CarRepositoryTest : ContainerBase {
     @Test
     fun `create should insert car and return it with id`() {
         // GIVEN
-        val unexistingCar = randomCar().copy(id = null)
+        val car = randomCar().copy(id = null)
 
         // WHEN
-        val createdCar = carRepository.create(unexistingCar)
+        val result = carRepository.create(car)
 
         // THEN
-        val foundCar = carRepository.findById(createdCar.id.toString())
-        assertEquals(createdCar, foundCar)
-        assertNotNull(createdCar.id)
+        result
+            .test()
+            .assertNext {
+                assertNotNull(it.id, "Car should have non-null id after saving")
+                assertEquals(car.copy(id = it.id), it)
+            }
+            .verifyComplete()
     }
 
     @Test
     fun `findAll should find all cars`() {
         // GIVEN
-        val insertedCar1 = carRepository.create(randomCar())
-        val insertedCar2 = carRepository.create(randomCar())
+        val insertedCar1 = carRepository.create(randomCar()).block()
+        val insertedCar2 = carRepository.create(randomCar()).block()
 
         // WHEN
         val cars = carRepository.findAll(0, 20)
 
         // THEN
-        assertTrue(cars.any { it.brand == insertedCar1.brand && it.plate == insertedCar1.plate })
-        assertTrue(cars.any { it.brand == insertedCar2.brand && it.plate == insertedCar2.plate })
+        cars.collectList()
+            .test()
+            .assertNext {
+                assertThat(it).containsAll(listOf(insertedCar1, insertedCar2))
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -50,15 +58,20 @@ internal class CarRepositoryTest : ContainerBase {
         // GIVEN
         val price = BigDecimal("600")
         val color = MongoCar.CarColor.BLUE
-        val car = carRepository.create(randomCar())
+        val car = carRepository.create(randomCar()).block()!!
         val updateCar = emptyCarPatch().copy(price = price, color = color)
 
         // WHEN
         val updated = carRepository.patch(car.id.toString(), updateCar)
 
-        // THENs
-        assertEquals(price, updated?.price)
-        assertEquals(color, updated?.color)
+        // THEN
+        updated
+            .test()
+            .assertNext {
+                assertEquals(price, it.price)
+                assertEquals(color, it.color)
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -66,17 +79,22 @@ internal class CarRepositoryTest : ContainerBase {
         // GIVEN
         val plate = "XX5295YY"
         val car = randomCar().copy(plate = plate)
-        carRepository.create(car)
+        carRepository.create(car).block()
 
         // WHEN
         val foundCar = carRepository.findByPlate(plate)
 
         // THEN
-        assertEquals(car, foundCar)
+        foundCar
+            .test()
+            .assertNext {
+                assertEquals(plate, it.plate)
+            }
+            .verifyComplete()
     }
 
     @Test
-    fun `findByPlate should return null if cant find car by plate`() {
+    fun `findByPlate should return empty if cant find car by plate`() {
         // GIVEN
         val unexistingPlate = "wrongPlate"
 
@@ -84,21 +102,28 @@ internal class CarRepositoryTest : ContainerBase {
         val foundCar = carRepository.findByPlate(unexistingPlate)
 
         // THEN
-        assertNull(foundCar)
+        foundCar
+            .test()
+            .verifyComplete()
     }
 
     @Test
     fun `findAllByBrand should find all cars by brand`() {
         // GIVEN
         val brand = "SomeBrand"
-        val car1 = carRepository.create(randomCar().copy(brand = brand))
-        val car2 = carRepository.create(randomCar().copy(brand = brand))
+        val car1 = carRepository.create(randomCar().copy(brand = brand)).block()
+        val car2 = carRepository.create(randomCar().copy(brand = brand)).block()
 
         // WHEN
         val foundCars = carRepository.findAllByBrand(brand)
 
         // THEN
-        assertTrue(foundCars.containsAll(listOf(car1, car2)))
+        foundCars.collectList()
+            .test()
+            .assertNext {
+                assertThat(it).containsAll(listOf(car1, car2))
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -106,30 +131,38 @@ internal class CarRepositoryTest : ContainerBase {
         // GIVEN
         val brand = "brand"
         val model = "model"
-        val car1 = carRepository.create(randomCar().copy(brand = brand, model = model))
-        val car2 = carRepository.create(randomCar().copy(brand = brand, model = model))
+        val car1 = carRepository.create(randomCar().copy(brand = brand, model = model)).block()
+        val car2 = carRepository.create(randomCar().copy(brand = brand, model = model)).block()
 
         // WHEN
         val foundCars = carRepository.findAllByBrandAndModel(brand, model)
 
         // THEN
-        assertTrue(foundCars.containsAll(listOf(car1, car2)))
+        foundCars.collectList()
+            .test()
+            .assertNext {
+                assertThat(it).containsAll(listOf(car1, car2))
+            }
+            .verifyComplete()
     }
 
     @Test
     fun `findById should return existing car by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar())
+        val car = carRepository.create(randomCar()).block()!!
 
         // WHEN
         val foundCar = carRepository.findById(car.id.toString())
 
         // THEN
-        assertEquals(car, foundCar)
+        foundCar
+            .test()
+            .expectNext(car)
+            .verifyComplete()
     }
 
     @Test
-    fun `findById should return null if cant find car by id`() {
+    fun `findById should return empty if cant find car by id`() {
         // GIVEN
         val unexistingId = ObjectId().toString()
 
@@ -137,19 +170,22 @@ internal class CarRepositoryTest : ContainerBase {
         val foundCar = carRepository.findById(unexistingId)
 
         // THEN
-        assertNull(foundCar)
+        foundCar
+            .test()
+            .verifyComplete()
     }
 
     @Test
     fun `deleteById should delete car by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar())
+        val car = carRepository.create(randomCar()).block()!!
 
         // WHEN
-        carRepository.deleteById(car.id.toString())
+        carRepository.deleteById(car.id.toString()).block()!!
 
         // THEN
-        val result = carRepository.findById(car.id.toString())
-        assertNull(result)
+        carRepository.findById(car.id.toString())
+            .test()
+            .verifyComplete()
     }
 }

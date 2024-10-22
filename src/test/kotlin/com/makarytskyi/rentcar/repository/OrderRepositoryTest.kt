@@ -1,17 +1,18 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
+import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.emptyOrderPatch
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
+import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.kotlin.test.test
 
 internal class OrderRepositoryTest : ContainerBase {
 
@@ -27,35 +28,46 @@ internal class OrderRepositoryTest : ContainerBase {
     @Test
     fun `create should insert order and return it with id`() {
         // GIVEN
-        val car = carRepository.create(randomCar())
-        val user = userRepository.create(randomUser())
+        val car = carRepository.create(randomCar()).block()!!
+        val user = userRepository.create(randomUser()).block()!!
+        val order = randomOrder(car.id, user.id).copy(id = null)
 
         // WHEN
-        val order = orderRepository.create(randomOrder(car.id, user.id).copy(id = null))
+        val createdOrder = orderRepository.create(order)
 
         // THEN
-        val foundOrder = orderRepository.findById(order.id.toString())
-        assertNotNull(foundOrder)
-        assertNotNull(order.id)
+        createdOrder
+            .test()
+            .assertNext {
+                assertNotNull(it.id, "Order should have non-null id after saving")
+                assertEquals(order.copy(id = it.id), it)
+            }
+            .verifyComplete()
     }
 
     @Test
     fun `findAll should find all orders`() {
         // GIVEN
-        val car1 = carRepository.create(randomCar())
-        val user1 = userRepository.create(randomUser())
-        val order1 = orderRepository.create(randomOrder(car1.id, user1.id))
+        val car1 = carRepository.create(randomCar()).block()!!
+        val user1 = userRepository.create(randomUser()).block()!!
+        val order1 = orderRepository.create(randomOrder(car1.id, user1.id)).block()!!
+        val fullOrder1 = aggregatedOrder(order1, car1, user1)
 
-        val car2 = carRepository.create(randomCar())
-        val user2 = userRepository.create(randomUser())
-        val order2 = orderRepository.create(randomOrder(car2.id, user2.id))
+        val car2 = carRepository.create(randomCar()).block()!!
+        val user2 = userRepository.create(randomUser()).block()!!
+        val order2 = orderRepository.create(randomOrder(car2.id, user2.id)).block()!!
+        val fullOrder2 = aggregatedOrder(order2, car2, user2)
 
         // WHEN
-        val orders = orderRepository.findAll(0, 20)
+        val allOrders = orderRepository.findFullAll(0, 20)
 
         // THEN
-        assertTrue(orders.any { it.id == order1.id })
-        assertTrue(orders.any { it.id == order2.id })
+        allOrders.collectList()
+            .test()
+            .assertNext {
+                assertThat(it).containsAll(listOf(fullOrder1, fullOrder2))
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -63,9 +75,9 @@ internal class OrderRepositoryTest : ContainerBase {
         // GIVEN
         val from = monthAfter
         val to = monthAndDayAfter
-        val car = carRepository.create(randomCar())
-        val user = userRepository.create(randomUser())
-        val order = orderRepository.create(randomOrder(car.id, user.id))
+        val car = carRepository.create(randomCar()).block()!!
+        val user = userRepository.create(randomUser()).block()!!
+        val order = orderRepository.create(randomOrder(car.id, user.id)).block()!!
 
         val updateOrder = emptyOrderPatch().copy(
             from = from,
@@ -76,92 +88,117 @@ internal class OrderRepositoryTest : ContainerBase {
         val updated = orderRepository.patch(order.id.toString(), updateOrder)
 
         // THEN
-        assertEquals(from, updated?.from)
-        assertEquals(to, updated?.to)
+        updated
+            .test()
+            .assertNext {
+                assertEquals(from, it.from)
+                assertEquals(to, it.to)
+            }
+            .verifyComplete()
     }
 
     @Test
     fun `findById should return existing order by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar())
-        val user = userRepository.create(randomUser())
-        val order = orderRepository.create(randomOrder(car.id, user.id))
+        val car = carRepository.create(randomCar()).block()!!
+        val user = userRepository.create(randomUser()).block()!!
+        val order = orderRepository.create(randomOrder(car.id, user.id)).block()!!
+        val fullOrder = aggregatedOrder(order, car, user)
 
         // WHEN
-        val foundOrder = orderRepository.findById(order.id.toString())
+        val foundOrder = orderRepository.findFullById(order.id.toString())
 
         // THEN
-        assertEquals(order.id, foundOrder?.id)
-        assertEquals(order.carId, foundOrder?.car?.id)
-        assertEquals(order.userId, foundOrder?.user?.id)
+        foundOrder
+            .test()
+            .expectNext(fullOrder)
+            .verifyComplete()
     }
 
     @Test
-    fun `findById should return null if cant find order by id`() {
+    fun `findById should return empty if cant find order by id`() {
         // GIVEN
         val unexistingId = "unexistingId"
 
         // WHEN
-        val foundOrder = orderRepository.findById(unexistingId)
+        val foundOrder = orderRepository.findFullById(unexistingId)
 
         // THEN
-        assertNull(foundOrder)
+        foundOrder
+            .test()
+            .verifyComplete()
     }
 
     @Test
     fun `deleteById should delete order by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar())
-        val user = userRepository.create(randomUser())
-        val order = orderRepository.create(randomOrder(car.id, user.id))
+        val car = carRepository.create(randomCar()).block()!!
+        val user = userRepository.create(randomUser()).block()!!
+        val order = orderRepository.create(randomOrder(car.id, user.id)).block()!!
 
         // WHEN
-        orderRepository.deleteById(order.id.toString())
+        orderRepository.deleteById(order.id.toString()).block()!!
 
         // THEN
-        val deletedRepairing = orderRepository.findById(order.id.toString())
-        assertNull(deletedRepairing)
+        orderRepository.findFullById(order.id.toString())
+            .test()
+            .verifyComplete()
     }
 
     @Test
     fun `findByCarId should return orders found by carId`() {
         // GIVEN
-        val car = carRepository.create(randomCar())
-        val user = userRepository.create(randomUser())
-        val order = orderRepository.create(randomOrder(car.id, user.id))
+        val car = carRepository.create(randomCar()).block()!!
+        val user = userRepository.create(randomUser()).block()!!
+        val order = orderRepository.create(randomOrder(car.id, user.id)).block()
 
         // WHEN
         val foundOrders = orderRepository.findByCarId(car.id.toString())
 
         // THEN
-        assertTrue(foundOrders.contains(order))
+        foundOrders.collectList()
+            .test()
+            .assertNext {
+                assertThat(it).contains(order)
+            }
+            .verifyComplete()
     }
 
     @Test
     fun `findByUserId should return orders found by userId`() {
         // GIVEN
-        val car = carRepository.create(randomCar())
-        val user = userRepository.create(randomUser())
-        val order = orderRepository.create(randomOrder(car.id, user.id))
+        val car = carRepository.create(randomCar()).block()!!
+        val user = userRepository.create(randomUser()).block()!!
+        val order = orderRepository.create(randomOrder(car.id, user.id)).block()
 
         // WHEN
         val foundOrders = orderRepository.findByUserId(user.id.toString())
 
         // THEN
-        assertTrue(foundOrders.contains(order))
+        foundOrders.collectList()
+            .test()
+            .assertNext {
+                assertThat(it).contains(order)
+            }
+            .verifyComplete()
     }
 
     @Test
     fun `findByUserIdAndCarId should return orders found by userId and carId`() {
         // GIVEN
-        val car = carRepository.create(randomCar())
-        val user = userRepository.create(randomUser())
-        val order = orderRepository.create(randomOrder(car.id, user.id))
+        val car = carRepository.create(randomCar()).block()!!
+        val user = userRepository.create(randomUser()).block()!!
+        val order = orderRepository.create(randomOrder(car.id, user.id)).block()
 
         // WHEN
         val foundOrders = orderRepository.findByCarIdAndUserId(car.id.toString(), user.id.toString())
 
         // THEN
-        assertTrue(foundOrders.contains(order))
+        foundOrders.collectList()
+            .test()
+            .assertNext {
+                assertThat(it).contains(order)
+            }
+            .verifyComplete()
     }
 }

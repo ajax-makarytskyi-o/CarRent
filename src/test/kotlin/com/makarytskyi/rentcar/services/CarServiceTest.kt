@@ -9,27 +9,31 @@ import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.responseCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.updateCarRequest
 import com.makarytskyi.rentcar.fixtures.CarFixture.updatedCar
-import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.service.impl.CarServiceImpl
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toFlux
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
+import reactor.kotlin.test.verifyError
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class CarServiceTest {
-    @Mock
+    @MockK
     lateinit var carRepository: CarRepository
 
-    @InjectMocks
+    @InjectMockKs
     lateinit var carService: CarServiceImpl
 
     @Test
@@ -37,25 +41,32 @@ internal class CarServiceTest {
         // GIVEN
         val car = randomCar()
         val responseCar = responseCar(car)
-        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
+        every { carRepository.findById(car.id.toString()) } returns car.toMono()
 
         // WHEN
         val result = carService.getById(car.id.toString())
 
         // THEN
-        assertEquals(responseCar, result)
-        verify(carRepository).findById(car.id.toString())
+        result
+            .test()
+            .expectNext(responseCar)
+            .verifyComplete()
+
+        verify { carRepository.findById(car.id.toString()) }
     }
 
     @Test
-    fun `getById should return throw ResourceNotFoundException`() {
+    fun `getById should return throw NotFoundException`() {
         // GIVEN
         val carId = ObjectId()
-        whenever(carRepository.findById(carId.toString())).thenReturn(null)
+        every { carRepository.findById(carId.toString()) } returns Mono.empty()
 
         // WHEN // THEN
-        assertThrows(NotFoundException::class.java, { carService.getById(carId.toString()) })
-        verify(carRepository).findById(carId.toString())
+        carService.getById(carId.toString())
+            .test()
+            .verifyError<NotFoundException>()
+
+        verify { carRepository.findById(carId.toString()) }
     }
 
     @Test
@@ -63,29 +74,37 @@ internal class CarServiceTest {
         // GIVEN
         val car = randomCar()
         val response = responseCar(car)
-        val mongoCars: List<MongoCar> = listOf(car)
-        val expected = listOf(response)
-        whenever(carRepository.findAll(0, 10)).thenReturn(mongoCars)
+        val mongoCars = listOf(car)
+        every { carRepository.findAll(0, 10) } returns mongoCars.toFlux()
 
         // WHEN
         val result = carService.findAll(0, 10)
 
         // THEN
-        assertEquals(expected, result)
-        verify(carRepository).findAll(0, 10)
+        result.collectList()
+            .test()
+            .assertNext {
+                assertThat(it).contains(response)
+            }
+            .verifyComplete()
+
+        verify { carRepository.findAll(0, 10) }
     }
 
     @Test
-    fun `findAll should return empty List of CarResponse if repository return empty List`() {
+    fun `findAll should return empty if repository returned empty`() {
         // GIVEN
-        whenever(carRepository.findAll(0, 10)).thenReturn(emptyList())
+        every { carRepository.findAll(0, 10) } returns Flux.empty()
 
         // WHEN
         val result = carService.findAll(0, 10)
 
         // THEN
-        assertEquals(emptyList(), result)
-        verify(carRepository).findAll(0, 10)
+        result
+            .test()
+            .verifyComplete()
+
+        verify { carRepository.findAll(0, 10) }
     }
 
     @Test
@@ -95,14 +114,18 @@ internal class CarServiceTest {
         val requestEntity = createCarEntity(request)
         val createdCar = createdCar(requestEntity)
         val carResponse = responseCar(createdCar)
-        whenever(carRepository.create(requestEntity)).thenReturn(createdCar)
+        every { carRepository.create(requestEntity) } returns createdCar.toMono()
 
         // WHEN
         val result = carService.create(request)
 
         // THEN
-        assertEquals(carResponse, result)
-        verify(carRepository).create(requestEntity)
+        result
+            .test()
+            .expectNext(carResponse)
+            .verifyComplete()
+
+        verify { carRepository.create(requestEntity) }
     }
 
     @Test
@@ -112,47 +135,62 @@ internal class CarServiceTest {
         val updateCarRequest = updateCarRequest()
         val updateCarEntity = carPatch(updateCarRequest)
         val updatedCar = updatedCar(oldCar, updateCarRequest)
-        whenever(carRepository.patch(oldCar.id.toString(), updateCarEntity)).thenReturn(updatedCar)
+        every { carRepository.patch(oldCar.id.toString(), updateCarEntity) } returns updatedCar.toMono()
 
         // WHEN
         val result = carService.patch(oldCar.id.toString(), updateCarRequest)
 
         // THEN
-        assertNotNull(result)
-        assertEquals(updateCarRequest.price, result.price)
-        verify(carRepository).patch(oldCar.id.toString(), updateCarEntity)
+        result
+            .test()
+            .assertNext {
+                assertEquals(updateCarRequest.price, it.price)
+            }
+            .verifyComplete()
+
+        verify { carRepository.patch(oldCar.id.toString(), updateCarEntity) }
     }
 
     @Test
-    fun `patch should throw ResourceNotFoundException if car is not found`() {
+    fun `patch should throw NotFoundException if car is not found`() {
         // GIVEN
         val carId = "unknown"
         val updateCarRequest = updateCarRequest()
+        every { carRepository.patch(carId, carPatch(updateCarRequest)) } returns Mono.empty()
 
         // WHEN // THEN
-        assertThrows(NotFoundException::class.java, { carService.patch(carId, updateCarRequest) })
+        carService.patch(carId, updateCarRequest)
+            .test()
+            .verifyError<NotFoundException>()
+
+        verify { carRepository.patch(carId, carPatch(updateCarRequest)) }
     }
 
     @Test
-    fun `deleteById should not throw ResourceNotFoundException if car is not found`() {
+    fun `deleteById should not throw NotFoundException if car is not found`() {
         // GIVEN
         val carId = "unknown"
+        every { carRepository.deleteById(carId) } returns Mono.empty()
 
         // WHEN // THEN
-        assertNotNull(carService.deleteById(carId))
-        verify(carRepository).deleteById(carId)
+        carService.deleteById(carId)
+            .test()
+            .verifyComplete()
+
+        verify { carRepository.deleteById(carId) }
     }
 
     @Test
-    fun `findByPlate should throw ResourceNotFoundException if such car is not found`() {
+    fun `findByPlate should throw NotFoundException if such car is not found`() {
         // GIVEN
         val plate = "UNKNOWN"
+        every { carRepository.findByPlate(plate) } returns Mono.empty()
 
-        // WHEN
-        whenever(carRepository.findByPlate(plate)).thenReturn(null)
+        // WHEN // THEN
+        carService.getByPlate(plate)
+            .test()
+            .verifyError<NotFoundException>()
 
-        // THEN
-        assertThrows(NotFoundException::class.java, { carService.getByPlate(plate) })
-        verify(carRepository).findByPlate(plate)
+        verify { carRepository.findByPlate(plate) }
     }
 }

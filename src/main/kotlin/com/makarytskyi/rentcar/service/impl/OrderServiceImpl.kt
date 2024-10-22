@@ -6,6 +6,7 @@ import com.makarytskyi.rentcar.dto.order.CreateOrderRequest
 import com.makarytskyi.rentcar.dto.order.OrderResponse
 import com.makarytskyi.rentcar.dto.order.UpdateOrderRequest
 import com.makarytskyi.rentcar.exception.NotFoundException
+import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
@@ -13,6 +14,13 @@ import com.makarytskyi.rentcar.service.OrderService
 import java.math.BigDecimal
 import java.util.Date
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
+import reactor.kotlin.core.publisher.switchIfEmpty
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.core.util.function.component1
+import reactor.kotlin.core.util.function.component2
 
 @InvocationTracker
 @Service
@@ -22,69 +30,82 @@ internal class OrderServiceImpl(
     private val userRepository: UserRepository,
 ) : OrderService {
 
-    override fun getById(id: String): AggregatedOrderResponse =
-        orderRepository.findById(id)?.let { AggregatedOrderResponse.from(it) }
-            ?: throw NotFoundException("Order with id $id is not found")
+    override fun getById(id: String): Mono<AggregatedOrderResponse> =
+        orderRepository.findFullById(id)
+            .switchIfEmpty { Mono.error(NotFoundException("Order with id $id is not found")) }
+            .map { AggregatedOrderResponse.from(it) }
 
-    override fun findAll(page: Int, size: Int): List<AggregatedOrderResponse> =
-        orderRepository.findAll(page, size).map { AggregatedOrderResponse.from(it) }
-            .toList()
+    override fun findAll(page: Int, size: Int): Flux<AggregatedOrderResponse> =
+        orderRepository.findFullAll(page, size).map { AggregatedOrderResponse.from(it) }
 
-    override fun create(createOrderRequest: CreateOrderRequest): OrderResponse {
-        validateDates(createOrderRequest.from, createOrderRequest.to)
-        validateUserExists(createOrderRequest.userId)
-        validateCarAvailability(createOrderRequest.carId, createOrderRequest.from, createOrderRequest.to)
-
-        return OrderResponse.from(
-            orderRepository.create(CreateOrderRequest.toEntity(createOrderRequest)),
-            getCarPrice(createOrderRequest.carId)
-        )
+    override fun create(createOrderRequest: CreateOrderRequest): Mono<OrderResponse> {
+        return createOrderRequest.toMono()
+            .doOnNext { validateDates(it.from, it.to) }
+            .flatMap {
+                Mono.zip(
+                    Mono.defer { validateUserExists(createOrderRequest.userId) }
+                        .subscribeOn(Schedulers.boundedElastic()),
+                    Mono.defer {
+                        validateCarAvailability(
+                            createOrderRequest.carId,
+                            createOrderRequest.from,
+                            createOrderRequest.to
+                        )
+                    }.subscribeOn(Schedulers.boundedElastic())
+                ).thenReturn(Unit)
+            }
+            .flatMap { orderRepository.create(CreateOrderRequest.toEntity(createOrderRequest)) }
+            .flatMap { order -> getCarPrice(createOrderRequest.carId).map { OrderResponse.from(order, it) } }
     }
 
-    override fun deleteById(id: String) = orderRepository.deleteById(id)
+    override fun deleteById(id: String): Mono<Unit> = orderRepository.deleteById(id)
 
-    override fun findByUser(userId: String): List<OrderResponse> = orderRepository.findByUserId(userId).map {
-        OrderResponse.from(it, getCarPrice(it.carId.toString()))
-    }
+    override fun findByUser(userId: String): Flux<OrderResponse> = orderRepository.findByUserId(userId)
+        .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
+        .map { (order, carPrice) -> OrderResponse.from(order, carPrice) }
 
-    override fun findByCar(carId: String): List<OrderResponse> = orderRepository.findByCarId(carId).map {
-        OrderResponse.from(it, getCarPrice(it.carId.toString()))
-    }
+    override fun findByCar(carId: String): Flux<OrderResponse> = orderRepository.findByCarId(carId)
+        .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
+        .map { (order, carPrice) -> OrderResponse.from(order, carPrice) }
 
-    override fun findByCarAndUser(carId: String, userId: String): List<OrderResponse> =
+    override fun findByCarAndUser(carId: String, userId: String): Flux<OrderResponse> =
         orderRepository.findByCarIdAndUserId(carId, userId)
-            .map { OrderResponse.from(it, getCarPrice(it.carId.toString())) }
+            .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
+            .map { (order, carPrice) -> OrderResponse.from(order, carPrice) }
 
-    override fun patch(id: String, orderRequest: UpdateOrderRequest): OrderResponse {
-        val order = orderRepository.findById(id) ?: throw NotFoundException("Order with $id is not found")
-        val newFrom = orderRequest.from ?: order.from
-        val newTo = orderRequest.to ?: order.to
-        validateDates(newFrom!!, newTo!!)
-        validateCarAvailability(order.car?.id.toString(), newFrom, newTo)
+    override fun patch(id: String, orderRequest: UpdateOrderRequest): Mono<OrderResponse> =
+        orderRepository.findFullById(id)
+            .switchIfEmpty { Mono.error(NotFoundException("Order with $id is not found")) }
+            .flatMap {
+                val from = orderRequest.from ?: it.from
+                val to = orderRequest.to ?: it.to
+                validateDates(from, to)
+                it.car?.let {
+                    validateCarAvailability(it.id.toString(), from, to).then(orderRequest.toMono())
+                } ?: IllegalArgumentException("Car id should not be null").toMono()
+            }
+            .flatMap { orderRepository.patch(id, UpdateOrderRequest.toPatch(it)) }
+            .flatMap { order -> getCarPrice(order.carId.toString()).map { OrderResponse.from(order, it) } }
 
-        return orderRepository.patch(id, UpdateOrderRequest.toPatch(orderRequest))
-            ?.let { OrderResponse.from(it, order.car?.price) }
-            ?: throw NotFoundException("Order with $id is not found")
+    private fun validateDates(from: Date?, to: Date?) {
+        require(to?.after(from) == true) { "Start date must be before end date" }
+        require(from?.after(Date()) == true) { "Dates must be in future" }
     }
 
-    private fun validateDates(from: Date, to: Date) {
-        require(to.after(from)) { "Start date must be before end date" }
-        require(from.after(Date())) { "Dates must be in future" }
+    private fun validateUserExists(userId: String) = userRepository.findById(userId)
+        .switchIfEmpty { Mono.error(IllegalArgumentException("User with id $userId is not found")) }
+
+    private fun validateCarAvailability(carId: String, from: Date?, to: Date?): Mono<MongoOrder> {
+        return carRepository.findById(carId)
+            .switchIfEmpty { Mono.error(NotFoundException("Car with id $carId is not found")) }
+            .flatMapMany { orderRepository.findByCarId(it.id.toString()) }
+            .filter { it.from?.before(to) == true && it.to?.after(from) == true }
+            .flatMap<MongoOrder> { Mono.error(IllegalArgumentException("Car is already booked on this time")) }
+            .toMono()
     }
 
-    private fun validateUserExists(userId: String) =
-        require(userRepository.findById(userId) != null) { "User with id $userId is not found" }
-
-    private fun validateCarAvailability(carId: String?, from: Date, to: Date) {
-        require(carId != null) { "Car id should not be null" }
-        carRepository.findById(carId) ?: throw NotFoundException("Car with id $carId is not found")
-
-        val carOrders = orderRepository.findByCarId(carId)
-
-        require(carOrders.none { it.from?.before(to) == true && it.to?.after(from) == true }) {
-            "Order on these dates is already exist"
-        }
-    }
-
-    private fun getCarPrice(carId: String?): BigDecimal? = carId?.let { carRepository.findById(it)?.price }
+    private fun getCarPrice(carId: String): Mono<BigDecimal> =
+        carRepository.findById(carId)
+            .map { it.price ?: BigDecimal.ZERO }
+            .defaultIfEmpty(BigDecimal.ZERO)
 }

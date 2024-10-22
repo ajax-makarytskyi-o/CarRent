@@ -16,39 +16,41 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/cars")
 internal class CarController(private val service: CarService) {
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: String): CarResponse = service.getById(id)
+    fun getById(@PathVariable id: String): Mono<CarResponse> = service.getById(id)
 
     @GetMapping()
     fun findAll(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "20") size: Int
-    ): List<CarResponse> = service.findAll(page, size)
+    ): Flux<CarResponse> = service.findAll(page, size)
 
     @GetMapping("/brand/{brand}")
-    fun findAllByBrand(@PathVariable brand: String): List<CarResponse> = service.findAllByBrand(brand)
+    fun findAllByBrand(@PathVariable brand: String): Flux<CarResponse> = service.findAllByBrand(brand)
 
     @GetMapping("/brand/{brand}/model/{model}")
-    fun findAllByBrandAndModel(@PathVariable brand: String, @PathVariable model: String): List<CarResponse> =
+    fun findAllByBrandAndModel(@PathVariable brand: String, @PathVariable model: String): Flux<CarResponse> =
         service.findAllByBrandAndModel(brand, model)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun create(@Valid @RequestBody car: CreateCarRequest): CarResponse = service.create(car)
+    fun create(@Valid @RequestBody car: CreateCarRequest): Mono<CarResponse> = service.create(car)
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun delete(@PathVariable id: String) = service.deleteById(id)
+    fun delete(@PathVariable id: String): Mono<Unit> = service.deleteById(id)
 
     @PatchMapping("/{id}")
-    fun patch(@PathVariable id: String, @Valid @RequestBody car: UpdateCarRequest): CarResponse =
+    fun patch(@PathVariable id: String, @Valid @RequestBody car: UpdateCarRequest): Mono<CarResponse> =
         service.patch(id, car)
 
     @GetMapping("/plate/{plate}")
-    fun getByPlate(@PathVariable plate: String): CarResponse = service.getByPlate(plate)
+    fun getByPlate(@PathVariable plate: String): Mono<CarResponse> = service.getByPlate(plate)
 }

@@ -15,86 +15,105 @@ import com.makarytskyi.rentcar.fixtures.RepairingFixture.updatedRepairing
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.RepairingRepository
 import com.makarytskyi.rentcar.service.impl.RepairingServiceImpl
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toFlux
+import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.test
+import reactor.kotlin.test.verifyError
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class RepairingServiceTest {
 
-    @Mock
+    @MockK
     lateinit var repairingRepository: RepairingRepository
 
-    @Mock
+    @MockK
     lateinit var carRepository: CarRepository
 
-    @InjectMocks
+    @InjectMockKs
     lateinit var repairingService: RepairingServiceImpl
 
     @Test
-    fun `getById should return RepairingResponse when Repairing exists`() {
+    fun `getById should return repairing response when repairing exists`() {
         // GIVEN
         val car = randomCar()
         val repairing = randomAggregatedRepairing(car)
         val response = responseAggregatedRepairing(repairing)
-        whenever(repairingRepository.findById(repairing.id.toString())).thenReturn(repairing)
+        every { repairingRepository.findFullById(repairing.id.toString()) } returns repairing.toMono()
 
         // WHEN
-        val result = repairingService.getById(repairing.id.toString())
+        val result = repairingService.getFullById(repairing.id.toString())
 
         // THEN
-        assertEquals(response, result)
-        verify(repairingRepository).findById(repairing.id.toString())
+        result
+            .test()
+            .expectNext(response)
+            .verifyComplete()
+
+        verify { repairingRepository.findFullById(repairing.id.toString()) }
     }
 
     @Test
-    fun `getById should return throw ResourceNotFoundException`() {
+    fun `getById should return throw NotFoundException`() {
         // GIVEN
         val repairingId = ObjectId().toString()
-        whenever(repairingRepository.findById(repairingId)).thenReturn(null)
+        every { repairingRepository.findFullById(repairingId) } returns Mono.empty()
 
         // WHEN // THEN
-        assertThrows(NotFoundException::class.java, { repairingService.getById(repairingId) })
-        verify(repairingRepository).findById(repairingId)
+        repairingService.getFullById(repairingId)
+            .test()
+            .verifyError<NotFoundException>()
+
+        verify { repairingRepository.findFullById(repairingId) }
     }
 
     @Test
-    fun `findAll should return List of RepairingResponse`() {
+    fun `findAll should return repairing responses`() {
         // GIVEN
         val car = randomCar()
         val repairing = randomAggregatedRepairing(car)
-        val response = responseAggregatedRepairing(repairing)
         val repairings = listOf(repairing)
-        val expected = listOf(response)
-        whenever(repairingRepository.findAll(0, 10)).thenReturn(repairings)
+        val response = responseAggregatedRepairing(repairing)
+        every { repairingRepository.findFullAll(0, 10) } returns repairings.toFlux()
 
         // WHEN
-        val result = repairingService.findAll(0, 10)
+        val result = repairingService.findFullAll(0, 10)
 
         // THEN
-        assertEquals(expected, result)
-        verify(repairingRepository).findAll(0, 10)
+        result.collectList()
+            .test()
+            .assertNext {
+                assertThat(it).contains(response)
+            }
+            .verifyComplete()
+
+        verify { repairingRepository.findFullAll(0, 10) }
     }
 
     @Test
-    fun `findAll should return empty List of RepairingResponse if repository return empty List`() {
+    fun `findAll should return empty if repository returned empty`() {
         // GIVEN
-        whenever(repairingRepository.findAll(0, 10)).thenReturn(emptyList())
+        every { repairingRepository.findFullAll(0, 10) } returns Flux.empty()
 
         // WHEN
-        val result = repairingService.findAll(0, 10)
+        val result = repairingService.findFullAll(0, 10)
 
         // THEN
-        assertEquals(emptyList(), result)
-        verify(repairingRepository).findAll(0, 10)
+        result
+            .test()
+            .verifyComplete()
+
+        verify { repairingRepository.findFullAll(0, 10) }
     }
 
     @Test
@@ -105,26 +124,34 @@ internal class RepairingServiceTest {
         val requestEntity = createRepairingEntity(request)
         val createdRepairing = createdRepairing(requestEntity)
         val response = responseRepairing(createdRepairing)
-        whenever(repairingRepository.create(requestEntity)).thenReturn(createdRepairing)
-        whenever(carRepository.findById(car.id.toString())).thenReturn(car)
+        every { repairingRepository.create(requestEntity) } returns createdRepairing.toMono()
+        every { carRepository.findById(car.id.toString()) } returns car.toMono()
 
         // WHEN
         val result = repairingService.create(request)
 
         // THEN
-        assertEquals(response, result)
-        verify(repairingRepository).create(requestEntity)
+        result
+            .test()
+            .expectNext(response)
+            .verifyComplete()
+
+        verify { repairingRepository.create(requestEntity) }
     }
 
     @Test
-    fun `should throw IllegalArgumentException if car doesn't exist`() {
+    fun `should throw NotFoundException if car doesn't exist`() {
         // GIVEN
         val car = randomCar()
         val request = createRepairingRequest(car)
-        whenever(carRepository.findById(car.id.toString())).thenReturn(null)
+        every { carRepository.findById(car.id.toString()) } returns Mono.empty()
 
         // WHEN // THEN
-        assertThrows(IllegalArgumentException::class.java, { repairingService.create(request) })
+        repairingService.create(request)
+            .test()
+            .verifyError<NotFoundException>()
+
+        verify { carRepository.findById(request.carId) }
     }
 
     @Test
@@ -135,35 +162,46 @@ internal class RepairingServiceTest {
         val request = updateRepairingRequest()
         val requestEntity = repairingPatch(request)
         val updatedRepairing = updatedRepairing(repairing, request)
-        whenever(repairingRepository.patch(repairing.id.toString(), requestEntity)).thenReturn(updatedRepairing)
+        every { repairingRepository.patch(repairing.id.toString(), requestEntity) } returns updatedRepairing.toMono()
 
         // WHEN
         val result = repairingService.patch(repairing.id.toString(), request)
 
         // THEN
-        assertNotNull(result)
-        verify(repairingRepository).patch(repairing.id.toString(), requestEntity)
+        result
+            .test()
+            .expectNext(responseRepairing(updatedRepairing))
+            .verifyComplete()
+
+        verify { repairingRepository.patch(repairing.id.toString(), requestEntity) }
     }
 
     @Test
-    fun `patch should throw ResourceNotFoundException if repairing is not found`() {
+    fun `patch should throw NotFoundException if repairing is not found`() {
         // GIVEN
         val repairingId = "unknown"
+        val request = updateRepairingRequest()
+        every { repairingRepository.patch(repairingId, repairingPatch(request)) } returns Mono.empty()
 
         // WHEN // THEN
-        assertThrows(
-            NotFoundException::class.java,
-            { repairingService.patch(repairingId, updateRepairingRequest()) }
-        )
+        repairingService.patch(repairingId, request)
+            .test()
+            .verifyError<NotFoundException>()
+
+        verify { repairingRepository.patch(repairingId, repairingPatch(request)) }
     }
 
     @Test
     fun `deleteById should be successful`() {
         // GIVEN
         val repairingId = "someId"
+        every { repairingRepository.deleteById(repairingId) } returns Mono.empty()
 
         // WHEN // THEN
-        assertNotNull(repairingService.deleteById(repairingId))
-        verify(repairingRepository).deleteById(repairingId)
+        repairingService.deleteById(repairingId)
+            .test()
+            .verifyComplete()
+
+        verify { repairingRepository.deleteById(repairingId) }
     }
 }

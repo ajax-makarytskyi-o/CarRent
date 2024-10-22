@@ -3,20 +3,22 @@ package com.makarytskyi.rentcar.service
 import com.makarytskyi.rentcar.dto.user.CreateUserRequest
 import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
 import com.makarytskyi.rentcar.dto.user.UserResponse
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 internal interface UserService {
 
-    fun findAll(page: Int, size: Int): List<UserResponse>
+    fun findAll(page: Int, size: Int): Flux<UserResponse>
 
-    fun create(createUserRequest: CreateUserRequest): UserResponse
+    fun create(createUserRequest: CreateUserRequest): Mono<UserResponse>
 
-    fun getById(id: String): UserResponse
+    fun getById(id: String): Mono<UserResponse>
 
-    fun deleteById(id: String)
+    fun deleteById(id: String): Mono<Unit>
 
-    fun patch(id: String, userRequest: UpdateUserRequest): UserResponse
+    fun patch(id: String, userRequest: UpdateUserRequest): Mono<UserResponse>
 
-    fun getByEmail(email: String): UserResponse
+    fun getByEmail(email: String): Mono<UserResponse>
 
-    fun getByPhoneNumber(phoneNumber: String): UserResponse
+    fun getByPhoneNumber(phoneNumber: String): Mono<UserResponse>
 }

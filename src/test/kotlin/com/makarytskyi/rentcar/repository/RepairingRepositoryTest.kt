@@ -6,7 +6,6 @@ import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyRepairingPatch
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing
 import java.math.BigDecimal
-import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import org.assertj.core.api.Assertions.assertThat
@@ -104,7 +103,7 @@ internal class RepairingRepositoryTest : ContainerBase {
         foundRepairings.collectList()
             .test()
             .assertNext {
-                assertContains(it, repairing, "Result should contain expected repairing.")
+                assertThat(it).contains(repairing)
             }
             .verifyComplete()
     }
@@ -169,7 +168,7 @@ internal class RepairingRepositoryTest : ContainerBase {
         repairings.collectList()
             .test()
             .assertNext {
-                assertContains(it, repairing, "Result should contain expected repairing.")
+                assertThat(it).contains(repairing)
             }
             .verifyComplete()
     }
@@ -187,7 +186,7 @@ internal class RepairingRepositoryTest : ContainerBase {
         repairings.collectList()
             .test()
             .assertNext {
-                assertContains(it, repairing, "Result should contain expected repairing.")
+                assertThat(it).contains(repairing)
             }
             .verifyComplete()
     }

@@ -8,7 +8,6 @@ import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import kotlin.test.Test
-import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import org.assertj.core.api.Assertions.assertThat
@@ -160,7 +159,7 @@ internal class OrderRepositoryTest : ContainerBase {
         foundOrders.collectList()
             .test()
             .assertNext {
-                assertContains(it, order, "Result should contain expected order.")
+                assertThat(it).contains(order)
             }
             .verifyComplete()
     }
@@ -179,7 +178,7 @@ internal class OrderRepositoryTest : ContainerBase {
         foundOrders.collectList()
             .test()
             .assertNext {
-                assertContains(it, order, "Result should contain expected order.")
+                assertThat(it).contains(order)
             }
             .verifyComplete()
     }
@@ -198,7 +197,7 @@ internal class OrderRepositoryTest : ContainerBase {
         foundOrders.collectList()
             .test()
             .assertNext {
-                assertContains(it, order, "Result should contain expected order.")
+                assertThat(it).contains(order)
             }
             .verifyComplete()
     }

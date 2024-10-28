@@ -18,6 +18,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Start NATS container
+        run: docker run -d --name nats -p 4222:4222 nats:latest
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:

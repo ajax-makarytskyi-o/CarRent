@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package com.makarytskyi.internalapi.model.car;
+
+option java_multiple_files = true;
+
+enum CarColorProto {
+  BLACK = 0;
+  RED = 1;
+  GREEN = 2;
+  BLUE = 3;
+  WHITE = 4;
+  GREY = 5;
+  YELLOW = 6;
+}
+
+message Car {
+  string id = 1;
+  string brand = 2;
+  string model = 3;
+  double price = 4;
+  int32 year = 5;
+  string plate = 6;
+  CarColorProto color = 7;
+}

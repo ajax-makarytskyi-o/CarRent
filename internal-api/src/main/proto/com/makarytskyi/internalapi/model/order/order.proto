@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package com.makarytskyi.internalapi.model.order;
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+
+message Order {
+  optional string id = 1;
+  string carId = 2;
+  string userId = 3;
+  google.protobuf.Timestamp from = 4;
+  google.protobuf.Timestamp to = 5;
+  double price = 6;
+}

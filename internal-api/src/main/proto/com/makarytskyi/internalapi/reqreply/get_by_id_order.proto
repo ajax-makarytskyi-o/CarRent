@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package com.makarytskyi.rentcar.proto.reqreply.find_by_id;
+
+import "com/makarytskyi/internalapi/model/order/order.proto";
+import "com/makarytskyi/internalapi/model/order/aggregated_order.proto";
+import "com/makarytskyi/internalapi/error/error.proto";
+
+option java_multiple_files = true;
+
+message GetByIdOrderProtoRequest {
+  string id = 1;
+}
+
+message GetByIdOrderProtoResponse {
+  oneof response {
+    Success success = 1;
+    internalapi.error.Error error = 2;
+  }
+}
+
+message Success {
+  internalapi.model.order.AggregatedOrder order = 1;
+}

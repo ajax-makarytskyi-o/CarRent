@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package com.makarytskyi.internalapi.model.order;
+
+import "google/protobuf/timestamp.proto";
+import "com/makarytskyi/internalapi/model/car/car.proto";
+import "com/makarytskyi/internalapi/model/user/user.proto";
+
+option java_multiple_files = true;
+
+message AggregatedOrder {
+  optional string id = 1;
+  car.Car car = 2;
+  user.User user = 3;
+  google.protobuf.Timestamp from = 4;
+  google.protobuf.Timestamp to = 5;
+  double price = 6;
+}

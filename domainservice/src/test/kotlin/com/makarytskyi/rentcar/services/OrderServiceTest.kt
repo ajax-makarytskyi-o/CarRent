@@ -179,6 +179,7 @@ internal class OrderServiceTest {
         val user = randomUser()
         val request = createOrderRequest(car, user)
         every { userRepository.findById(user.id.toString()) } returns Mono.empty()
+        every { carRepository.findById(car.id.toString()) } returns car.toMono()
 
         // WHEN // THEN
         orderService.create(request)

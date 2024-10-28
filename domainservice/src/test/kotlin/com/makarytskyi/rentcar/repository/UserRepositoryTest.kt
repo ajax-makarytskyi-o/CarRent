@@ -83,7 +83,7 @@ internal class UserRepositoryTest : ContainerBase {
     fun `findByPhoneNumber should return user found by phone number`() {
         // GIVEN
         val phoneNumber = "15025025"
-        val user = userRepository.create(randomUser().copy(phoneNumber = phoneNumber)).block()
+        val user = userRepository.create(randomUser().copy(phoneNumber = phoneNumber)).block()!!
 
         // WHEN
         val foundUser = userRepository.findByPhoneNumber(phoneNumber)
@@ -113,7 +113,7 @@ internal class UserRepositoryTest : ContainerBase {
     fun `findByEmail should return user found by email`() {
         // GIVEN
         val email = "testing@email.com"
-        val user = userRepository.create(randomUser().copy(email = email)).block()
+        val user = userRepository.create(randomUser().copy(email = email)).block()!!
 
         // WHEN
         val foundUser = userRepository.findByEmail(email)

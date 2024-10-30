@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.makarytskyi.rentcar.proto.reqreply.find_all;
+package com.makarytskyi.internalapi.reqreply;
 
 import "com/makarytskyi/internalapi/model/order/order.proto";
 import "com/makarytskyi/internalapi/model/order/aggregated_order.proto";

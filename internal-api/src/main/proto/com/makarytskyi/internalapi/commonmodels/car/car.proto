@@ -5,13 +5,14 @@ package com.makarytskyi.internalapi.model.car;
 option java_multiple_files = true;
 
 enum CarColorProto {
-  BLACK = 0;
-  RED = 1;
-  GREEN = 2;
-  BLUE = 3;
-  WHITE = 4;
-  GREY = 5;
-  YELLOW = 6;
+  CAR_COLOR_PROTO_UNSPECIFIED = 0;
+  CAR_COLOR_PROTO_RED = 1;
+  CAR_COLOR_PROTO_GREEN = 2;
+  CAR_COLOR_PROTO_BLUE = 3;
+  CAR_COLOR_PROTO_WHITE = 4;
+  CAR_COLOR_PROTO_GREY = 5;
+  CAR_COLOR_PROTO_YELLOW = 6;
+  CAR_COLOR_PROTO_BLACK = 7;
 }
 
 message Car {
@@ -19,7 +20,7 @@ message Car {
   string brand = 2;
   string model = 3;
   double price = 4;
-  int32 year = 5;
+  uint32 year = 5;
   string plate = 6;
   CarColorProto color = 7;
 }

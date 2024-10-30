@@ -9,7 +9,7 @@ import "com/makarytskyi/internalapi/model/user/user.proto";
 option java_multiple_files = true;
 
 message AggregatedOrder {
-  optional string id = 1;
+  string id = 1;
   car.Car car = 2;
   user.User user = 3;
   google.protobuf.Timestamp from = 4;

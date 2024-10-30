@@ -9,7 +9,7 @@ data class AggregatedOrderResponse(
     val id: String,
     val car: CarResponse,
     val user: UserResponse,
-    val from: Date?,
-    val to: Date?,
-    val price: BigDecimal?,
+    val from: Date,
+    val to: Date,
+    val price: BigDecimal,
 )

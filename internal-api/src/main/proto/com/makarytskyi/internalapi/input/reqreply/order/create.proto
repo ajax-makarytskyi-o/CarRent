@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.makarytskyi.internalapi.reqreply.create;
+package com.makarytskyi.internalapi.reqreply;
 
 import "com/makarytskyi/internalapi/model/order/order.proto";
 import "com/makarytskyi/internalapi/error/error.proto";

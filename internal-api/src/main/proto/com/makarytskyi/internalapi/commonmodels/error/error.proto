@@ -5,9 +5,9 @@ package com.makarytskyi.internalapi.error;
 option java_multiple_files = true;
 
 enum ExceptionType {
-  EXCEPTION = 0;
-  NOT_FOUND = 1;
-  ILLEGAL_ARGUMENT = 2;
+  EXCEPTION_TYPE_EXCEPTION = 0;
+  EXCEPTION_TYPE_NOT_FOUND = 1;
+  EXCEPTION_TYPE_ILLEGAL_ARGUMENT = 2;
 }
 
 message Error {

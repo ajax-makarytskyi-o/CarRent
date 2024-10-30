@@ -7,11 +7,11 @@ data class CarResponse(
     val brand: String,
     val model: String,
     val price: BigDecimal,
-    val year: Int?,
+    val year: Int,
     val plate: String,
-    val color: CarColor?,
+    val color: CarColor,
 ) {
     enum class CarColor {
-        RED, GREEN, BLUE, BLACK, WHITE, GREY, YELLOW
+        RED, GREEN, BLUE, BLACK, WHITE, GREY, YELLOW, UNSPECIFIED
     }
 }

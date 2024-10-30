@@ -1,19 +1,18 @@
 syntax = "proto3";
 
-package com.makarytskyi.rentcar.proto.reqreply.patch;
+package com.makarytskyi.internalapi.reqreply.find_by_id;
 
-import "com/makarytskyi/internalapi/model/order/patch.proto";
 import "com/makarytskyi/internalapi/model/order/order.proto";
+import "com/makarytskyi/internalapi/model/order/aggregated_order.proto";
 import "com/makarytskyi/internalapi/error/error.proto";
 
 option java_multiple_files = true;
 
-message PatchOrderProtoRequest {
+message GetByIdOrderProtoRequest {
   string id = 1;
-  internalapi.model.order.Patch patch = 2;
 }
 
-message PatchOrderProtoResponse {
+message GetByIdOrderProtoResponse {
   oneof response {
     Success success = 1;
     internalapi.error.Error error = 2;
@@ -21,5 +20,5 @@ message PatchOrderProtoResponse {
 }
 
 message Success {
-  internalapi.model.order.Order order = 1;
+  internalapi.model.order.AggregatedOrder order = 1;
 }

@@ -19,7 +19,7 @@ data class MongoCar(
     var color: CarColor? = null,
 ) {
     enum class CarColor {
-        RED, GREEN, BLUE, BLACK, WHITE, GREY, YELLOW
+        RED, GREEN, BLUE, BLACK, WHITE, GREY, YELLOW, UNSPECIFIED
     }
 
     companion object {

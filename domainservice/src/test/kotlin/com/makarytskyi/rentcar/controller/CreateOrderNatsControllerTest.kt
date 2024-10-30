@@ -1,75 +1,68 @@
 package com.makarytskyi.rentcar.controller
 
-import com.makarytskyi.rentcar.controller.nats.order.CreateOrderNatsController
+import com.makarytskyi.core.exception.NotFoundException
+import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
+import com.makarytskyi.internalapi.subject.NatsSubject.Order.CREATE
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
-import com.makarytskyi.rentcar.fixtures.OrderFixture.createOrderEntity
-import com.makarytskyi.rentcar.fixtures.OrderFixture.createOrderRequest
-import com.makarytskyi.rentcar.fixtures.OrderFixture.responseOrder
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.createOrderProtoRequest
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failCreateProtoResponse
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.successCreateProtoResponse
-import com.makarytskyi.rentcar.service.OrderService
-import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.createOrderRequest
+import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failureCreateResponse
+import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.successfulCreateResponse
+import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.repository.ContainerBase
+import com.makarytskyi.rentcar.repository.UserRepository
 import io.nats.client.Connection
-import org.bson.types.ObjectId
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import reactor.kotlin.core.publisher.toMono
-import reactor.kotlin.test.test
+import org.springframework.beans.factory.annotation.Autowired
 
-@ExtendWith(MockKExtension::class)
-class CreateOrderNatsControllerTest {
+class CreateOrderNatsControllerTest : ContainerBase {
 
-    @MockK
-    lateinit var orderService: OrderService
-
-    @MockK
+    @Autowired
     lateinit var connection: Connection
 
-    @InjectMockKs
-    lateinit var createController: CreateOrderNatsController
+    @Autowired
+    internal lateinit var carRepository: CarRepository
+
+    @Autowired
+    internal lateinit var userRepository: UserRepository
 
     @Test
     fun `create should return success message with saved order`() {
         // GIVEN
-        val car = randomCar()
-        val user = randomUser()
-        val request = createOrderRequest(car, user)
-        val protoRequest = createOrderProtoRequest(request)
-        val response = responseOrder(createOrderEntity(request).copy(id = ObjectId()), car)
-        val protoResponse = successCreateProtoResponse(response)
+        val car = carRepository.create(randomCar()).block()!!
+        val user = userRepository.create(randomUser()).block()!!
+
+        val protoRequest = createOrderRequest(car, user)
+        val orderResponse = successfulCreateResponse(
+            protoRequest,
+            car.price!!.toDouble()
+        ).toBuilder().successBuilder.orderBuilder.clearId().build()
 
         //WHEN
-        every { orderService.create(request) } returns response.toMono()
+        val response = connection.request(CREATE, protoRequest.toByteArray())
 
         //THEN
-        createController.handle(protoRequest)
-            .test()
-            .expectNext(protoResponse)
-            .verifyComplete()
+        val data = CreateOrderResponse.parser().parseFrom(response.get().data)
+        assertNotNull(data.success.order.id)
+        assertEquals(orderResponse, data.toBuilder().successBuilder.orderBuilder.clearId().build())
     }
 
     @Test
-    fun `create should return error message if service threw exception`() {
+    fun `create should return error message if user doesn't exist`() {
         // GIVEN
         val car = randomCar()
-        val user = randomUser()
-        val request = createOrderRequest(car, user)
-        val protoRequest = createOrderProtoRequest(request)
-        val exception = IllegalArgumentException("Car was not found")
-        val protoResponse = failCreateProtoResponse(exception)
+        val user = randomUser().copy(id = null)
+        val protoRequest = createOrderRequest(car, user)
+        val exception = NotFoundException("User with id null is not found")
+        val protoResponse = failureCreateResponse(exception)
 
         //WHEN
-        every { orderService.create(request) } returns exception.toMono()
+        val natsResponse = connection.request(CREATE, protoRequest.toByteArray())
 
         //THEN
-        createController.handle(protoRequest)
-            .test()
-            .expectNext(protoResponse)
-            .verifyComplete()
+        val data = CreateOrderResponse.parser().parseFrom(natsResponse.get().data)
+        assertEquals(protoResponse, data)
     }
 }

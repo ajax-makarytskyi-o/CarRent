@@ -1,18 +1,20 @@
 package com.makarytskyi.rentcar.mapper
 
-import com.makarytskyi.core.dto.user.UserResponse
-import com.makarytskyi.internalapi.model.user.User
+import com.makarytskyi.core.dto.user.UserResponseDto
+import com.makarytskyi.internalapi.commonmodels.user.User
 import com.makarytskyi.rentcar.model.MongoUser
 
-fun UserResponse.toProto(): User = User.newBuilder()
-    .setId(this.id)
-    .setName(this.name)
-    .setEmail(this.email)
-    .setPhoneNumber(this.phoneNumber)
-    .setCity(this.city)
+fun UserResponseDto.toProto(): User = User.newBuilder()
+    .apply {
+        setId(this@toProto.id)
+        setName(this@toProto.name)
+        setEmail(this@toProto.email)
+        setPhoneNumber(this@toProto.phoneNumber)
+        setCity(this@toProto.city)
+    }
     .build()
 
-fun MongoUser.toResponse(): UserResponse = UserResponse(
+fun MongoUser.toResponse(): UserResponseDto = UserResponseDto(
     id = id?.toString().orEmpty(),
     name = name.orEmpty(),
     email = email.orEmpty(),

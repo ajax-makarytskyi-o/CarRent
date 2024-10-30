@@ -5,10 +5,13 @@ import com.makarytskyi.rentcar.controller.nats.order.CreateOrderNatsController
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import io.nats.client.Connection
 import io.nats.client.Dispatcher
+import io.nats.client.MessageHandler
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
@@ -21,7 +24,7 @@ class NatsInitializerBeanPostProcessorTest {
     @MockK
     lateinit var createController: CreateOrderNatsController
 
-    val natInitializer: NatsInitializerBeanPostProcessor = NatsInitializerBeanPostProcessor(natsConnection)
+    val natInitializer: NatsInitializerBeanPostProcessor = NatsInitializerBeanPostProcessor(dispatcher)
 
     @Test
     fun `beanPostProcessor should create dispatcher and subscribe on subject if bean is NatsController`() {
@@ -29,14 +32,14 @@ class NatsInitializerBeanPostProcessorTest {
         val queueGroup = "create_order"
         every { createController.subject } returns CREATE
         every { createController.queueGroup } returns queueGroup
-        every { natsConnection.createDispatcher(any()) } returns dispatcher
+        val messageHandlerSlot = slot<MessageHandler>()
+        every { dispatcher.subscribe(any(), any(), capture(messageHandlerSlot)) } returns mockk()
 
         //WHEN
         natInitializer.postProcessAfterInitialization(createController, "createController")
 
         //THEN
-        verify(exactly = 1) { natsConnection.createDispatcher(any()) }
-        verify(exactly = 1) { dispatcher.subscribe(CREATE, queueGroup) }
+        verify(exactly = 1) { dispatcher.subscribe(CREATE, queueGroup, any()) }
     }
 
     @Test

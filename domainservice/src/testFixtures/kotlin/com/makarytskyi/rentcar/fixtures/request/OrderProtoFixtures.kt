@@ -1,101 +1,136 @@
 package com.makarytskyi.rentcar.fixtures.request
 
-import com.makarytskyi.core.dto.order.AggregatedOrderResponse
-import com.makarytskyi.core.dto.order.CreateOrderRequest
-import com.makarytskyi.core.dto.order.OrderResponse
-import com.makarytskyi.core.dto.order.UpdateOrderRequest
-import com.makarytskyi.internalapi.reqreply.create.CreateOrderProtoRequest
-import com.makarytskyi.internalapi.reqreply.create.CreateOrderProtoResponse
+import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
+import com.makarytskyi.core.dto.order.OrderResponseDto
+import com.makarytskyi.core.exception.NotFoundException
+import com.makarytskyi.internalapi.commonmodels.error.Error
+import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersRequest
+import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
+import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
+import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
 import com.makarytskyi.rentcar.mapper.toProto
-import com.makarytskyi.rentcar.proto.reqreply.delete.DeleteOrderProtoRequest
-import com.makarytskyi.rentcar.proto.reqreply.find_all.FindAllOrdersProtoRequest
-import com.makarytskyi.rentcar.proto.reqreply.find_by_id.GetByIdOrderProtoRequest
-import com.makarytskyi.rentcar.proto.reqreply.find_by_id.GetByIdOrderProtoResponse
-import com.makarytskyi.rentcar.proto.reqreply.patch.PatchOrderProtoRequest
-import com.makarytskyi.rentcar.proto.reqreply.patch.PatchOrderProtoResponse
+import com.makarytskyi.rentcar.model.MongoCar
+import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.util.dateToTimestamp
 
 object OrderProtoFixtures {
-    fun createOrderProtoRequest(request: CreateOrderRequest): CreateOrderProtoRequest =
-        CreateOrderProtoRequest.newBuilder()
+    fun createOrderRequest(mongoCar: MongoCar, mongoUser: MongoUser): CreateOrderRequest =
+        CreateOrderRequest.newBuilder()
             .apply {
-                orderBuilder.setCarId(request.carId)
-                orderBuilder.setUserId(request.userId)
-                orderBuilder.setFrom(dateToTimestamp(request.from))
-                orderBuilder.setTo(dateToTimestamp(request.to))
+                orderBuilder.apply {
+                    carId = mongoCar.id.toString()
+                    userId = mongoUser.id.toString()
+                    from = dateToTimestamp(monthAfter)
+                    to = dateToTimestamp(monthAndDayAfter)
+                }
             }
             .build()
 
-    fun successCreateProtoResponse(response: OrderResponse): CreateOrderProtoResponse = CreateOrderProtoResponse
+    fun successfulCreateResponse(response: CreateOrderRequest, price: Double): CreateOrderResponse = CreateOrderResponse
         .newBuilder()
         .apply {
-            successBuilder.orderBuilder.setId(response.id)
-            successBuilder.orderBuilder.setCarId(response.carId)
-            successBuilder.orderBuilder.setUserId(response.userId)
-            successBuilder.orderBuilder.setFrom(dateToTimestamp(response.from!!))
-            successBuilder.orderBuilder.setTo(dateToTimestamp(response.to!!))
-            successBuilder.orderBuilder.setPrice(response.price!!.toDouble())
+            successBuilder.orderBuilder.apply {
+                setId(response.order.id)
+                setCarId(response.order.carId)
+                setUserId(response.order.userId)
+                setFrom(response.order.from)
+                setTo(response.order.to)
+                setPrice(price)
+            }
         }
         .build()
 
-    fun failCreateProtoResponse(exception: Exception): CreateOrderProtoResponse = CreateOrderProtoResponse.newBuilder()
-        .apply { errorBuilder.setMessage(exception.message).setExceptionType(exception.toProto()) }
-        .build()
-
-    fun successPatchProtoResponse(response: OrderResponse): PatchOrderProtoResponse = PatchOrderProtoResponse
-        .newBuilder()
+    fun failureCreateResponse(exception: Exception): CreateOrderResponse = CreateOrderResponse.newBuilder()
         .apply {
-            successBuilder.orderBuilder.setId(response.id)
-            successBuilder.orderBuilder.setCarId(response.carId)
-            successBuilder.orderBuilder.setUserId(response.userId)
-            successBuilder.orderBuilder.setFrom(dateToTimestamp(response.from!!))
-            successBuilder.orderBuilder.setTo(dateToTimestamp(response.to!!))
-            successBuilder.orderBuilder.setPrice(response.price!!.toDouble())
+            failureBuilder.apply {
+                setMessage(exception.message)
+                when (exception) {
+                    is NotFoundException -> setNotFound(Error.getDefaultInstance())
+                    is IllegalArgumentException -> setIllegalArgument(Error.getDefaultInstance())
+                }
+            }
         }
         .build()
 
-    fun failPatchProtoResponse(exception: Exception): PatchOrderProtoResponse = PatchOrderProtoResponse.newBuilder()
-        .apply { errorBuilder.setMessage(exception.message).setExceptionType(exception.toProto()) }
+    fun successfulPatchResponse(response: OrderResponseDto): PatchOrderResponse = PatchOrderResponse
+        .newBuilder()
+        .apply {
+            successBuilder.orderBuilder.apply {
+                setId(response.id)
+                setCarId(response.carId)
+                setUserId(response.userId)
+                setFrom(dateToTimestamp(response.from))
+                setTo(dateToTimestamp(response.to))
+                setPrice(response.price.toDouble())
+            }
+        }
         .build()
 
-    fun updateOrderProtoRequest(id: String, request: UpdateOrderRequest): PatchOrderProtoRequest =
-        PatchOrderProtoRequest.newBuilder()
+    fun failurePatchResponse(exception: Exception): PatchOrderResponse = PatchOrderResponse.newBuilder()
+        .apply {
+            failureBuilder.apply {
+                setMessage(exception.message)
+                when (exception) {
+                    is NotFoundException -> setNotFound(Error.getDefaultInstance())
+                    is IllegalArgumentException -> setIllegalArgument(Error.getDefaultInstance())
+                }
+            }
+        }
+        .build()
+
+    fun updateOrderRequest(id: String): PatchOrderRequest =
+        PatchOrderRequest.newBuilder()
             .apply {
                 setId(id)
-                patchBuilder.setFrom(dateToTimestamp(request.from!!))
-                patchBuilder.setTo(dateToTimestamp(request.to!!))
+                patchBuilder.setFrom(dateToTimestamp(monthAfter))
+                patchBuilder.setTo(dateToTimestamp(monthAndDayAfter))
             }
             .build()
 
-    fun getByIdOrderProtoRequest(id: String): GetByIdOrderProtoRequest = GetByIdOrderProtoRequest
+    fun getByIdOrderRequest(id: String): GetByIdOrderRequest = GetByIdOrderRequest
         .newBuilder()
         .setId(id)
         .build()
 
-    fun successGetByIdProtoResponse(response: AggregatedOrderResponse): GetByIdOrderProtoResponse =
-        GetByIdOrderProtoResponse
+    fun successGetByIdResponse(response: AggregatedOrderResponseDto): GetByIdOrderResponse =
+        GetByIdOrderResponse
             .newBuilder()
             .apply {
-                successBuilder.orderBuilder.setId(response.id)
-                successBuilder.orderBuilder.setCar(response.car.toProto())
-                successBuilder.orderBuilder.setUser(response.user.toProto())
-                successBuilder.orderBuilder.setFrom(dateToTimestamp(response.from!!))
-                successBuilder.orderBuilder.setTo(dateToTimestamp(response.to!!))
-                successBuilder.orderBuilder.setPrice(response.price!!.toDouble())
+                successBuilder.orderBuilder.apply {
+                    setId(response.id)
+                    setCar(response.car.toProto())
+                    setUser(response.user.toProto())
+                    setFrom(dateToTimestamp(response.from))
+                    setTo(dateToTimestamp(response.to))
+                    setPrice(response.price.toDouble())
+                }
             }
             .build()
 
-    fun failGetByIdProtoResponse(exception: Exception): GetByIdOrderProtoResponse =
-        GetByIdOrderProtoResponse.newBuilder()
-            .apply { errorBuilder.setMessage(exception.message).setExceptionType(exception.toProto()) }
+    fun failureGetByIdResponse(exception: Exception): GetByIdOrderResponse =
+        GetByIdOrderResponse.newBuilder()
+            .apply {
+                failureBuilder.apply {
+                    setMessage(exception.message)
+                    when (exception) {
+                        is NotFoundException -> setNotFound(Error.getDefaultInstance())
+                    }
+                }
+            }
             .build()
 
-    fun deleteOrderProtoRequest(id: String): DeleteOrderProtoRequest =
-        DeleteOrderProtoRequest.newBuilder()
+    fun deleteOrderRequest(id: String): DeleteOrderRequest =
+        DeleteOrderRequest.newBuilder()
             .setId(id)
             .build()
 
-    fun findAllOrderProtoRequest(page: Int, size: Int): FindAllOrdersProtoRequest = FindAllOrdersProtoRequest
+    fun findAllOrderRequest(page: Int, size: Int): FindAllOrdersRequest = FindAllOrdersRequest
         .newBuilder()
         .setPage(page)
         .setSize(size)

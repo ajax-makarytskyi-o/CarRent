@@ -56,7 +56,7 @@ internal class RepairingServiceImpl(
         repairingRepository.findByStatusAndCarId(status, carId).map { RepairingResponse.from(it) }
 
     private fun validateCarExists(carId: String): Mono<MongoCar> = carRepository.findById(carId)
-        .switchIfEmpty { Mono.error(NotFoundException("Car in repairing with $carId is not found")) }
+        .switchIfEmpty { Mono.error(NotFoundException("Car in repairing with id $carId is not found")) }
 
     private fun validateDate(date: Date?) {
         require(date?.after(Date()) == true) { "Date must be in future" }

@@ -1,80 +1,83 @@
 package com.makarytskyi.rentcar.controller
 
-import com.makarytskyi.core.dto.order.AggregatedOrderResponse
-import com.makarytskyi.internalapi.model.order.AggregatedOrder
-import com.makarytskyi.rentcar.controller.nats.order.FindAllOrdersNatsController
+import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
+import com.makarytskyi.internalapi.commonmodels.order.AggregatedOrder
+import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
+import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_ALL
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
-import com.makarytskyi.rentcar.fixtures.OrderFixture.responseAggregatedOrder
+import com.makarytskyi.rentcar.fixtures.OrderFixture.responseAggregatedOrderDto
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.findAllOrderProtoRequest
+import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.findAllOrderRequest
 import com.makarytskyi.rentcar.mapper.toProto
-import com.makarytskyi.rentcar.service.OrderService
-import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
+import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.repository.ContainerBase
+import com.makarytskyi.rentcar.repository.OrderRepository
+import com.makarytskyi.rentcar.repository.UserRepository
 import io.mockk.junit5.MockKExtension
 import io.nats.client.Connection
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import reactor.core.publisher.Flux
-import reactor.kotlin.core.publisher.toFlux
+import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.test.test
 
 @ExtendWith(MockKExtension::class)
-class FindAllOrdersNatsControllerTest {
+class FindAllOrdersNatsControllerTest : ContainerBase {
 
-    @MockK
-    lateinit var orderService: OrderService
-
-    @MockK
+    @Autowired
     lateinit var connection: Connection
 
-    @InjectMockKs
-    lateinit var findAllController: FindAllOrdersNatsController
+    @Autowired
+    internal lateinit var carRepository: CarRepository
+
+    @Autowired
+    internal lateinit var userRepository: UserRepository
+
+    @Autowired
+    internal lateinit var orderRepository: OrderRepository
 
     @Test
-    fun `create should return success message with saved order`() {
+    fun `findAll should return success message with list of orders`() {
         // GIVEN
         val page = 0
         val size = 10
-        val car = randomCar()
-        val user = randomUser()
-        val order = aggregatedOrder(randomOrder(car.id, user.id), car, user)
-        val protoRequest = findAllOrderProtoRequest(page, size)
-        val orders: List<AggregatedOrderResponse> = listOf(responseAggregatedOrder(order, car))
+        val car = carRepository.create(randomCar()).block()!!
+        val user = userRepository.create(randomUser()).block()!!
+        val order = orderRepository.create(randomOrder(car.id, user.id)).block()!!
+        val aggregatedOrder = aggregatedOrder(order, car, user)
+
+        val findAllRequest = findAllOrderRequest(page, size)
+        val orders: List<AggregatedOrderResponseDto> = listOf(responseAggregatedOrderDto(aggregatedOrder, car))
         val protoOrders: List<AggregatedOrder> = orders.map { it.toProto() }
 
         //WHEN
-        every { orderService.findAll(page, size) } returns orders.toFlux()
+        val response = connection.request(FIND_ALL, findAllRequest.toByteArray())
 
         //THEN
-        findAllController.handle(protoRequest)
+        val responseOrders = FindAllOrdersResponse.parser().parseFrom(response.get().data)
+        assertThat(responseOrders.success.ordersList).containsAll(protoOrders)
+        orderRepository.findFullAll(page, size).collectList()
             .test()
             .assertNext {
-                assertThat(it.success.ordersList).containsAll(protoOrders)
+                assertThat(it).contains(aggregatedOrder)
             }
             .verifyComplete()
     }
 
     @Test
-    fun `create should return error message if service threw exception`() {
+    fun `findAll should return message with empty list if service returned empty list`() {
         // GIVEN
-        val page = 0
+        val page = 3
         val size = 10
-        val protoRequest = findAllOrderProtoRequest(page, size)
+        val findAllRequest = findAllOrderRequest(page, size)
 
         //WHEN
-        every { orderService.findAll(page, size) } returns Flux.empty()
+        val response = connection.request(FIND_ALL, findAllRequest.toByteArray())
 
         //THEN
-        findAllController.handle(protoRequest)
-            .test()
-            .assertNext {
-                assertThat(it.success.ordersList).hasSize(0)
-            }
-            .verifyComplete()
+        val responseOrders = FindAllOrdersResponse.parser().parseFrom(response.get().data)
+        assertThat(responseOrders.success.ordersList).hasSize(0)
     }
 }

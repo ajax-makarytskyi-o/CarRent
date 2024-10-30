@@ -1,75 +1,80 @@
 package com.makarytskyi.rentcar.controller
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.rentcar.controller.nats.order.PatchOrderNatsController
+import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
+import com.makarytskyi.internalapi.subject.NatsSubject.Order.PATCH
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
-import com.makarytskyi.rentcar.fixtures.OrderFixture.responseOrder
-import com.makarytskyi.rentcar.fixtures.OrderFixture.updateOrderRequest
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failPatchProtoResponse
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.successPatchProtoResponse
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.updateOrderProtoRequest
-import com.makarytskyi.rentcar.service.OrderService
-import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
+import com.makarytskyi.rentcar.fixtures.OrderFixture.responseOrderDto
+import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
+import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failurePatchResponse
+import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.successfulPatchResponse
+import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.updateOrderRequest
+import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.repository.ContainerBase
+import com.makarytskyi.rentcar.repository.OrderRepository
+import com.makarytskyi.rentcar.repository.UserRepository
+import com.makarytskyi.rentcar.util.timestampToDate
 import io.mockk.junit5.MockKExtension
 import io.nats.client.Connection
+import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import reactor.kotlin.core.publisher.toMono
-import reactor.kotlin.test.test
+import org.springframework.beans.factory.annotation.Autowired
 
 @ExtendWith(MockKExtension::class)
-class PatchOrderNatsControllerTest {
+class PatchOrderNatsControllerTest : ContainerBase {
 
-    @MockK
-    lateinit var orderService: OrderService
-
-    @MockK
+    @Autowired
     lateinit var connection: Connection
 
-    @InjectMockKs
-    lateinit var patchController: PatchOrderNatsController
+    @Autowired
+    internal lateinit var carRepository: CarRepository
+
+    @Autowired
+    internal lateinit var userRepository: UserRepository
+
+    @Autowired
+    internal lateinit var orderRepository: OrderRepository
 
     @Test
-    fun `create should return success message with saved order`() {
+    fun `patch should return success message with updated order`() {
         // GIVEN
-        val id = ObjectId().toString()
-        val car = randomCar()
-        val request = updateOrderRequest()
-        val protoRequest = updateOrderProtoRequest(id, request)
-        val updatedOrder = randomOrder(ObjectId(), ObjectId()).copy(from = request.from, to = request.to)
-        val response = responseOrder(updatedOrder, car).copy(id = id)
-        val protoResponse = successPatchProtoResponse(response)
+        val car = carRepository.create(randomCar()).block()!!
+        val user = userRepository.create(randomUser()).block()!!
+        val order = orderRepository.create(randomOrder(car.id, user.id)).block()!!
+
+        val protoRequest = updateOrderRequest(order.id.toString())
+        val updatedOrder =
+            randomOrder(car.id, user.id).copy(
+                from = timestampToDate(protoRequest.patch.from),
+                to = timestampToDate(protoRequest.patch.to),
+            )
+        val responseDto = responseOrderDto(updatedOrder, car).copy(id = order.id.toString())
+        val protoResponse = successfulPatchResponse(responseDto)
 
         //WHEN
-        every { orderService.patch(id, request) } returns response.toMono()
+        val response = connection.request(PATCH, protoRequest.toByteArray())
 
         //THEN
-        patchController.handle(protoRequest)
-            .test()
-            .expectNext(protoResponse)
-            .verifyComplete()
+        val data = PatchOrderResponse.parser().parseFrom(response.get().data)
+        assertEquals(protoResponse, data)
     }
 
     @Test
-    fun `create should return error message if service threw exception`() {
+    fun `create should return error message if updating order isn't found`() {
         // GIVEN
         val id = ObjectId().toString()
-        val request = updateOrderRequest()
-        val exception = NotFoundException("Order was not found")
-        val protoRequest = updateOrderProtoRequest(id, request)
-        val protoResponse = failPatchProtoResponse(exception)
+        val exception = NotFoundException("Order with id $id is not found")
+        val protoRequest = updateOrderRequest(id)
+        val protoResponse = failurePatchResponse(exception)
 
         //WHEN
-        every { orderService.patch(id, request) } returns exception.toMono()
+        val response = connection.request(PATCH, protoRequest.toByteArray())
 
         //THEN
-        patchController.handle(protoRequest)
-            .test()
-            .expectNext(protoResponse)
-            .verifyComplete()
+        val data = PatchOrderResponse.parser().parseFrom(response.get().data)
+        assertEquals(protoResponse, data)
     }
 }

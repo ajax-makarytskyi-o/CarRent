@@ -1,9 +1,9 @@
 package com.makarytskyi.rentcar.service.impl
 
-import com.makarytskyi.core.dto.order.AggregatedOrderResponse
-import com.makarytskyi.core.dto.order.CreateOrderRequest
-import com.makarytskyi.core.dto.order.OrderResponse
-import com.makarytskyi.core.dto.order.UpdateOrderRequest
+import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
+import com.makarytskyi.core.dto.order.CreateOrderRequestDto
+import com.makarytskyi.core.dto.order.OrderResponseDto
+import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.rentcar.annotation.InvocationTracker
 import com.makarytskyi.rentcar.mapper.toEntity
@@ -33,15 +33,15 @@ internal class OrderServiceImpl(
     private val userRepository: UserRepository,
 ) : OrderService {
 
-    override fun getById(id: String): Mono<AggregatedOrderResponse> =
+    override fun getById(id: String): Mono<AggregatedOrderResponseDto> =
         orderRepository.findFullById(id)
             .switchIfEmpty { Mono.error(NotFoundException("Order with id $id is not found")) }
             .map { it.toResponse() }
 
-    override fun findAll(page: Int, size: Int): Flux<AggregatedOrderResponse> =
+    override fun findAll(page: Int, size: Int): Flux<AggregatedOrderResponseDto> =
         orderRepository.findFullAll(page, size).map { it.toResponse() }
 
-    override fun create(createOrderRequest: CreateOrderRequest): Mono<OrderResponse> {
+    override fun create(createOrderRequest: CreateOrderRequestDto): Mono<OrderResponseDto> {
         return createOrderRequest.toMono()
             .doOnNext { validateDates(it.from, it.to) }
             .flatMap {
@@ -61,22 +61,22 @@ internal class OrderServiceImpl(
 
     override fun deleteById(id: String): Mono<Unit> = orderRepository.deleteById(id)
 
-    override fun findByUser(userId: String): Flux<OrderResponse> = orderRepository.findByUserId(userId)
+    override fun findByUser(userId: String): Flux<OrderResponseDto> = orderRepository.findByUserId(userId)
         .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
         .map { (order, carPrice) -> order.toResponse(carPrice) }
 
-    override fun findByCar(carId: String): Flux<OrderResponse> = orderRepository.findByCarId(carId)
+    override fun findByCar(carId: String): Flux<OrderResponseDto> = orderRepository.findByCarId(carId)
         .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
         .map { (order, carPrice) -> order.toResponse(carPrice) }
 
-    override fun findByCarAndUser(carId: String, userId: String): Flux<OrderResponse> =
+    override fun findByCarAndUser(carId: String, userId: String): Flux<OrderResponseDto> =
         orderRepository.findByCarIdAndUserId(carId, userId)
             .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
             .map { (order, carPrice) -> order.toResponse(carPrice) }
 
-    override fun patch(id: String, orderRequest: UpdateOrderRequest): Mono<OrderResponse> =
+    override fun patch(id: String, orderRequest: UpdateOrderRequestDto): Mono<OrderResponseDto> =
         orderRepository.findFullById(id)
-            .switchIfEmpty { Mono.error(NotFoundException("Order with $id is not found")) }
+            .switchIfEmpty { Mono.error(NotFoundException("Order with id $id is not found")) }
             .flatMap { order ->
                 val from = orderRequest.from ?: order.from
                 val to = orderRequest.to ?: order.to
@@ -94,7 +94,7 @@ internal class OrderServiceImpl(
     }
 
     private fun validateUserExists(userId: String) = userRepository.findById(userId)
-        .switchIfEmpty { Mono.error(IllegalArgumentException("User with id $userId is not found")) }
+        .switchIfEmpty { Mono.error(NotFoundException("User with id $userId is not found")) }
 
     private fun validateCarAvailability(carId: String, from: Date?, to: Date?): Mono<MongoOrder> {
         return carRepository.findById(carId)

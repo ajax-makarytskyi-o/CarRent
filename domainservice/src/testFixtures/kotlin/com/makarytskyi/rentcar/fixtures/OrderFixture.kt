@@ -1,9 +1,9 @@
 package com.makarytskyi.rentcar.fixtures
 
-import com.makarytskyi.core.dto.order.AggregatedOrderResponse
-import com.makarytskyi.core.dto.order.CreateOrderRequest
-import com.makarytskyi.core.dto.order.OrderResponse
-import com.makarytskyi.core.dto.order.UpdateOrderRequest
+import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
+import com.makarytskyi.core.dto.order.CreateOrderRequestDto
+import com.makarytskyi.core.dto.order.OrderResponseDto
+import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.rentcar.fixtures.Utils.getDateFromNow
 import com.makarytskyi.rentcar.mapper.toResponse
 import com.makarytskyi.rentcar.model.MongoCar
@@ -12,6 +12,7 @@ import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
 import java.math.BigDecimal
+import java.util.Date
 import org.bson.types.ObjectId
 
 object OrderFixture {
@@ -66,50 +67,50 @@ object OrderFixture {
         to = order.to,
     )
 
-    fun responseOrder(mongoOrder: MongoOrder, mongoCar: MongoCar) = OrderResponse(
+    fun responseOrderDto(mongoOrder: MongoOrder, mongoCar: MongoCar) = OrderResponseDto(
         id = mongoOrder.id.toString(),
         carId = mongoOrder.carId.toString(),
         userId = mongoOrder.userId.toString(),
-        from = mongoOrder.from,
-        to = mongoOrder.to,
-        price = mongoCar.price,
+        from = mongoOrder.from!!,
+        to = mongoOrder.to!!,
+        price = mongoCar.price!!,
     )
 
-    fun emptyResponseOrder() = OrderResponse(
+    fun emptyResponseOrderDto() = OrderResponseDto(
         id = "",
         carId = "",
         userId = "",
-        from = null,
-        to = null,
+        from = Date(),
+        to = Date(),
         price = BigDecimal.ZERO,
     )
 
-    fun responseAggregatedOrder(mongoOrder: AggregatedMongoOrder, mongoCar: MongoCar) = AggregatedOrderResponse(
+    fun responseAggregatedOrderDto(mongoOrder: AggregatedMongoOrder, mongoCar: MongoCar) = AggregatedOrderResponseDto(
         id = mongoOrder.id.toString(),
         car = mongoOrder.car!!.toResponse(),
         user = mongoOrder.user!!.toResponse(),
-        from = mongoOrder.from,
-        to = mongoOrder.to,
-        price = mongoCar.price,
+        from = mongoOrder.from!!,
+        to = mongoOrder.to!!,
+        price = mongoCar.price!!,
     )
 
-    fun emptyResponseAggregatedOrder() = AggregatedOrderResponse(
+    fun emptyResponseAggregatedOrderDto() = AggregatedOrderResponseDto(
         id = "",
         car = MongoCar().toResponse(),
         user = MongoUser().toResponse(),
-        from = null,
-        to = null,
+        from = Date(),
+        to = Date(),
         price = BigDecimal.ZERO,
     )
 
-    fun createOrderRequest(mongoCar: MongoCar, mongoUser: MongoUser) = CreateOrderRequest(
+    fun createOrderRequestDto(mongoCar: MongoCar, mongoUser: MongoUser) = CreateOrderRequestDto(
         carId = mongoCar.id.toString(),
         userId = mongoUser.id.toString(),
         from = monthAfter,
         to = monthAndDayAfter,
     )
 
-    fun createOrderEntity(request: CreateOrderRequest) = MongoOrder(
+    fun createOrderEntity(request: CreateOrderRequestDto) = MongoOrder(
         id = null,
         carId = ObjectId(request.carId),
         userId = ObjectId(request.userId),
@@ -119,17 +120,17 @@ object OrderFixture {
 
     fun createdOrder(mongoOrder: MongoOrder) = mongoOrder.copy(id = ObjectId())
 
-    fun updateOrderRequest() = UpdateOrderRequest(
+    fun updateOrderRequestDto() = UpdateOrderRequestDto(
         from = tomorrow,
         to = twoDaysAfter,
     )
 
-    fun orderPatch(request: UpdateOrderRequest) = MongoOrderPatch(
+    fun orderPatch(request: UpdateOrderRequestDto) = MongoOrderPatch(
         from = request.from,
         to = request.to,
     )
 
-    fun updatedOrder(oldMongoOrder: AggregatedMongoOrder, request: UpdateOrderRequest) =
+    fun updatedOrder(oldMongoOrder: AggregatedMongoOrder, request: UpdateOrderRequestDto) =
         MongoOrder(
             id = oldMongoOrder.id,
             carId = oldMongoOrder.car?.id,

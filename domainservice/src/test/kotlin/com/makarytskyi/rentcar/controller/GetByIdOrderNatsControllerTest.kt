@@ -1,74 +1,75 @@
 package com.makarytskyi.rentcar.controller
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.rentcar.controller.nats.order.GetByIdOrderNatsController
+import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
+import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_BY_ID
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
-import com.makarytskyi.rentcar.fixtures.OrderFixture.randomAggregatedOrder
-import com.makarytskyi.rentcar.fixtures.OrderFixture.responseAggregatedOrder
+import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
+import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
+import com.makarytskyi.rentcar.fixtures.OrderFixture.responseAggregatedOrderDto
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failGetByIdProtoResponse
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.getByIdOrderProtoRequest
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.successGetByIdProtoResponse
-import com.makarytskyi.rentcar.service.OrderService
-import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
+import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failureGetByIdResponse
+import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.getByIdOrderRequest
+import com.makarytskyi.rentcar.mapper.toProto
+import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.repository.ContainerBase
+import com.makarytskyi.rentcar.repository.OrderRepository
+import com.makarytskyi.rentcar.repository.UserRepository
 import io.mockk.junit5.MockKExtension
 import io.nats.client.Connection
+import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import reactor.kotlin.core.publisher.toMono
-import reactor.kotlin.test.test
+import org.springframework.beans.factory.annotation.Autowired
 
 @ExtendWith(MockKExtension::class)
-class GetByIdOrderNatsControllerTest {
+class GetByIdOrderNatsControllerTest : ContainerBase {
 
-    @MockK
-    lateinit var orderService: OrderService
-
-    @MockK
+    @Autowired
     lateinit var connection: Connection
 
-    @InjectMockKs
-    lateinit var getController: GetByIdOrderNatsController
+    @Autowired
+    internal lateinit var carRepository: CarRepository
+
+    @Autowired
+    internal lateinit var userRepository: UserRepository
+
+    @Autowired
+    internal lateinit var orderRepository: OrderRepository
 
     @Test
-    fun `create should return success message with saved order`() {
+    fun `getById should return success message with found order`() {
         // GIVEN
-        val id = ObjectId().toString()
-        val car = randomCar()
-        val user = randomUser()
-        val protoRequest = getByIdOrderProtoRequest(id)
-        val order = randomAggregatedOrder(car, user).copy(id = ObjectId())
-        val response = responseAggregatedOrder(order, car)
-        val protoResponse = successGetByIdProtoResponse(response)
+        val car = carRepository.create(randomCar()).block()!!
+        val user = userRepository.create(randomUser()).block()!!
+        val order = orderRepository.create(randomOrder(car.id, user.id)).block()!!
+        val aggregatedOrder = aggregatedOrder(order, car, user)
+
+        val getByIdRequest = getByIdOrderRequest(order.id.toString())
+        val expectedOrder = responseAggregatedOrderDto(aggregatedOrder, car).toProto()
 
         //WHEN
-        every { orderService.getById(id) } returns response.toMono()
+        val response = connection.request(FIND_BY_ID, getByIdRequest.toByteArray())
 
         //THEN
-        getController.handle(protoRequest)
-            .test()
-            .expectNext(protoResponse)
-            .verifyComplete()
+        val responseOrders = GetByIdOrderResponse.parser().parseFrom(response.get().data)
+        assertEquals(responseOrders.success.order, expectedOrder)
     }
 
     @Test
-    fun `create should return error message if service threw exception`() {
+    fun `getById should return error message if order isn't found`() {
         // GIVEN
         val id = ObjectId().toString()
-        val protoRequest = getByIdOrderProtoRequest(id)
+        val protoRequest = getByIdOrderRequest(id)
         val exception = NotFoundException("Order with id $id is not found")
-        val protoResponse = failGetByIdProtoResponse(exception)
+        val protoResponse = failureGetByIdResponse(exception)
 
         //WHEN
-        every { orderService.getById(id) } returns exception.toMono()
+        val response = connection.request(FIND_BY_ID, protoRequest.toByteArray())
 
         //THEN
-        getController.handle(protoRequest)
-            .test()
-            .expectNext(protoResponse)
-            .verifyComplete()
+        val responseOrder = GetByIdOrderResponse.parser().parseFrom(response.get().data)
+        assertEquals(protoResponse, responseOrder)
     }
 }

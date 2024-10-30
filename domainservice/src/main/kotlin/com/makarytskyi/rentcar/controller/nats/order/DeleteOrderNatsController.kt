@@ -1,11 +1,12 @@
 package com.makarytskyi.rentcar.controller.nats.order
 
 import com.google.protobuf.Parser
+import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.DELETE
 import com.makarytskyi.rentcar.controller.nats.NatsController
-import com.makarytskyi.rentcar.controller.nats.order.CreateOrderNatsController.Companion
-import com.makarytskyi.rentcar.proto.reqreply.delete.DeleteOrderProtoRequest
-import com.makarytskyi.rentcar.proto.reqreply.delete.DeleteOrderProtoResponse
+import com.makarytskyi.rentcar.mapper.toDeleteResponse
 import com.makarytskyi.rentcar.service.OrderService
 import io.nats.client.Connection
 import org.springframework.stereotype.Component
@@ -15,14 +16,15 @@ import reactor.core.publisher.Mono
 class DeleteOrderNatsController(
     override val connection: Connection,
     private val orderService: OrderService
-) : NatsController<DeleteOrderProtoRequest, DeleteOrderProtoResponse> {
+) : NatsController<DeleteOrderRequest, DeleteOrderResponse> {
     override val subject = DELETE
     override val queueGroup = QUEUE_GROUP
-    override val parser: Parser<DeleteOrderProtoRequest> = DeleteOrderProtoRequest.parser()
+    override val parser: Parser<DeleteOrderRequest> = DeleteOrderRequest.parser()
+    override val defaultResponse: DeleteOrderResponse = DeleteOrderResponse.getDefaultInstance()
 
-    override fun handle(request: DeleteOrderProtoRequest): Mono<DeleteOrderProtoResponse> =
+    override fun handle(request: DeleteOrderRequest): Mono<DeleteOrderResponse> =
         orderService.deleteById(request.id)
-            .map { DeleteOrderProtoResponse.newBuilder().apply { successBuilder }.build() }
+            .thenReturn(toDeleteResponse())
 
     companion object {
         const val QUEUE_GROUP = "delete_order"

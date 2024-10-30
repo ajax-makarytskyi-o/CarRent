@@ -4,7 +4,6 @@ import com.makarytskyi.rentcar.model.MongoUser
 import io.mongock.api.annotations.ChangeUnit
 import io.mongock.api.annotations.Execution
 import io.mongock.api.annotations.RollbackExecution
-import org.reflections.Reflections.log
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate

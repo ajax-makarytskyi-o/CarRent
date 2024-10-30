@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.makarytskyi.internalapi.model.order;
+package com.makarytskyi.internalapi.commonmodels.order;
 
 import "google/protobuf/timestamp.proto";
 

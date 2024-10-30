@@ -2,7 +2,3 @@ complexity:
   TooManyFunctions:
     thresholdInClasses: 15
     thresholdInFiles: 15
-
-exceptions:
-  TooGenericExceptionThrown:
-    active: false

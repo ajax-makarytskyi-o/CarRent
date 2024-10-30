@@ -14,5 +14,6 @@ dependencies {
     testFixturesImplementation(project(":internal-api"))
     testFixturesImplementation(project(":core"))
     testImplementation(testFixtures(project(":core")))
+    testFixturesImplementation(testFixtures(project(":core")))
     testFixturesImplementation("org.mongodb:bson:5.0.1")
 }

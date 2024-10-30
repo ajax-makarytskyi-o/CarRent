@@ -1,27 +1,26 @@
 package com.makarytskyi.gateway.controller
 
-import com.makarytskyi.core.dto.order.AggregatedOrderResponse
-import com.makarytskyi.core.dto.order.CreateOrderRequest
-import com.makarytskyi.core.dto.order.OrderResponse
-import com.makarytskyi.core.dto.order.UpdateOrderRequest
+import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
+import com.makarytskyi.core.dto.order.CreateOrderRequestDto
+import com.makarytskyi.core.dto.order.OrderResponseDto
+import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.gateway.config.NatsClient
 import com.makarytskyi.gateway.mapper.toDto
 import com.makarytskyi.gateway.mapper.toProto
-import com.makarytskyi.internalapi.reqreply.create.CreateOrderProtoResponse
+import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersRequest
+import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
+import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.CREATE
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.DELETE
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_ALL
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_BY_ID
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.PATCH
-import com.makarytskyi.rentcar.proto.reqreply.delete.DeleteOrderProtoRequest
-import com.makarytskyi.rentcar.proto.reqreply.delete.DeleteOrderProtoResponse
-import com.makarytskyi.rentcar.proto.reqreply.find_all.FindAllOrdersProtoRequest
-import com.makarytskyi.rentcar.proto.reqreply.find_all.FindAllOrdersProtoResponse
-import com.makarytskyi.rentcar.proto.reqreply.find_by_id.GetByIdOrderProtoRequest
-import com.makarytskyi.rentcar.proto.reqreply.find_by_id.GetByIdOrderProtoResponse
-import com.makarytskyi.rentcar.proto.reqreply.patch.PatchOrderProtoRequest
-import com.makarytskyi.rentcar.proto.reqreply.patch.PatchOrderProtoResponse
-import io.nats.client.Connection
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -42,11 +41,11 @@ import reactor.core.publisher.Mono
 class OrderController(private val natsClient: NatsClient) {
 
     @GetMapping("/{id}")
-    fun getFullById(@PathVariable id: String): Mono<AggregatedOrderResponse> =
+    fun getFullById(@PathVariable id: String): Mono<AggregatedOrderResponseDto> =
         natsClient.request(
             FIND_BY_ID,
-            GetByIdOrderProtoRequest.newBuilder().setId(id).build(),
-            GetByIdOrderProtoResponse.parser()
+            GetByIdOrderRequest.newBuilder().setId(id).build(),
+            GetByIdOrderResponse.parser()
         )
             .map { it.toDto() }
 
@@ -54,22 +53,22 @@ class OrderController(private val natsClient: NatsClient) {
     fun findFullAll(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "20") size: Int
-    ): Flux<AggregatedOrderResponse> =
+    ): Flux<AggregatedOrderResponseDto> =
         natsClient.request(
             FIND_ALL,
-            FindAllOrdersProtoRequest.newBuilder().setPage(page).setSize(size).build(),
-            FindAllOrdersProtoResponse.parser()
+            FindAllOrdersRequest.newBuilder().setPage(page).setSize(size).build(),
+            FindAllOrdersResponse.parser()
         )
             .map { it.toDto() }
             .flatMapMany { Flux.fromIterable(it) }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun create(@Valid @RequestBody order: CreateOrderRequest): Mono<OrderResponse> =
+    fun create(@Valid @RequestBody order: CreateOrderRequestDto): Mono<OrderResponseDto> =
         natsClient.request(
             CREATE,
             order.toProto(),
-            CreateOrderProtoResponse.parser()
+            CreateOrderResponse.parser()
         )
             .map { it.toDto() }
 
@@ -78,17 +77,17 @@ class OrderController(private val natsClient: NatsClient) {
     fun delete(@PathVariable id: String): Mono<Unit> =
         natsClient.request(
             DELETE,
-            DeleteOrderProtoRequest.newBuilder().setId(id).build(),
-            DeleteOrderProtoResponse.parser()
+            DeleteOrderRequest.newBuilder().setId(id).build(),
+            DeleteOrderResponse.parser()
         )
-            .map { Unit }
+            .thenReturn(Unit)
 
     @PatchMapping("/{id}")
-    fun patch(@PathVariable id: String, @Valid @RequestBody patch: UpdateOrderRequest): Mono<OrderResponse> =
+    fun patch(@PathVariable id: String, @Valid @RequestBody patch: UpdateOrderRequestDto): Mono<OrderResponseDto> =
         natsClient.request(
             PATCH,
-            PatchOrderProtoRequest.newBuilder().setId(id).setPatch(patch.toProto()).build(),
-            PatchOrderProtoResponse.parser()
+            PatchOrderRequest.newBuilder().setId(id).setPatch(patch.toProto()).build(),
+            PatchOrderResponse.parser()
         )
             .map { it.toDto() }
 }

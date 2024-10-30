@@ -1,6 +1,6 @@
 package com.makarytskyi.gateway.config
 
-import com.google.protobuf.GeneratedMessageV3
+import com.google.protobuf.GeneratedMessage
 import com.google.protobuf.Parser
 import io.nats.client.Connection
 import org.springframework.stereotype.Component
@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono
 
 @Component
 class NatsClient(private val natsConnection: Connection) {
-    fun <RequestT : GeneratedMessageV3, ResponseT : GeneratedMessageV3> request(
+    fun <RequestT : GeneratedMessage, ResponseT : GeneratedMessage> request(
         subject: String,
         data: RequestT,
         parser: Parser<ResponseT>

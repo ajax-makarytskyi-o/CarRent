@@ -1,35 +1,33 @@
 package com.makarytskyi.gateway.mapper
 
 import com.google.protobuf.Timestamp
-import com.makarytskyi.core.dto.order.AggregatedOrderResponse
-import com.makarytskyi.core.dto.order.CreateOrderRequest
-import com.makarytskyi.core.dto.order.OrderResponse
-import com.makarytskyi.core.dto.order.UpdateOrderRequest
+import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
+import com.makarytskyi.core.dto.order.CreateOrderRequestDto
+import com.makarytskyi.core.dto.order.OrderResponseDto
+import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.internalapi.error.Error
-import com.makarytskyi.internalapi.error.ExceptionType
-import com.makarytskyi.internalapi.model.order.AggregatedOrder
-import com.makarytskyi.internalapi.model.order.Order
-import com.makarytskyi.internalapi.model.order.Patch
-import com.makarytskyi.internalapi.reqreply.create.CreateOrderProtoRequest
-import com.makarytskyi.internalapi.reqreply.create.CreateOrderProtoResponse
-import com.makarytskyi.rentcar.proto.reqreply.find_all.FindAllOrdersProtoResponse
-import com.makarytskyi.rentcar.proto.reqreply.find_by_id.GetByIdOrderProtoResponse
-import com.makarytskyi.rentcar.proto.reqreply.patch.PatchOrderProtoResponse
+import com.makarytskyi.internalapi.commonmodels.order.AggregatedOrder
+import com.makarytskyi.internalapi.commonmodels.order.Order
+import com.makarytskyi.internalapi.commonmodels.order.Patch
+import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
+import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
 import java.util.Date
 
-fun CreateOrderRequest.toProto(): CreateOrderProtoRequest = CreateOrderProtoRequest.newBuilder()
-    .setOrder(
-        Order.newBuilder()
-            .setCarId(this.carId)
-            .setUserId(this.userId)
-            .setFrom(dateToTimestamp(this.from))
-            .setTo(dateToTimestamp(this.to))
-            .build()
-    )
+fun CreateOrderRequestDto.toProto(): CreateOrderRequest = CreateOrderRequest.newBuilder()
+    .apply {
+        orderBuilder.apply {
+            setCarId(this@toProto.carId)
+            setUserId(this@toProto.userId)
+            setFrom(dateToTimestamp(this@toProto.from))
+            setTo(dateToTimestamp(this@toProto.to))
+        }
+    }
     .build()
 
-fun AggregatedOrder.toDto(): AggregatedOrderResponse = AggregatedOrderResponse(
+fun AggregatedOrder.toDto(): AggregatedOrderResponseDto = AggregatedOrderResponseDto(
     id = id,
     car = car.toResponse(),
     user = user.toResponse(),
@@ -38,65 +36,69 @@ fun AggregatedOrder.toDto(): AggregatedOrderResponse = AggregatedOrderResponse(
     price = price.toBigDecimal()
 )
 
-fun FindAllOrdersProtoResponse.toDto(): List<AggregatedOrderResponse> =
+fun FindAllOrdersResponse.toDto(): List<AggregatedOrderResponseDto> =
     success.ordersList.stream().map { it.toDto() }.toList()
 
-fun CreateOrderProtoResponse.toDto() =
-    when (responseCase) {
-        CreateOrderProtoResponse.ResponseCase.SUCCESS -> OrderResponse(
-            id = success.order.id,
-            carId = success.order.carId,
-            userId = success.order.userId,
-            from = Date(success.order.from.seconds),
-            to = Date(success.order.to.seconds),
-            price = success.order.price.toBigDecimal(),
-        )
-
-        CreateOrderProtoResponse.ResponseCase.ERROR -> failure(error)
-        CreateOrderProtoResponse.ResponseCase.RESPONSE_NOT_SET -> throw Exception(error.message)
-    }
-
-fun GetByIdOrderProtoResponse.toDto() =
-    when (responseCase) {
-        GetByIdOrderProtoResponse.ResponseCase.SUCCESS -> AggregatedOrderResponse(
-            id = success.order.id,
-            car = success.order.car.toResponse(),
-            user = success.order.user.toResponse(),
-            from = Date(success.order.from.seconds),
-            to = Date(success.order.to.seconds),
-            price = success.order.price.toBigDecimal(),
-        )
-
-        GetByIdOrderProtoResponse.ResponseCase.ERROR -> failure(this.error)
-        GetByIdOrderProtoResponse.ResponseCase.RESPONSE_NOT_SET -> throw Exception(error.message)
-    }
-
-fun UpdateOrderRequest.toProto(): Patch = Patch.newBuilder()
+fun UpdateOrderRequestDto.toProto(): Patch = Patch.newBuilder()
     .setFrom(dateToTimestamp(from))
     .setTo(dateToTimestamp(to))
     .build()
 
-fun PatchOrderProtoResponse.toDto(): OrderResponse =
+@SuppressWarnings("TooGenericExceptionThrown")
+fun CreateOrderResponse.toDto() =
     when (responseCase) {
-        PatchOrderProtoResponse.ResponseCase.SUCCESS -> OrderResponse(
-            id = success.order.id,
-            carId = success.order.carId,
-            userId = success.order.userId,
-            from = Date(success.order.from.seconds),
-            to = Date(success.order.to.seconds),
-            price = success.order.price.toBigDecimal(),
-        )
-
-        PatchOrderProtoResponse.ResponseCase.ERROR -> failure(error)
-        PatchOrderProtoResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException(error.message)
+        CreateOrderResponse.ResponseCase.SUCCESS -> success.order.toDto()
+        CreateOrderResponse.ResponseCase.FAILURE -> failure.throwException()
+        CreateOrderResponse.ResponseCase.RESPONSE_NOT_SET -> throw Exception(failure.message)
     }
 
-private fun failure(error: Error): Nothing =
-    when (error.exceptionType) {
-        ExceptionType.NOT_FOUND -> throw NotFoundException(error.message)
-        ExceptionType.ILLEGAL_ARGUMENT -> throw IllegalArgumentException(error.message)
-        else -> throw RuntimeException(error.message)
+@SuppressWarnings("TooGenericExceptionThrown")
+fun GetByIdOrderResponse.toDto() =
+    when (responseCase) {
+        GetByIdOrderResponse.ResponseCase.SUCCESS -> success.order.toDto()
+        GetByIdOrderResponse.ResponseCase.FAILURE -> failure.throwException()
+        GetByIdOrderResponse.ResponseCase.RESPONSE_NOT_SET -> throw Exception(failure.message)
     }
+
+@SuppressWarnings("TooGenericExceptionThrown")
+fun PatchOrderResponse.toDto(): OrderResponseDto =
+    when (responseCase) {
+        PatchOrderResponse.ResponseCase.SUCCESS -> success.order.toDto()
+        PatchOrderResponse.ResponseCase.FAILURE -> failure.throwException()
+        PatchOrderResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException(failure.message)
+    }
+
+@SuppressWarnings("TooGenericExceptionThrown")
+private fun CreateOrderResponse.Failure.throwException(): Nothing =
+    when (errorCase) {
+        CreateOrderResponse.Failure.ErrorCase.NOT_FOUND -> throw NotFoundException(message)
+        CreateOrderResponse.Failure.ErrorCase.ILLEGAL_ARGUMENT -> throw IllegalArgumentException(message)
+        CreateOrderResponse.Failure.ErrorCase.ERROR_NOT_SET -> throw RuntimeException(message)
+    }
+
+@SuppressWarnings("TooGenericExceptionThrown")
+private fun PatchOrderResponse.Failure.throwException(): Nothing =
+    when (errorCase) {
+        PatchOrderResponse.Failure.ErrorCase.NOT_FOUND -> throw NotFoundException(message)
+        PatchOrderResponse.Failure.ErrorCase.ILLEGAL_ARGUMENT -> throw IllegalArgumentException(message)
+        PatchOrderResponse.Failure.ErrorCase.ERROR_NOT_SET -> throw RuntimeException(message)
+    }
+
+@SuppressWarnings("TooGenericExceptionThrown")
+private fun GetByIdOrderResponse.Failure.throwException(): Nothing =
+    when (errorCase) {
+        GetByIdOrderResponse.Failure.ErrorCase.NOT_FOUND -> throw NotFoundException(message)
+        GetByIdOrderResponse.Failure.ErrorCase.ERROR_NOT_SET -> throw RuntimeException(message)
+    }
+
+private fun Order.toDto() = OrderResponseDto(
+    id = this.id,
+    carId = this.carId,
+    userId = this.userId,
+    from = Date(this.from.seconds),
+    to = Date(this.to.seconds),
+    price = this.price.toBigDecimal(),
+)
 
 private fun dateToTimestamp(date: Date?): Timestamp =
     Timestamp.newBuilder()

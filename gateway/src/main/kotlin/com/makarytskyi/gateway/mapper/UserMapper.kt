@@ -1,9 +1,9 @@
 package com.makarytskyi.gateway.mapper
 
-import com.makarytskyi.core.dto.user.UserResponse
-import com.makarytskyi.internalapi.model.user.User
+import com.makarytskyi.core.dto.user.UserResponseDto
+import com.makarytskyi.internalapi.commonmodels.user.User
 
-fun User.toResponse(): UserResponse = UserResponse(
+fun User.toResponse(): UserResponseDto = UserResponseDto(
     id = id,
     name = name,
     email = email,

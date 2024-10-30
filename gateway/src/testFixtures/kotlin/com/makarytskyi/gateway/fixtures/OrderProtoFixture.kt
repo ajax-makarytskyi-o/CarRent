@@ -1,38 +1,42 @@
 package com.makarytskyi.gateway.fixtures
 
 import com.google.protobuf.Timestamp
-import com.makarytskyi.core.dto.order.AggregatedOrderResponse
-import com.makarytskyi.core.dto.order.CreateOrderRequest
-import com.makarytskyi.core.dto.order.OrderResponse
-import com.makarytskyi.core.dto.order.UpdateOrderRequest
+import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
+import com.makarytskyi.core.dto.order.CreateOrderRequestDto
+import com.makarytskyi.core.dto.order.OrderResponseDto
+import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
+import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.gateway.fixtures.CarProtoFixture.randomCar
 import com.makarytskyi.gateway.fixtures.UserProtoFixture.randomUser
 import com.makarytskyi.gateway.mapper.toResponse
-import com.makarytskyi.internalapi.model.order.AggregatedOrder
-import com.makarytskyi.internalapi.reqreply.create.CreateOrderProtoRequest
-import com.makarytskyi.internalapi.reqreply.create.CreateOrderProtoResponse
-import com.makarytskyi.rentcar.proto.reqreply.delete.DeleteOrderProtoRequest
-import com.makarytskyi.rentcar.proto.reqreply.find_all.FindAllOrdersProtoResponse
-import com.makarytskyi.rentcar.proto.reqreply.find_by_id.GetByIdOrderProtoResponse
-import com.makarytskyi.rentcar.proto.reqreply.patch.PatchOrderProtoRequest
-import com.makarytskyi.rentcar.proto.reqreply.patch.PatchOrderProtoResponse
+import com.makarytskyi.internalapi.commonmodels.error.Error
+import com.makarytskyi.internalapi.commonmodels.order.AggregatedOrder
+import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
+import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
 import java.util.Date
 import kotlin.random.Random
+import java.lang.Exception
 import org.bson.types.ObjectId
 
 object OrderProtoFixture {
-
-    fun createProtoRequest(request: CreateOrderRequest): CreateOrderProtoRequest = CreateOrderProtoRequest.newBuilder()
+    fun createRequest(request: CreateOrderRequestDto): CreateOrderRequest = CreateOrderRequest.newBuilder()
         .apply {
-            orderBuilder.setCarId(request.carId)
-            orderBuilder.setUserId(request.userId)
-            orderBuilder.setFrom(Timestamp.newBuilder().setSeconds(request.from.time).build())
-            orderBuilder.setTo(Timestamp.newBuilder().setSeconds(request.to.time).build())
+            orderBuilder.apply {
+                setCarId(request.carId)
+                setUserId(request.userId)
+                setFrom(Timestamp.newBuilder().setSeconds(request.from.time).build())
+                setTo(Timestamp.newBuilder().setSeconds(request.to.time).build())
+            }
         }
         .build()
 
-    fun patchProtoRequest(id: String, request: UpdateOrderRequest): PatchOrderProtoRequest =
-        PatchOrderProtoRequest.newBuilder()
+    fun patchRequest(id: String, request: UpdateOrderRequestDto): PatchOrderRequest =
+        PatchOrderRequest.newBuilder()
             .apply {
                 setId(id)
                 patchBuilder.setFrom(Timestamp.newBuilder().setSeconds(request.from!!.time).build())
@@ -40,12 +44,12 @@ object OrderProtoFixture {
             }
             .build()
 
-    fun deleteProtoRequest(id: String): DeleteOrderProtoRequest = DeleteOrderProtoRequest
+    fun deleteRequest(id: String): DeleteOrderRequest = DeleteOrderRequest
         .newBuilder()
         .setId(id)
         .build()
 
-    fun createOrderResponse(request: CreateOrderRequest, price: Double) = OrderResponse(
+    fun createOrderResponse(request: CreateOrderRequestDto, price: Double) = OrderResponseDto(
         id = ObjectId().toString(),
         carId = request.carId,
         userId = request.userId,
@@ -54,21 +58,21 @@ object OrderProtoFixture {
         price = price.toBigDecimal(),
     )
 
-    fun updateOrderResponse(request: UpdateOrderRequest, price: Double) = OrderResponse(
+    fun updateOrderResponse(request: UpdateOrderRequestDto, price: Double) = OrderResponseDto(
         id = ObjectId().toString(),
         carId = ObjectId().toString(),
         userId = ObjectId().toString(),
-        from = request.from,
-        to = request.to,
+        from = request.from!!,
+        to = request.to!!,
         price = price.toBigDecimal(),
     )
 
-    fun findAllProtoResponse(): FindAllOrdersProtoResponse = FindAllOrdersProtoResponse
+    fun findAllResponse(): FindAllOrdersResponse = FindAllOrdersResponse
         .newBuilder()
         .apply { successBuilder.addOrders(randomAggregatedOrder()) }
         .build()
 
-    fun aggregatedOrderDto(protoResponse: GetByIdOrderProtoResponse) = AggregatedOrderResponse(
+    fun aggregatedOrderDto(protoResponse: GetByIdOrderResponse) = AggregatedOrderResponseDto(
         id = protoResponse.success.order.id,
         car = protoResponse.success.order.car.toResponse(),
         user = protoResponse.success.order.user.toResponse(),
@@ -77,9 +81,9 @@ object OrderProtoFixture {
         price = protoResponse.success.order.price.toBigDecimal(),
     )
 
-    fun listOfAggregatedOrderDto(protoResponse: FindAllOrdersProtoResponse): List<AggregatedOrderResponse> =
+    fun listOfAggregatedOrderDto(protoResponse: FindAllOrdersResponse): List<AggregatedOrderResponseDto> =
         protoResponse.success.ordersList.map {
-            AggregatedOrderResponse(
+            AggregatedOrderResponseDto(
                 id = it.id,
                 car = it.car.toResponse(),
                 user = it.user.toResponse(),
@@ -89,54 +93,91 @@ object OrderProtoFixture {
             )
         }
 
-    fun successfulUpdateProtoResponse(request: UpdateOrderRequest, price: Double): PatchOrderProtoResponse =
-        PatchOrderProtoResponse.newBuilder()
+    fun successfulUpdateResponse(request: UpdateOrderRequestDto, price: Double): PatchOrderResponse =
+        PatchOrderResponse.newBuilder()
             .apply {
-                successBuilder.orderBuilder.setId(ObjectId().toString())
-                successBuilder.orderBuilder.setCarId(ObjectId().toString())
-                successBuilder.orderBuilder.setUserId(ObjectId().toString())
-                successBuilder.orderBuilder.setFrom(Timestamp.newBuilder().setSeconds(request.from!!.time).build())
-                successBuilder.orderBuilder.setTo(Timestamp.newBuilder().setSeconds(request.to!!.time).build())
-                successBuilder.orderBuilder.setPrice(price)
+                successBuilder.orderBuilder.apply {
+                    setId(ObjectId().toString())
+                    setCarId(ObjectId().toString())
+                    setUserId(ObjectId().toString())
+                    setFrom(Timestamp.newBuilder().setSeconds(request.from!!.time).build())
+                    setTo(Timestamp.newBuilder().setSeconds(request.to!!.time).build())
+                    setPrice(price)
+                }
             }
             .build()
 
-    fun failureUpdateProtoResponse(): PatchOrderProtoResponse = PatchOrderProtoResponse
-        .newBuilder()
-        .apply { errorBuilder.setMessage("Order is not found").setExceptionTypeValue(1).build() }
+    fun failurePatchResponse(exception: Exception): PatchOrderResponse = PatchOrderResponse.newBuilder()
+        .apply {
+            failureBuilder.apply {
+                setMessage(this.message)
+                when (exception) {
+                    is NotFoundException -> setNotFound(Error.getDefaultInstance())
+                    is IllegalArgumentException -> setIllegalArgument(Error.getDefaultInstance())
+                }
+            }
+        }
         .build()
 
-    fun successfulCreateProtoResponse(request: CreateOrderRequest, price: Double): CreateOrderProtoResponse =
-        CreateOrderProtoResponse.newBuilder()
+    fun successfulCreateResponse(request: CreateOrderRequestDto, price: Double): CreateOrderResponse =
+        CreateOrderResponse.newBuilder()
             .apply {
-                successBuilder.orderBuilder.setId(ObjectId().toString())
-                successBuilder.orderBuilder.setCarId(request.carId)
-                successBuilder.orderBuilder.setUserId(request.userId)
-                successBuilder.orderBuilder.setFrom(Timestamp.newBuilder().setSeconds(request.from.time).build())
-                successBuilder.orderBuilder.setTo(Timestamp.newBuilder().setSeconds(request.to.time).build())
-                successBuilder.orderBuilder.setPrice(price)
+                successBuilder.orderBuilder.apply {
+                    setId(ObjectId().toString())
+                    setCarId(request.carId)
+                    setUserId(request.userId)
+                    setFrom(Timestamp.newBuilder().setSeconds(request.from.time).build())
+                    setTo(Timestamp.newBuilder().setSeconds(request.to.time).build())
+                    setPrice(price)
+                }
             }
             .build()
 
-    fun failureCreateProtoResponse(): CreateOrderProtoResponse = CreateOrderProtoResponse
+    fun failureCreateResponse(exception: Exception): CreateOrderResponse = CreateOrderResponse
         .newBuilder()
-        .apply { errorBuilder.setMessage("This car is already booked on these dates").setExceptionTypeValue(2).build() }
+        .apply {
+            failureBuilder.apply {
+                setMessage(this.message)
+                when (exception) {
+                    is NotFoundException -> setNotFound(Error.getDefaultInstance())
+                    is IllegalArgumentException -> setIllegalArgument(Error.getDefaultInstance())
+                }
+            }
+        }
         .build()
 
-    fun successfulGetByIdProtoResponse(): GetByIdOrderProtoResponse = GetByIdOrderProtoResponse
+    fun successfulGetByIdResponse(order: AggregatedOrder): GetByIdOrderResponse = GetByIdOrderResponse
         .newBuilder()
-        .apply { successBuilder.setOrder(randomAggregatedOrder()).build() }
+        .apply { successBuilder.setOrder(order).build() }
         .build()
 
-    fun failureGetByIdProtoResponse(): GetByIdOrderProtoResponse = GetByIdOrderProtoResponse
+    fun failureGetByIdResponse(exception: Exception): GetByIdOrderResponse = GetByIdOrderResponse
         .newBuilder()
-        .apply { errorBuilder.setMessage("Order is not found").setExceptionTypeValue(1).build() }
+        .apply {
+            failureBuilder.apply {
+                setMessage(this.message)
+                when (exception) {
+                    is NotFoundException -> setNotFound(Error.getDefaultInstance())
+                }
+            }
+        }
         .build()
 
-    private fun randomAggregatedOrder(): AggregatedOrder = AggregatedOrder.newBuilder()
-        .setId(ObjectId().toString())
-        .setCar(randomCar())
-        .setUser(randomUser())
-        .setPrice(Random.nextDouble(100.0, 500.0))
+    fun randomAggregatedOrder(): AggregatedOrder = AggregatedOrder.newBuilder()
+        .apply {
+            setId(ObjectId().toString())
+            setCar(randomCar())
+            setUser(randomUser())
+            setPrice(Random.nextDouble(100.0, 500.0))
+        }
         .build()
+
+    fun aggregatedOrderResponse(order: AggregatedOrder): AggregatedOrderResponseDto = AggregatedOrderResponseDto(
+        id = order.id,
+        car = order.car.toResponse(),
+        user = order.user.toResponse(),
+        from = Date(order.from.seconds),
+        to = Date(order.to.seconds),
+        price = order.price.toBigDecimal()
+    )
 }

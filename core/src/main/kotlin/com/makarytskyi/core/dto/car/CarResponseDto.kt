@@ -2,7 +2,7 @@ package com.makarytskyi.core.dto.car
 
 import java.math.BigDecimal
 
-data class CarResponse(
+data class CarResponseDto(
     val id: String,
     val brand: String,
     val model: String,

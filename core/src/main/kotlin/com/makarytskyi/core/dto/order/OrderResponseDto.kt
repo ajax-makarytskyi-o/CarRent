@@ -3,7 +3,7 @@ package com.makarytskyi.core.dto.order
 import java.math.BigDecimal
 import java.util.Date
 
-data class OrderResponse(
+data class OrderResponseDto(
     val id: String,
     val carId: String,
     val userId: String,

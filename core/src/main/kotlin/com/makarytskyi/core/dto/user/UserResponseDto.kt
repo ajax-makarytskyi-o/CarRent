@@ -1,6 +1,6 @@
 package com.makarytskyi.core.dto.user
 
-data class UserResponse(
+data class UserResponseDto(
     val id: String,
     val name: String,
     val email: String,

@@ -2,7 +2,7 @@ package com.makarytskyi.core.dto.order
 
 import java.util.Date
 
-data class UpdateOrderRequest(
+data class UpdateOrderRequestDto(
     val from: Date?,
     val to: Date?,
 )

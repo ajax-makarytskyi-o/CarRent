@@ -1,5 +1,3 @@
-import gradle.kotlin.dsl.accessors._a6e2d5db45668b67b380a3a812f3c826.testImplementation
-import gradle.kotlin.dsl.accessors._a6e2d5db45668b67b380a3a812f3c826.testRuntimeOnly
 import io.gitlab.arturbosch.detekt.Detekt
 
 plugins {
@@ -36,5 +34,11 @@ tasks.withType<Detekt>().configureEach {
         xml.required.set(true)
         sarif.required.set(true)
         md.required.set(true)
+    }
+}
+
+configurations {
+    named("testFixturesImplementation") {
+        extendsFrom(configurations.implementation.get())
     }
 }

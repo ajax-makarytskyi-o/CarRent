@@ -14,6 +14,10 @@ import com.makarytskyi.rentcar.fixtures.OrderFixture.responseAggregatedOrderDto
 import com.makarytskyi.rentcar.fixtures.OrderFixture.responseOrderDto
 import com.makarytskyi.rentcar.fixtures.OrderFixture.updateOrderRequestDto
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
+import com.makarytskyi.rentcar.mapper.OrderMapper.toEntity
+import com.makarytskyi.rentcar.mapper.OrderMapper.toPatch
+import com.makarytskyi.rentcar.mapper.OrderMapper.toResponse
+import java.math.BigDecimal
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.assertThrows
@@ -38,9 +42,10 @@ class OrderMapperTest {
     fun `order mapper throws IllegalArgumentException if car date fields are null`() {
         // GIVEN
         val order = emptyOrder()
+        val price = BigDecimal.ZERO
 
         // WHEN // THEN
-        assertThrows<IllegalArgumentException> { order.toResponse(null) }
+        assertThrows<IllegalArgumentException> { order.toResponse(price) }
     }
 
     @Test

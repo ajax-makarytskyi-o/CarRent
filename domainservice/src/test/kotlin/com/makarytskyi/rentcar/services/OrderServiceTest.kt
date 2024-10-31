@@ -74,7 +74,7 @@ internal class OrderServiceTest {
     }
 
     @Test
-    fun `getById should return throw NotFoundException`() {
+    fun `getById should return NotFoundException`() {
         // GIVEN
         val orderId = ObjectId()
         every { orderRepository.findFullById(orderId.toString()) } returns Mono.empty()
@@ -154,7 +154,7 @@ internal class OrderServiceTest {
     }
 
     @Test
-    fun `should throw IllegalArgumentException if car doesn't exist`() {
+    fun `should return IllegalArgumentException if car doesn't exist`() {
         // GIVEN
         val user = randomUser()
         val car = randomCar()
@@ -173,7 +173,7 @@ internal class OrderServiceTest {
     }
 
     @Test
-    fun `should throw NotFoundException if user doesn't exist`() {
+    fun `should return NotFoundException if user doesn't exist`() {
         // GIVEN
         val car = randomCar()
         val user = randomUser()
@@ -190,7 +190,7 @@ internal class OrderServiceTest {
     }
 
     @Test
-    fun `should throw IllegalArgumentException if car is ordered`() {
+    fun `should return IllegalArgumentException if car is ordered`() {
         // GIVEN
         val user = randomUser()
         val car = randomCar()
@@ -213,7 +213,7 @@ internal class OrderServiceTest {
     }
 
     @Test
-    fun `should throw IllegalArgumentException if dates reversed`() {
+    fun `should return IllegalArgumentException if dates reversed`() {
         // GIVEN
         val user = randomUser()
         val car = randomCar()
@@ -229,7 +229,7 @@ internal class OrderServiceTest {
     }
 
     @Test
-    fun `should throw IllegalArgumentException if date in past`() {
+    fun `should return IllegalArgumentException if date in past`() {
         // GIVEN
         val user = randomUser()
         val car = randomCar()
@@ -301,7 +301,7 @@ internal class OrderServiceTest {
     }
 
     @Test
-    fun `patch should throw NotFoundException if order is not found`() {
+    fun `patch should return NotFoundException if order is not found`() {
         // GIVEN
         val orderId = "unknown"
         every { orderRepository.findFullById(orderId) } returns Mono.empty()

@@ -12,7 +12,7 @@ data class UserResponse(
 
     companion object {
         fun from(mongoUser: MongoUser): UserResponse = UserResponse(
-            mongoUser.id?.toString().orEmpty(),
+            requireNotNull(mongoUser.id?.toString()) { "User id is null" },
             mongoUser.name.orEmpty(),
             mongoUser.email.orEmpty(),
             mongoUser.phoneNumber.orEmpty(),

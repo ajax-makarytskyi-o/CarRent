@@ -11,23 +11,15 @@ import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failurePatchR
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.successfulPatchResponse
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.updateOrderRequest
 import com.makarytskyi.rentcar.repository.CarRepository
-import com.makarytskyi.rentcar.repository.ContainerBase
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.util.timestampToDate
-import io.mockk.junit5.MockKExtension
-import io.nats.client.Connection
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 
-@ExtendWith(MockKExtension::class)
-class PatchOrderNatsControllerTest : ContainerBase {
-
-    @Autowired
-    lateinit var connection: Connection
+class PatchOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
 
     @Autowired
     internal lateinit var carRepository: CarRepository
@@ -48,33 +40,31 @@ class PatchOrderNatsControllerTest : ContainerBase {
         val protoRequest = updateOrderRequest(order.id.toString())
         val updatedOrder =
             randomOrder(car.id, user.id).copy(
-                from = timestampToDate(protoRequest.patch.from),
-                to = timestampToDate(protoRequest.patch.to),
+                from = timestampToDate(protoRequest.patch.startDate),
+                to = timestampToDate(protoRequest.patch.endDate),
             )
         val responseDto = responseOrderDto(updatedOrder, car).copy(id = order.id.toString())
         val protoResponse = successfulPatchResponse(responseDto)
 
-        //WHEN
-        val response = connection.request(PATCH, protoRequest.toByteArray())
+        // WHEN
+        val response = sendRequest(PATCH, protoRequest, PatchOrderResponse.parser())
 
-        //THEN
-        val data = PatchOrderResponse.parser().parseFrom(response.get().data)
-        assertEquals(protoResponse, data)
+        // THEN
+        assertEquals(protoResponse, response)
     }
 
     @Test
-    fun `create should return error message if updating order isn't found`() {
+    fun `patch should return error message if updating order isn't found`() {
         // GIVEN
         val id = ObjectId().toString()
         val exception = NotFoundException("Order with id $id is not found")
         val protoRequest = updateOrderRequest(id)
         val protoResponse = failurePatchResponse(exception)
 
-        //WHEN
-        val response = connection.request(PATCH, protoRequest.toByteArray())
+        // WHEN
+        val response = sendRequest(PATCH, protoRequest, PatchOrderResponse.parser())
 
-        //THEN
-        val data = PatchOrderResponse.parser().parseFrom(response.get().data)
-        assertEquals(protoResponse, data)
+        // THEN
+        assertEquals(protoResponse, response)
     }
 }

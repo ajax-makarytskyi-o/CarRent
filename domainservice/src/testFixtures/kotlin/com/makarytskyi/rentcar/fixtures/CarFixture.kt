@@ -1,26 +1,56 @@
 package com.makarytskyi.rentcar.fixtures
 
+import com.makarytskyi.core.dto.car.CarResponseDto
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
 import com.makarytskyi.rentcar.fixtures.Utils.generateString
-import com.makarytskyi.rentcar.fixtures.Utils.randomPrice
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import java.math.BigDecimal
+import java.math.RoundingMode
 import kotlin.random.Random
 import org.bson.types.ObjectId
 
 object CarFixture {
 
+    fun randomBrand(): String {
+        return generateString(15)
+    }
+
+    fun randomModel(): String {
+        return generateString(15)
+    }
+
+    fun randomYear(): Int {
+        return Random.nextInt(1900, 2020)
+    }
+
+    fun randomPlate(): String {
+        return generateString(6)
+    }
+
+    fun randomColor(): MongoCar.CarColor {
+        return MongoCar.CarColor.entries.toTypedArray().random()
+    }
+
+    fun randomPrice(): BigDecimal {
+        val min = BigDecimal.ZERO
+        val max = BigDecimal("5000")
+        val range = max.subtract(min)
+        val randomFraction = BigDecimal(Random.nextDouble())
+        val randomValue = min.add(range.multiply(randomFraction))
+        return randomValue.setScale(2, RoundingMode.HALF_UP)
+    }
+
     fun randomCar() = MongoCar(
         id = ObjectId(),
-        brand = generateString(15),
-        model = generateString(15),
+        brand = randomBrand(),
+        model = randomModel(),
         price = randomPrice(),
-        year = Random.nextInt(1900, 2020),
-        plate = generateString(6),
-        color = MongoCar.CarColor.BLUE
+        year = randomYear(),
+        plate = randomPlate(),
+        color = randomColor()
     )
 
     fun responseCar(mongoCar: MongoCar) = CarResponse(
@@ -43,13 +73,23 @@ object CarFixture {
         color = null,
     )
 
+    fun emptyResponseCarDto() = CarResponseDto(
+        id = "",
+        brand = "",
+        model = "",
+        price = BigDecimal.ZERO,
+        year = 0,
+        plate = "",
+        color = CarResponseDto.CarColor.UNSPECIFIED,
+    )
+
     fun createCarRequest() = CreateCarRequest(
-        brand = generateString(15),
-        model = generateString(15),
+        brand = randomBrand(),
+        model = randomModel(),
         price = randomPrice(),
-        year = Random.nextInt(1900, 2020),
-        plate = generateString(6),
-        color = MongoCar.CarColor.RED,
+        year = randomYear(),
+        plate = randomPlate(),
+        color = randomColor(),
     )
 
     fun createCarEntity(request: CreateCarRequest) = MongoCar(
@@ -66,7 +106,7 @@ object CarFixture {
 
     fun updateCarRequest() = UpdateCarRequest(
         price = randomPrice(),
-        color = MongoCar.CarColor.GREEN,
+        color = randomColor(),
     )
 
     fun carPatch(request: UpdateCarRequest) = MongoCarPatch(

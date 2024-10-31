@@ -13,6 +13,8 @@ import com.makarytskyi.rentcar.fixtures.UserFixture.userPatch
 import com.makarytskyi.rentcar.model.MongoUser
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.bson.types.ObjectId
+import org.junit.jupiter.api.assertThrows
 
 class UserMapperTest {
     @Test
@@ -29,17 +31,24 @@ class UserMapperTest {
     }
 
     @Test
-    fun `response mapper return response with default fields if user fields are null`() {
+    fun `response mapper throws IllegalArgumentException if user fields are null`() {
         // GIVEN
         val user = MongoUser()
-        val response = emptyResponseUser()
 
-        // WHEN
-        val result = UserResponse.from(user)
-
-        // THEN
-        assertEquals(response, result)
+        // WHEN // THEN
+        assertThrows<IllegalArgumentException> { UserResponse.from(user) }
     }
+
+    @Test
+    fun `response mapper return empty response if fields except id are null`() {
+        // GIVEN
+        val emptyUser = MongoUser().copy(id = ObjectId())
+        val response = UserResponse.from(emptyUser)
+
+        // WHEN // THEN
+        assertEquals(response, emptyResponseUser().copy(id = emptyUser.id.toString()))
+    }
+
 
     @Test
     fun `create request mapper should return entity successfully`() {

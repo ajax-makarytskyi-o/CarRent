@@ -57,7 +57,7 @@ internal class UserServiceTest {
     }
 
     @Test
-    fun `getById should return throw NotFoundException`() {
+    fun `getById should return NotFoundException`() {
         // GIVEN
         val userId = ObjectId()
         every { userRepository.findById(userId.toString()) } returns Mono.empty()
@@ -152,7 +152,7 @@ internal class UserServiceTest {
     }
 
     @Test
-    fun `patch should throw NotFoundException if user is not found`() {
+    fun `patch should return NotFoundException if user is not found`() {
         // GIVEN
         val userId = "unknown"
         val request = updateUserRequest()
@@ -167,7 +167,7 @@ internal class UserServiceTest {
     }
 
     @Test
-    fun `deleteById should not throw NotFoundException if user is not found`() {
+    fun `deleteById should not return NotFoundException if user is not found`() {
         // GIVEN
         val userId = "unknown"
         every { userRepository.deleteById(userId) } returns Mono.empty()
@@ -181,7 +181,7 @@ internal class UserServiceTest {
     }
 
     @Test
-    fun `patch should throw IllegalArgumentException if user with specified phone number already exists`() {
+    fun `patch should return IllegalArgumentException if user with specified phone number already exists`() {
         // GIVEN
         val user = randomUser()
         val request = updateUserRequest()

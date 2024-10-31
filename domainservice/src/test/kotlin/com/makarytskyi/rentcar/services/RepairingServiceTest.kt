@@ -64,7 +64,7 @@ internal class RepairingServiceTest {
     }
 
     @Test
-    fun `getById should return throw NotFoundException`() {
+    fun `getById should return NotFoundException`() {
         // GIVEN
         val repairingId = ObjectId().toString()
         every { repairingRepository.findFullById(repairingId) } returns Mono.empty()
@@ -140,7 +140,7 @@ internal class RepairingServiceTest {
     }
 
     @Test
-    fun `should throw NotFoundException if car doesn't exist`() {
+    fun `should return NotFoundException if car doesn't exist`() {
         // GIVEN
         val car = randomCar()
         val request = createRepairingRequest(car)
@@ -177,7 +177,7 @@ internal class RepairingServiceTest {
     }
 
     @Test
-    fun `patch should throw NotFoundException if repairing is not found`() {
+    fun `patch should return NotFoundException if repairing is not found`() {
         // GIVEN
         val repairingId = "unknown"
         val request = updateRepairingRequest()

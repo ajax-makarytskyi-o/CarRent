@@ -6,9 +6,9 @@ import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.rentcar.annotation.InvocationTracker
-import com.makarytskyi.rentcar.mapper.toEntity
-import com.makarytskyi.rentcar.mapper.toPatch
-import com.makarytskyi.rentcar.mapper.toResponse
+import com.makarytskyi.rentcar.mapper.OrderMapper.toEntity
+import com.makarytskyi.rentcar.mapper.OrderMapper.toPatch
+import com.makarytskyi.rentcar.mapper.OrderMapper.toResponse
 import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.OrderRepository

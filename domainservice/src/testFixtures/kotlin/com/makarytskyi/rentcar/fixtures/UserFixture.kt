@@ -9,6 +9,22 @@ import com.makarytskyi.rentcar.model.patch.MongoUserPatch
 import org.bson.types.ObjectId
 
 object UserFixture {
+    fun randomName(): String {
+        return generateString(10)
+    }
+
+    fun randomEmail(): String {
+        return "${generateString(8)}@gmail.com"
+    }
+
+    fun randomPhoneNumber(): String {
+        return generateString(10)
+    }
+
+    fun randomCity(): String {
+        return generateString(8)
+    }
+
     fun responseUser(mongoUser: MongoUser) = UserResponse(
         id = mongoUser.id.toString(),
         name = mongoUser.name!!,
@@ -26,10 +42,10 @@ object UserFixture {
     )
 
     fun createUserRequest() = CreateUserRequest(
-        name = generateString(10),
-        email = "${generateString(8)}@gmail.com",
-        phoneNumber = generateString(10),
-        city = generateString(8),
+        name = randomName(),
+        email = randomEmail(),
+        phoneNumber = randomPhoneNumber(),
+        city = randomCity(),
     )
 
     fun createUserEntity(request: CreateUserRequest) = MongoUser(
@@ -43,9 +59,9 @@ object UserFixture {
     fun createdUser(mongoUser: MongoUser) = mongoUser.copy(id = ObjectId())
 
     fun updateUserRequest() = UpdateUserRequest(
-        name = generateString(10),
-        phoneNumber = generateString(10),
-        city = generateString(8)
+        name = randomName(),
+        phoneNumber = randomPhoneNumber(),
+        city = randomCity()
     )
 
     fun userPatch(request: UpdateUserRequest) = MongoUserPatch(
@@ -62,10 +78,10 @@ object UserFixture {
 
     fun randomUser() = MongoUser(
         id = ObjectId(),
-        name = generateString(10),
-        email = "${generateString(8)}@gmail.com",
-        phoneNumber = generateString(10),
-        city = generateString(8),
+        name = randomName(),
+        email = randomEmail(),
+        phoneNumber = randomPhoneNumber(),
+        city = randomCity(),
     )
 
     fun updatedUser(mongoUser: MongoUser, request: UpdateUserRequest) =

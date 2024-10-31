@@ -1,7 +1,5 @@
 package com.makarytskyi.rentcar.fixtures
 
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.Clock
 import java.time.Duration
 import java.util.Date
@@ -19,14 +17,5 @@ internal object Utils {
         return Date.from(
             Clock.offset(Clock.systemDefaultZone(), Duration.ofDays(days)).instant()
         )
-    }
-
-    fun randomPrice(): BigDecimal {
-        val min = BigDecimal.ZERO
-        val max = BigDecimal("5000")
-        val range = max.subtract(min)
-        val randomFraction = BigDecimal(Random.nextDouble())
-        val randomValue = min.add(range.multiply(randomFraction))
-        return randomValue.setScale(2, RoundingMode.HALF_UP)
     }
 }

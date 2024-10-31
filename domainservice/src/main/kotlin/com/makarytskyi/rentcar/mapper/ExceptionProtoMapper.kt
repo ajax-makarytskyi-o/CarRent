@@ -1,53 +1,48 @@
 package com.makarytskyi.rentcar.mapper
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.internalapi.commonmodels.error.Error
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
-import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 
-fun Throwable.toFindAllResponse(): Mono<FindAllOrdersResponse> =
+fun Throwable.toFindAllFailureResponse(): FindAllOrdersResponse =
     FindAllOrdersResponse.newBuilder()
-        .apply { failureBuilder.apply { setMessage(this@toFindAllResponse.message) } }
-        .build().toMono()
+        .also { it.failureBuilder.message = this.message }
+        .build()
 
-fun Throwable.toGetByIdResponse(): Mono<GetByIdOrderResponse> =
+fun Throwable.toGetByIdFailureResponse(): GetByIdOrderResponse =
     GetByIdOrderResponse.newBuilder()
-        .apply {
-            failureBuilder.apply {
-                setMessage(this@toGetByIdResponse.message)
-                when (this@toGetByIdResponse) {
-                    is NotFoundException -> setNotFound(Error.getDefaultInstance())
-                }
+        .also {
+            it.failureBuilder.also { failure ->
+                failure.message = message.orEmpty()
+                failure.notFoundBuilder
             }
         }
-        .build().toMono()
+        .build()
 
-fun Throwable.toCreateResponse(): Mono<CreateOrderResponse> =
+fun Throwable.toCreateFailureResponse(): CreateOrderResponse =
     CreateOrderResponse.newBuilder()
-        .apply {
-            failureBuilder.apply {
-                setMessage(this@toCreateResponse.message)
-                when (this@toCreateResponse) {
-                    is NotFoundException -> setNotFound(Error.getDefaultInstance())
-                    is IllegalArgumentException -> setIllegalArgument(Error.getDefaultInstance())
+        .also {
+            it.failureBuilder.also { failure ->
+                failure.message = message.orEmpty()
+                when (this) {
+                    is NotFoundException -> failure.notFoundBuilder
+                    is IllegalArgumentException -> failure.illegalArgumentBuilder
                 }
             }
         }
-        .build().toMono()
+        .build()
 
-fun Throwable.toPatchResponse(): Mono<PatchOrderResponse> =
+fun Throwable.toPatchFailureResponse(): PatchOrderResponse =
     PatchOrderResponse.newBuilder()
-        .apply {
-            failureBuilder.apply {
-                setMessage(this@toPatchResponse.message)
-                when (this@toPatchResponse) {
-                    is NotFoundException -> setNotFound(Error.getDefaultInstance())
-                    is IllegalArgumentException -> setIllegalArgument(Error.getDefaultInstance())
+        .also {
+            it.failureBuilder.also { failure ->
+                failure.message = message.orEmpty()
+                when (this) {
+                    is NotFoundException -> failure.notFoundBuilder
+                    is IllegalArgumentException -> failure.illegalArgumentBuilder
                 }
             }
         }
-        .build().toMono()
+        .build()

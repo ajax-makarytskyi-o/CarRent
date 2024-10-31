@@ -56,7 +56,7 @@ internal class CarServiceTest {
     }
 
     @Test
-    fun `getById should return throw NotFoundException`() {
+    fun `getById should return NotFoundException`() {
         // GIVEN
         val carId = ObjectId()
         every { carRepository.findById(carId.toString()) } returns Mono.empty()
@@ -152,7 +152,7 @@ internal class CarServiceTest {
     }
 
     @Test
-    fun `patch should throw NotFoundException if car is not found`() {
+    fun `patch should return NotFoundException if car is not found`() {
         // GIVEN
         val carId = "unknown"
         val updateCarRequest = updateCarRequest()
@@ -167,7 +167,7 @@ internal class CarServiceTest {
     }
 
     @Test
-    fun `deleteById should not throw NotFoundException if car is not found`() {
+    fun `deleteById should not return NotFoundException if car is not found`() {
         // GIVEN
         val carId = "unknown"
         every { carRepository.deleteById(carId) } returns Mono.empty()
@@ -181,7 +181,7 @@ internal class CarServiceTest {
     }
 
     @Test
-    fun `findByPlate should throw NotFoundException if such car is not found`() {
+    fun `findByPlate should retun NotFoundException if such car is not found`() {
         // GIVEN
         val plate = "UNKNOWN"
         every { carRepository.findByPlate(plate) } returns Mono.empty()

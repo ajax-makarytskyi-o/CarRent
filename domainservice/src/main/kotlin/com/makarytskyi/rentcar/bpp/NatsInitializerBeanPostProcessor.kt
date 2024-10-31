@@ -5,11 +5,14 @@ import com.makarytskyi.rentcar.controller.nats.NatsController
 import io.nats.client.Dispatcher
 import io.nats.client.MessageHandler
 import org.springframework.beans.factory.config.BeanPostProcessor
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @Component
+@Order(Ordered.LOWEST_PRECEDENCE)
 class NatsInitializerBeanPostProcessor(private val dispatcher: Dispatcher) : BeanPostProcessor {
 
     override fun postProcessAfterInitialization(bean: Any, beanName: String): Any {
@@ -44,7 +47,7 @@ class NatsInitializerBeanPostProcessor(private val dispatcher: Dispatcher) : Bea
                 .build()
             setField(failureDescriptor, failure)
         }.build()
-        return (response as? ResponseT)?.toMono() ?: defaultResponse.toMono()
+        return (response as ResponseT).toMono()
     }
 
     companion object {

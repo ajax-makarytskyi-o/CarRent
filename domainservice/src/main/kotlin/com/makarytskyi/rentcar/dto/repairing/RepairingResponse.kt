@@ -14,8 +14,8 @@ data class RepairingResponse(
 
     companion object {
         fun from(mongoRepairing: MongoRepairing): RepairingResponse = RepairingResponse(
-            mongoRepairing.id?.toString().orEmpty(),
-            mongoRepairing.carId?.toString().orEmpty(),
+            requireNotNull(mongoRepairing.id?.toString()) { "Repairing id is null" },
+            requireNotNull(mongoRepairing.carId?.toString()) { "Car id is null" },
             mongoRepairing.date,
             mongoRepairing.price,
             mongoRepairing.status,

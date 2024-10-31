@@ -15,7 +15,7 @@ data class CarResponse(
 
     companion object {
         fun from(mongoCar: MongoCar): CarResponse = CarResponse(
-            mongoCar.id?.toString().orEmpty(),
+            requireNotNull(mongoCar.id?.toString()) { "Car id is null" },
             mongoCar.brand.orEmpty(),
             mongoCar.model.orEmpty(),
             mongoCar.price ?: BigDecimal.ZERO,

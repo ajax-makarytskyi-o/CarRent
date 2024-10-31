@@ -13,6 +13,8 @@ import com.makarytskyi.rentcar.fixtures.CarFixture.updateCarRequest
 import com.makarytskyi.rentcar.model.MongoCar
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.bson.types.ObjectId
+import org.junit.jupiter.api.assertThrows
 
 class CarMapperTest {
     @Test
@@ -29,16 +31,22 @@ class CarMapperTest {
     }
 
     @Test
-    fun `response mapper return response with default fields if car fields are null`() {
+    fun `response mapper throws IllegalArgumentException if car id is null`() {
         // GIVEN
         val emptyCar = MongoCar()
-        val response = emptyResponseCar()
 
-        // WHEN
-        val result = CarResponse.from(emptyCar)
+        // WHEN // THEN
+        assertThrows<IllegalArgumentException> { CarResponse.from(emptyCar) }
+    }
 
-        // THEN
-        assertEquals(response, result)
+    @Test
+    fun `response mapper return empty response if fields except id are null`() {
+        // GIVEN
+        val emptyCar = MongoCar().copy(id = ObjectId())
+        val response = CarResponse.from(emptyCar)
+
+        // WHEN // THEN
+        assertEquals(response, emptyResponseCar().copy(id = emptyCar.id.toString()))
     }
 
     @Test

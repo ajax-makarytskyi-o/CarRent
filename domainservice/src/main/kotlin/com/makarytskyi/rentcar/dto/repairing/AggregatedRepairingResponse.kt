@@ -17,7 +17,7 @@ data class AggregatedRepairingResponse(
 
     companion object {
         fun from(mongoRepairing: AggregatedMongoRepairing): AggregatedRepairingResponse = AggregatedRepairingResponse(
-            mongoRepairing.id?.toString().orEmpty(),
+            requireNotNull(mongoRepairing.id?.toString()) { "Repairing id is null" },
             CarResponse.from(mongoRepairing.car ?: MongoCar()),
             mongoRepairing.date,
             mongoRepairing.price,

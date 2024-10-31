@@ -11,6 +11,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import org.assertj.core.api.Assertions.assertThat
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.test.test
 
@@ -118,7 +119,7 @@ internal class OrderRepositoryTest : ContainerBase {
     @Test
     fun `findById should return empty if cant find order by id`() {
         // GIVEN
-        val unexistingId = "unexistingId"
+        val unexistingId = ObjectId().toString()
 
         // WHEN
         val foundOrder = orderRepository.findFullById(unexistingId)

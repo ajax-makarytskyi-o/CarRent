@@ -2,7 +2,7 @@ package com.makarytskyi.rentcar.controller
 
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
-import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_BY_ID
+import com.makarytskyi.internalapi.subject.NatsSubject.Order.GET_BY_ID
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
@@ -10,24 +10,16 @@ import com.makarytskyi.rentcar.fixtures.OrderFixture.responseAggregatedOrderDto
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failureGetByIdResponse
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.getByIdOrderRequest
-import com.makarytskyi.rentcar.mapper.toProto
+import com.makarytskyi.rentcar.mapper.OrderMapper.toProto
 import com.makarytskyi.rentcar.repository.CarRepository
-import com.makarytskyi.rentcar.repository.ContainerBase
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
-import io.mockk.junit5.MockKExtension
-import io.nats.client.Connection
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 
-@ExtendWith(MockKExtension::class)
-class GetByIdOrderNatsControllerTest : ContainerBase {
-
-    @Autowired
-    lateinit var connection: Connection
+class GetByIdOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
 
     @Autowired
     internal lateinit var carRepository: CarRepository
@@ -49,12 +41,11 @@ class GetByIdOrderNatsControllerTest : ContainerBase {
         val getByIdRequest = getByIdOrderRequest(order.id.toString())
         val expectedOrder = responseAggregatedOrderDto(aggregatedOrder, car).toProto()
 
-        //WHEN
-        val response = connection.request(FIND_BY_ID, getByIdRequest.toByteArray())
+        // WHEN
+        val response = sendRequest(GET_BY_ID, getByIdRequest, GetByIdOrderResponse.parser())
 
-        //THEN
-        val responseOrders = GetByIdOrderResponse.parser().parseFrom(response.get().data)
-        assertEquals(responseOrders.success.order, expectedOrder)
+        // THEN
+        assertEquals(response.success.order, expectedOrder)
     }
 
     @Test
@@ -65,11 +56,10 @@ class GetByIdOrderNatsControllerTest : ContainerBase {
         val exception = NotFoundException("Order with id $id is not found")
         val protoResponse = failureGetByIdResponse(exception)
 
-        //WHEN
-        val response = connection.request(FIND_BY_ID, protoRequest.toByteArray())
+        // WHEN
+        val response = sendRequest(GET_BY_ID, protoRequest, GetByIdOrderResponse.parser())
 
-        //THEN
-        val responseOrder = GetByIdOrderResponse.parser().parseFrom(response.get().data)
-        assertEquals(protoResponse, responseOrder)
+        // THEN
+        assertEquals(protoResponse, response)
     }
 }

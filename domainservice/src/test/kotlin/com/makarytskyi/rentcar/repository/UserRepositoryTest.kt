@@ -1,8 +1,13 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.fixtures.UserFixture.emptyUserPatch
+import com.makarytskyi.rentcar.fixtures.UserFixture.randomCity
+import com.makarytskyi.rentcar.fixtures.UserFixture.randomEmail
+import com.makarytskyi.rentcar.fixtures.UserFixture.randomName
+import com.makarytskyi.rentcar.fixtures.UserFixture.randomPhoneNumber
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import org.assertj.core.api.Assertions.assertThat
+import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -53,9 +58,9 @@ internal class UserRepositoryTest : ContainerBase {
     @Test
     fun `patch should partially update user`() {
         // GIVEN
-        val name = "Alex"
-        val phoneNumber = "670185014"
-        val city = "London"
+        val name = randomName()
+        val phoneNumber = randomPhoneNumber()
+        val city = randomCity()
 
         val user = userRepository.create(randomUser()).block()!!
 
@@ -82,7 +87,7 @@ internal class UserRepositoryTest : ContainerBase {
     @Test
     fun `findByPhoneNumber should return user found by phone number`() {
         // GIVEN
-        val phoneNumber = "15025025"
+        val phoneNumber = randomPhoneNumber()
         val user = userRepository.create(randomUser().copy(phoneNumber = phoneNumber)).block()!!
 
         // WHEN
@@ -98,7 +103,7 @@ internal class UserRepositoryTest : ContainerBase {
     @Test
     fun `findByPhoneNumber should return empty if cant find by phone number`() {
         // GIVEN
-        val unexistingPhoneNumber = "00000000"
+        val unexistingPhoneNumber = randomPhoneNumber()
 
         // WHEN
         val user = userRepository.findByPhoneNumber(unexistingPhoneNumber)
@@ -112,7 +117,7 @@ internal class UserRepositoryTest : ContainerBase {
     @Test
     fun `findByEmail should return user found by email`() {
         // GIVEN
-        val email = "testing@email.com"
+        val email = randomEmail()
         val user = userRepository.create(randomUser().copy(email = email)).block()!!
 
         // WHEN
@@ -128,7 +133,7 @@ internal class UserRepositoryTest : ContainerBase {
     @Test
     fun `findByEmail should return empty if cant find by email`() {
         // GIVEN
-        val unexistingEmail = "wrong@email.com"
+        val unexistingEmail = randomEmail()
 
         // WHEN
         val foundUser = userRepository.findByEmail(unexistingEmail)
@@ -157,7 +162,7 @@ internal class UserRepositoryTest : ContainerBase {
     @Test
     fun `findById should return empty if cant find user by id`() {
         // GIVEN
-        val unexistingId = "wrongId"
+        val unexistingId = ObjectId().toString()
 
         // WHEN
         val foundUser = userRepository.findById(unexistingId)

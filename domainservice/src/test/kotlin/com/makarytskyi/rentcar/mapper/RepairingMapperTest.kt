@@ -8,9 +8,7 @@ import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.createRepairingEntity
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.createRepairingRequest
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyAggregatedRepairing
-import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyAggregatedRepairingResponse
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyRepairing
-import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyRepairingResponse
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomAggregatedRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.repairingPatch
@@ -20,6 +18,7 @@ import com.makarytskyi.rentcar.fixtures.RepairingFixture.updateRepairingRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
+import org.junit.jupiter.api.assertThrows
 
 class RepairingMapperTest {
     @Test
@@ -36,16 +35,21 @@ class RepairingMapperTest {
     }
 
     @Test
-    fun `repairing mapper return response with default fields if car fields are null`() {
+    fun `repairing mapper throws IllegalArgumentException if id is null`() {
         // GIVEN
         val repairing = emptyRepairing()
-        val response = emptyRepairingResponse()
 
-        // WHEN
-        val result = RepairingResponse.from(repairing)
+        // WHEN // THEN
+        assertThrows<IllegalArgumentException> { RepairingResponse.from(repairing) }
+    }
 
-        // THEN
-        assertEquals(response, result)
+    @Test
+    fun `repairing mapper throws IllegalArgumentException if car id is null`() {
+        // GIVEN
+        val repairing = emptyRepairing().copy(id = ObjectId())
+
+        // WHEN // THEN
+        assertThrows<IllegalArgumentException> { RepairingResponse.from(repairing) }
     }
 
     @Test
@@ -121,15 +125,11 @@ class RepairingMapperTest {
     }
 
     @Test
-    fun `aggregated repairing mapper return response with default fields if car fields are null`() {
+    fun `aggregated repairing mapper throws IllegalArgumentException if car id is null`() {
         // GIVEN
         val repairing = emptyAggregatedRepairing()
-        val response = emptyAggregatedRepairingResponse()
 
-        // WHEN
-        val result = AggregatedRepairingResponse.from(repairing)
-
-        // THEN
-        assertEquals(response, result)
+        // WHEN // THEN
+        assertThrows<IllegalArgumentException> { AggregatedRepairingResponse.from(repairing) }
     }
 }

@@ -1,14 +1,15 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.aggregatedRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyRepairingPatch
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing
-import java.math.BigDecimal
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import org.assertj.core.api.Assertions.assertThat
+import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.test.test
@@ -66,7 +67,7 @@ internal class RepairingRepositoryTest : ContainerBase {
     @Test
     fun `patch should partially update repairing`() {
         // GIVEN
-        val price = BigDecimal("300")
+        val price = randomPrice()
         val status = MongoRepairing.RepairingStatus.COMPLETED
         val car = carRepository.create(randomCar()).block()!!
         val repairing = repairingRepository.create(randomRepairing(car.id)).block()!!
@@ -143,7 +144,7 @@ internal class RepairingRepositoryTest : ContainerBase {
     @Test
     fun `findById should return empty if cant find repairing by id`() {
         // GIVEN
-        val unexistingId = "unexistingId"
+        val unexistingId = ObjectId().toString()
 
         // WHEN
         val foundRepairing = repairingRepository.findFullById(unexistingId)

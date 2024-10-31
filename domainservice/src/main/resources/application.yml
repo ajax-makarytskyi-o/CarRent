@@ -21,4 +21,4 @@ management:
         enabled: true
 
 nats:
-  url: "nats://localhost:4222"
+  url: ${NATS_URL}

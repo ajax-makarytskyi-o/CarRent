@@ -20,10 +20,14 @@ import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.util.dateToTimestamp
 
 object OrderProtoFixtures {
+    val firstPage = 0
+    val emptySize = 0
+    val defaultSize = 20
+
     fun createOrderRequest(mongoCar: MongoCar, mongoUser: MongoUser): CreateOrderRequest =
         CreateOrderRequest.newBuilder()
             .apply {
-                orderBuilder.apply {
+                with(orderBuilder) {
                     carId = mongoCar.id.toString()
                     userId = mongoUser.id.toString()
                     from = dateToTimestamp(monthAfter)
@@ -35,7 +39,7 @@ object OrderProtoFixtures {
     fun successfulCreateResponse(response: CreateOrderRequest, price: Double): CreateOrderResponse = CreateOrderResponse
         .newBuilder()
         .apply {
-            successBuilder.orderBuilder.apply {
+            with(successBuilder.orderBuilder) {
                 setId(response.order.id)
                 setCarId(response.order.carId)
                 setUserId(response.order.userId)
@@ -48,7 +52,7 @@ object OrderProtoFixtures {
 
     fun failureCreateResponse(exception: Exception): CreateOrderResponse = CreateOrderResponse.newBuilder()
         .apply {
-            failureBuilder.apply {
+            with(failureBuilder) {
                 setMessage(exception.message)
                 when (exception) {
                     is NotFoundException -> setNotFound(Error.getDefaultInstance())
@@ -61,7 +65,7 @@ object OrderProtoFixtures {
     fun successfulPatchResponse(response: OrderResponseDto): PatchOrderResponse = PatchOrderResponse
         .newBuilder()
         .apply {
-            successBuilder.orderBuilder.apply {
+            with(successBuilder.orderBuilder) {
                 setId(response.id)
                 setCarId(response.carId)
                 setUserId(response.userId)
@@ -74,7 +78,7 @@ object OrderProtoFixtures {
 
     fun failurePatchResponse(exception: Exception): PatchOrderResponse = PatchOrderResponse.newBuilder()
         .apply {
-            failureBuilder.apply {
+            with(failureBuilder) {
                 setMessage(exception.message)
                 when (exception) {
                     is NotFoundException -> setNotFound(Error.getDefaultInstance())
@@ -88,8 +92,8 @@ object OrderProtoFixtures {
         PatchOrderRequest.newBuilder()
             .apply {
                 setId(id)
-                patchBuilder.setFrom(dateToTimestamp(monthAfter))
-                patchBuilder.setTo(dateToTimestamp(monthAndDayAfter))
+                patchBuilder.setStartDate(dateToTimestamp(monthAfter))
+                patchBuilder.setEndDate(dateToTimestamp(monthAndDayAfter))
             }
             .build()
 
@@ -102,7 +106,7 @@ object OrderProtoFixtures {
         GetByIdOrderResponse
             .newBuilder()
             .apply {
-                successBuilder.orderBuilder.apply {
+                with(successBuilder.orderBuilder) {
                     setId(response.id)
                     setCar(response.car.toProto())
                     setUser(response.user.toProto())
@@ -116,11 +120,9 @@ object OrderProtoFixtures {
     fun failureGetByIdResponse(exception: Exception): GetByIdOrderResponse =
         GetByIdOrderResponse.newBuilder()
             .apply {
-                failureBuilder.apply {
+                with(failureBuilder) {
                     setMessage(exception.message)
-                    when (exception) {
-                        is NotFoundException -> setNotFound(Error.getDefaultInstance())
-                    }
+                    failureBuilder.notFoundBuilder
                 }
             }
             .build()

@@ -5,8 +5,8 @@ import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
 import com.makarytskyi.rentcar.fixtures.Utils.getDateFromNow
-import com.makarytskyi.rentcar.fixtures.Utils.randomPrice
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus

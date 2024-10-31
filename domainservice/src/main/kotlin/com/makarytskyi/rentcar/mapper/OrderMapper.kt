@@ -25,90 +25,93 @@ import java.time.temporal.ChronoUnit
 import java.util.Date
 import org.bson.types.ObjectId
 
-fun OrderResponseDto.toCreateResponse(): CreateOrderResponse = CreateOrderResponse.newBuilder()
-    .also { it.successBuilder.setOrder(this.toProto()) }
-    .build()
+@SuppressWarnings("TooManyFunctions")
+object OrderMapper {
+    fun OrderResponseDto.toCreateResponse(): CreateOrderResponse = CreateOrderResponse.newBuilder()
+        .also { it.successBuilder.setOrder(this.toProto()) }
+        .build()
 
-fun List<AggregatedOrder>.toFindAllResponse(): FindAllOrdersResponse = FindAllOrdersResponse.newBuilder()
-    .also { it.successBuilder.addAllOrders(this) }.build()
+    fun List<AggregatedOrderResponseDto>.toFindAllResponse(): FindAllOrdersResponse = FindAllOrdersResponse.newBuilder()
+        .also { it.successBuilder.addAllOrders(this.map { responseDto -> responseDto.toProto() }) }.build()
 
-fun AggregatedOrderResponseDto.toGetByIdResponse(): GetByIdOrderResponse = GetByIdOrderResponse.newBuilder()
-    .also { it.successBuilder.setOrder(this.toProto()) }.build()
+    fun AggregatedOrderResponseDto.toGetByIdResponse(): GetByIdOrderResponse = GetByIdOrderResponse.newBuilder()
+        .also { it.successBuilder.setOrder(this.toProto()) }.build()
 
-fun OrderResponseDto.toPatchResponse(): PatchOrderResponse = PatchOrderResponse.newBuilder()
-    .also { it.successBuilder.setOrder(this.toProto()) }.build()
+    fun OrderResponseDto.toPatchResponse(): PatchOrderResponse = PatchOrderResponse.newBuilder()
+        .also { it.successBuilder.setOrder(this.toProto()) }.build()
 
-fun toDeleteResponse(): DeleteOrderResponse = DeleteOrderResponse.newBuilder()
-    .apply { successBuilder }.build()
+    fun toDeleteFailureResponse(): DeleteOrderResponse = DeleteOrderResponse.newBuilder()
+        .apply { successBuilder }.build()
 
-fun CreateOrderRequest.toDto() = CreateOrderRequestDto(
-    carId = order.carId,
-    userId = order.userId,
-    from = Date(order.from.seconds),
-    to = Date(order.to.seconds),
-)
+    fun CreateOrderRequest.toDto() = CreateOrderRequestDto(
+        carId = order.carId,
+        userId = order.userId,
+        from = Date(order.from.seconds),
+        to = Date(order.to.seconds),
+    )
 
-fun Patch.toDto(): UpdateOrderRequestDto = UpdateOrderRequestDto(
-    from = timestampToDate(from),
-    to = timestampToDate(to),
-)
+    fun Patch.toDto(): UpdateOrderRequestDto = UpdateOrderRequestDto(
+        from = if (this.hasStartDate()) timestampToDate(startDate) else null,
+        to = if (this.hasEndDate()) timestampToDate(endDate) else null,
+    )
 
-fun OrderResponseDto.toProto(): Order = Order.newBuilder()
-    .apply {
-        setId(this@toProto.id)
-        setCarId(this@toProto.carId)
-        setUserId(this@toProto.userId)
-        setFrom(dateToTimestamp(this@toProto.from))
-        setTo(dateToTimestamp(this@toProto.to))
-        setPrice(this@toProto.price.toDouble())
+    fun OrderResponseDto.toProto(): Order = Order.newBuilder()
+        .also {
+            it.setId(this.id)
+            it.setCarId(this.carId)
+            it.setUserId(this.userId)
+            it.setFrom(dateToTimestamp(this.from))
+            it.setTo(dateToTimestamp(this.to))
+            it.setPrice(this.price.toDouble())
+        }
+        .build()
+
+    fun AggregatedOrderResponseDto.toProto(): AggregatedOrder = AggregatedOrder.newBuilder()
+        .also {
+            it.setId(this.id)
+            it.setCar(this.car.toProto())
+            it.setUser(this.user.toProto())
+            it.setFrom(dateToTimestamp(this.from))
+            it.setTo(dateToTimestamp(this.to))
+            it.setPrice(this.price.toDouble())
+        }
+        .build()
+
+    fun AggregatedMongoOrder.toResponse(): AggregatedOrderResponseDto {
+        val bookedDays = from?.toInstant()?.until(to?.toInstant(), ChronoUnit.DAYS)?.toBigDecimal() ?: BigDecimal.ZERO
+
+        return AggregatedOrderResponseDto(
+            id = requireNotNull(id?.toString()) { "Order id is null" },
+            car = (car ?: MongoCar()).toResponse(),
+            user = (user ?: MongoUser()).toResponse(),
+            from = requireNotNull(from) { "Start date of order is unset" },
+            to = requireNotNull(to) { "End date of order is unset" },
+            price = car?.price?.times(bookedDays) ?: BigDecimal.ZERO,
+        )
     }
-    .build()
 
-fun AggregatedOrderResponseDto.toProto(): AggregatedOrder = AggregatedOrder.newBuilder()
-    .apply {
-        setId(this@toProto.id)
-        setCar(this@toProto.car.toProto())
-        setUser(this@toProto.user.toProto())
-        setFrom(dateToTimestamp(this@toProto.from))
-        setTo(dateToTimestamp(this@toProto.to))
-        setPrice(this@toProto.price.toDouble())
+    fun CreateOrderRequestDto.toEntity(): MongoOrder = MongoOrder(
+        carId = ObjectId(carId),
+        userId = ObjectId(userId),
+        from = from,
+        to = to,
+    )
+
+    fun MongoOrder.toResponse(price: BigDecimal?): OrderResponseDto {
+        val bookedDays = from?.toInstant()?.until(to?.toInstant(), ChronoUnit.DAYS)?.toBigDecimal() ?: BigDecimal.ZERO
+
+        return OrderResponseDto(
+            id = requireNotNull(id?.toString()) { "Order id is null" },
+            carId = requireNotNull(carId?.toString()) { "Car id is null" },
+            userId = requireNotNull(userId?.toString()) { "User id is null" },
+            from = requireNotNull(from) { "Start date of order is unset" },
+            to = requireNotNull(to) { "End date of order is unset" },
+            price = price?.times(bookedDays) ?: BigDecimal.ZERO
+        )
     }
-    .build()
 
-fun AggregatedMongoOrder.toResponse(): AggregatedOrderResponseDto {
-    val bookedDays = from?.toInstant()?.until(to?.toInstant(), ChronoUnit.DAYS)?.toBigDecimal() ?: BigDecimal.ZERO
-
-    return AggregatedOrderResponseDto(
-        id = id?.toString().orEmpty(),
-        car = (car ?: MongoCar()).toResponse(),
-        user = (user ?: MongoUser()).toResponse(),
-        from = from ?: throw IllegalArgumentException("Start date of order is unset"),
-        to = to ?: throw IllegalArgumentException("End date of order is unset"),
-        price = car?.price?.times(bookedDays) ?: BigDecimal.ZERO,
+    fun UpdateOrderRequestDto.toPatch(): MongoOrderPatch = MongoOrderPatch(
+        from = from,
+        to = to,
     )
 }
-
-fun CreateOrderRequestDto.toEntity(): MongoOrder = MongoOrder(
-    carId = ObjectId(carId),
-    userId = ObjectId(userId),
-    from = from,
-    to = to,
-)
-
-fun MongoOrder.toResponse(price: BigDecimal?): OrderResponseDto {
-    val bookedDays = from?.toInstant()?.until(to?.toInstant(), ChronoUnit.DAYS)?.toBigDecimal() ?: BigDecimal.ZERO
-
-    return OrderResponseDto(
-        id = id?.toString().orEmpty(),
-        carId = carId?.toString().orEmpty(),
-        userId = userId?.toString().orEmpty(),
-        from = from ?: throw IllegalArgumentException("Start date of order is unset"),
-        to = to ?: throw IllegalArgumentException("End date of order is unset"),
-        price = price?.times(bookedDays) ?: BigDecimal.ZERO
-    )
-}
-
-fun UpdateOrderRequestDto.toPatch(): MongoOrderPatch = MongoOrderPatch(
-    from = from,
-    to = to,
-)

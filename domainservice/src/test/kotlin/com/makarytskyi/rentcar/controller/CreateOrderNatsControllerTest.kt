@@ -9,18 +9,13 @@ import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.createOrderRe
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failureCreateResponse
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.successfulCreateResponse
 import com.makarytskyi.rentcar.repository.CarRepository
-import com.makarytskyi.rentcar.repository.ContainerBase
 import com.makarytskyi.rentcar.repository.UserRepository
-import io.nats.client.Connection
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class CreateOrderNatsControllerTest : ContainerBase {
-
-    @Autowired
-    lateinit var connection: Connection
+class CreateOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
 
     @Autowired
     internal lateinit var carRepository: CarRepository
@@ -40,13 +35,12 @@ class CreateOrderNatsControllerTest : ContainerBase {
             car.price!!.toDouble()
         ).toBuilder().successBuilder.orderBuilder.clearId().build()
 
-        //WHEN
-        val response = connection.request(CREATE, protoRequest.toByteArray())
+        // WHEN
+        val response = sendRequest(CREATE, protoRequest, CreateOrderResponse.parser())
 
-        //THEN
-        val data = CreateOrderResponse.parser().parseFrom(response.get().data)
-        assertNotNull(data.success.order.id)
-        assertEquals(orderResponse, data.toBuilder().successBuilder.orderBuilder.clearId().build())
+        // THEN
+        assertNotNull(response.success.order.id)
+        assertEquals(orderResponse, response.toBuilder().successBuilder.orderBuilder.clearId().build())
     }
 
     @Test
@@ -58,11 +52,10 @@ class CreateOrderNatsControllerTest : ContainerBase {
         val exception = NotFoundException("User with id null is not found")
         val protoResponse = failureCreateResponse(exception)
 
-        //WHEN
-        val natsResponse = connection.request(CREATE, protoRequest.toByteArray())
+        // WHEN
+        val response = sendRequest(CREATE, protoRequest, CreateOrderResponse.parser())
 
-        //THEN
-        val data = CreateOrderResponse.parser().parseFrom(natsResponse.get().data)
-        assertEquals(protoResponse, data)
+        // THEN
+        assertEquals(protoResponse, response)
     }
 }

@@ -1,9 +1,12 @@
 package com.makarytskyi.rentcar.repository
 
 import com.makarytskyi.rentcar.fixtures.CarFixture.emptyCarPatch
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomBrand
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomModel
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomPlate
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
 import com.makarytskyi.rentcar.model.MongoCar
-import java.math.BigDecimal
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -56,7 +59,7 @@ internal class CarRepositoryTest : ContainerBase {
     @Test
     fun `patch should partially update car`() {
         // GIVEN
-        val price = BigDecimal("600")
+        val price = randomPrice()
         val color = MongoCar.CarColor.BLUE
         val car = carRepository.create(randomCar()).block()!!
         val updateCar = emptyCarPatch().copy(price = price, color = color)
@@ -77,7 +80,7 @@ internal class CarRepositoryTest : ContainerBase {
     @Test
     fun `findByPlate should find existing car by plate`() {
         // GIVEN
-        val plate = "XX5295YY"
+        val plate = randomPlate()
         val car = randomCar().copy(plate = plate)
         carRepository.create(car).block()
 
@@ -96,7 +99,7 @@ internal class CarRepositoryTest : ContainerBase {
     @Test
     fun `findByPlate should return empty if cant find car by plate`() {
         // GIVEN
-        val unexistingPlate = "wrongPlate"
+        val unexistingPlate = randomPlate()
 
         // WHEN
         val foundCar = carRepository.findByPlate(unexistingPlate)
@@ -110,7 +113,7 @@ internal class CarRepositoryTest : ContainerBase {
     @Test
     fun `findAllByBrand should find all cars by brand`() {
         // GIVEN
-        val brand = "SomeBrand"
+        val brand = randomBrand()
         val car1 = carRepository.create(randomCar().copy(brand = brand)).block()
         val car2 = carRepository.create(randomCar().copy(brand = brand)).block()
 
@@ -129,8 +132,8 @@ internal class CarRepositoryTest : ContainerBase {
     @Test
     fun `findAllByBrandAndModel should find cars by brand and model`() {
         // GIVEN
-        val brand = "brand"
-        val model = "model"
+        val brand = randomBrand()
+        val model = randomModel()
         val car1 = carRepository.create(randomCar().copy(brand = brand, model = model)).block()
         val car2 = carRepository.create(randomCar().copy(brand = brand, model = model)).block()
 

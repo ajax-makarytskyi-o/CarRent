@@ -1,4 +1,3 @@
 complexity:
   TooManyFunctions:
     thresholdInClasses: 15
-    thresholdInFiles: 15

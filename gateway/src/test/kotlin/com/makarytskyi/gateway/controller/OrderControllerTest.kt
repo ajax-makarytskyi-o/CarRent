@@ -1,8 +1,6 @@
 package com.makarytskyi.gateway.controller
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.core.fixtures.OrderRequestFixture.randomCreateRequest
-import com.makarytskyi.core.fixtures.OrderRequestFixture.randomUpdateRequest
 import com.makarytskyi.gateway.config.NatsClient
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.aggregatedOrderDto
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.createOrderResponse
@@ -19,7 +17,9 @@ import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulCreateRespon
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulGetByIdResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulUpdateResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.updateOrderResponse
-import com.makarytskyi.gateway.mapper.toProto
+import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.randomCreateRequest
+import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.randomUpdateRequest
+import com.makarytskyi.gateway.mapper.OrderMapper.toProto
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersRequest
@@ -30,12 +30,13 @@ import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.CREATE
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.DELETE
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_ALL
-import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_BY_ID
+import com.makarytskyi.internalapi.subject.NatsSubject.Order.GET_BY_ID
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.PATCH
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.nats.client.Connection
 import kotlin.test.Test
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
@@ -47,6 +48,9 @@ import reactor.kotlin.test.verifyError
 
 @ExtendWith(MockKExtension::class)
 class OrderControllerTest {
+
+    @MockK
+    lateinit var connection: Connection
 
     @MockK
     lateinit var natsClient: NatsClient
@@ -63,7 +67,7 @@ class OrderControllerTest {
 
         every {
             natsClient.request(
-                FIND_BY_ID,
+                GET_BY_ID,
                 GetByIdOrderRequest.newBuilder().setId(id).build(),
                 GetByIdOrderResponse.parser()
             )
@@ -83,7 +87,7 @@ class OrderControllerTest {
 
         every {
             natsClient.request(
-                FIND_BY_ID,
+                GET_BY_ID,
                 GetByIdOrderRequest.newBuilder().setId(id).build(),
                 GetByIdOrderResponse.parser()
             )

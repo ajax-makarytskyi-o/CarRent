@@ -1,8 +1,6 @@
 package com.makarytskyi.gateway.mapper
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.core.fixtures.OrderRequestFixture.randomCreateRequest
-import com.makarytskyi.core.fixtures.OrderRequestFixture.randomUpdateRequest
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.aggregatedOrderResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.createOrderResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.failureCreateResponse
@@ -13,9 +11,14 @@ import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulCreateRespon
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulGetByIdResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulUpdateResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.updateOrderResponse
+import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.randomCreateRequest
+import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.randomUpdateRequest
+import com.makarytskyi.gateway.mapper.OrderMapper.toDto
 import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 
 class OrderMapperTest {
 
@@ -34,24 +37,14 @@ class OrderMapperTest {
         assertEquals(response, expectedResponse)
     }
 
-    @Test
-    fun `CreateOrderResponse mapper should throw IllegalArgumentException if proto has IllegalArgument failure`() {
+    @ParameterizedTest
+    @MethodSource("exceptionProvider")
+    fun `CreateOrderResponse mapper should throw exception if proto has failure`(exception: Exception) {
         // GIVEN
-        val exception = IllegalArgumentException("Dates must be in future")
         val protoResponse = failureCreateResponse(exception)
 
         // WHEN // THEN
-        assertThrows<IllegalArgumentException> { protoResponse.toDto() }
-    }
-
-    @Test
-    fun `CreateOrderResponse mapper should throw NotFoundException if response proto has NotFound failure`() {
-        // GIVEN
-        val exception = NotFoundException("Car with id is not found")
-        val protoResponse = failureCreateResponse(exception)
-
-        // WHEN // THEN
-        assertThrows<NotFoundException> { protoResponse.toDto() }
+        assertThrows(exception::class.java) { protoResponse.toDto() }
     }
 
     @Test
@@ -75,7 +68,7 @@ class OrderMapperTest {
         val protoResponse = failureGetByIdResponse(exception)
 
         // WHEN // THEN
-        assertThrows<NotFoundException> { protoResponse.toDto() }
+        assertThrows(NotFoundException::class.java) { protoResponse.toDto() }
     }
 
     @Test
@@ -97,23 +90,21 @@ class OrderMapperTest {
         assertEquals(response, expectedResponse)
     }
 
-    @Test
-    fun `PatchOrderResponse mapper should throw NotFoundException if response proto has NotFound`() {
+    @ParameterizedTest
+    @MethodSource("exceptionProvider")
+    fun `PatchOrderResponse mapper should throw exception if proto has failure`(exception: Exception) {
         // GIVEN
-        val exception = NotFoundException("Car with id is not found")
         val protoResponse = failurePatchResponse(exception)
 
         // WHEN // THEN
-        assertThrows<NotFoundException> { protoResponse.toDto() }
+        assertThrows(exception::class.java) { protoResponse.toDto() }
     }
 
-    @Test
-    fun `PatchOrderResponse mapper should throw IllegalArgumentException if response proto has IllegalArgument`() {
-        // GIVEN
-        val exception = IllegalArgumentException("Start date must be before end date")
-        val protoResponse = failurePatchResponse(exception)
-
-        // WHEN // THEN
-        assertThrows<IllegalArgumentException> { protoResponse.toDto() }
+    companion object {
+        @JvmStatic
+        fun exceptionProvider() = listOf(
+            arrayOf(NotFoundException("Resource with id is not found")),
+            arrayOf(IllegalArgumentException("Start date must be before end date"))
+        )
     }
 }

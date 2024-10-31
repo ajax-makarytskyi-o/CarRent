@@ -5,8 +5,8 @@ import com.makarytskyi.core.dto.order.CreateOrderRequestDto
 import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.gateway.config.NatsClient
-import com.makarytskyi.gateway.mapper.toDto
-import com.makarytskyi.gateway.mapper.toProto
+import com.makarytskyi.gateway.mapper.OrderMapper.toDto
+import com.makarytskyi.gateway.mapper.OrderMapper.toProto
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderResponse
@@ -19,7 +19,7 @@ import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.CREATE
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.DELETE
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_ALL
-import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_BY_ID
+import com.makarytskyi.internalapi.subject.NatsSubject.Order.GET_BY_ID
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.PATCH
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -43,7 +43,7 @@ class OrderController(private val natsClient: NatsClient) {
     @GetMapping("/{id}")
     fun getFullById(@PathVariable id: String): Mono<AggregatedOrderResponseDto> =
         natsClient.request(
-            FIND_BY_ID,
+            GET_BY_ID,
             GetByIdOrderRequest.newBuilder().setId(id).build(),
             GetByIdOrderResponse.parser()
         )

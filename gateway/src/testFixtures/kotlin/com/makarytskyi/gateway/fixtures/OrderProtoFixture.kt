@@ -20,7 +20,6 @@ import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
 import java.util.Date
 import kotlin.random.Random
-import java.lang.Exception
 import org.bson.types.ObjectId
 
 object OrderProtoFixture {
@@ -39,8 +38,8 @@ object OrderProtoFixture {
         PatchOrderRequest.newBuilder()
             .apply {
                 setId(id)
-                patchBuilder.setFrom(Timestamp.newBuilder().setSeconds(request.from!!.time).build())
-                patchBuilder.setTo(Timestamp.newBuilder().setSeconds(request.to!!.time).build())
+                patchBuilder.setStartDate(Timestamp.newBuilder().setSeconds(request.from!!.time).build())
+                patchBuilder.setEndDate(Timestamp.newBuilder().setSeconds(request.to!!.time).build())
             }
             .build()
 

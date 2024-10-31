@@ -1,9 +1,8 @@
 package com.makarytskyi.gateway.mapper
 
 import com.makarytskyi.core.dto.car.CarResponseDto
-import com.makarytskyi.core.dto.car.CarResponseDto.CarColor
 import com.makarytskyi.internalapi.commonmodels.car.Car
-import com.makarytskyi.internalapi.commonmodels.car.CarColorProto
+import com.makarytskyi.internalapi.commonmodels.car.CarColor
 
 fun Car.toResponse(): CarResponseDto = CarResponseDto(
     id = id,
@@ -15,15 +14,15 @@ fun Car.toResponse(): CarResponseDto = CarResponseDto(
     color = color.toDto(),
 )
 
-fun CarColorProto.toDto(): CarColor =
+fun CarColor.toDto(): CarResponseDto.CarColor =
     when (this) {
-        CarColorProto.CAR_COLOR_PROTO_UNSPECIFIED -> CarColor.UNSPECIFIED
-        CarColorProto.CAR_COLOR_PROTO_RED -> CarColor.RED
-        CarColorProto.CAR_COLOR_PROTO_GREEN -> CarColor.GREEN
-        CarColorProto.CAR_COLOR_PROTO_BLUE -> CarColor.BLUE
-        CarColorProto.CAR_COLOR_PROTO_WHITE -> CarColor.WHITE
-        CarColorProto.CAR_COLOR_PROTO_GREY -> CarColor.GREY
-        CarColorProto.CAR_COLOR_PROTO_YELLOW -> CarColor.YELLOW
-        CarColorProto.CAR_COLOR_PROTO_BLACK -> CarColor.BLACK
-        CarColorProto.UNRECOGNIZED -> CarColor.UNSPECIFIED
+        CarColor.CAR_COLOR_UNSPECIFIED -> CarResponseDto.CarColor.UNSPECIFIED
+        CarColor.CAR_COLOR_RED -> CarResponseDto.CarColor.RED
+        CarColor.CAR_COLOR_GREEN -> CarResponseDto.CarColor.GREEN
+        CarColor.CAR_COLOR_BLUE -> CarResponseDto.CarColor.BLUE
+        CarColor.CAR_COLOR_WHITE -> CarResponseDto.CarColor.WHITE
+        CarColor.CAR_COLOR_GREY -> CarResponseDto.CarColor.GREY
+        CarColor.CAR_COLOR_YELLOW -> CarResponseDto.CarColor.YELLOW
+        CarColor.CAR_COLOR_BLACK -> CarResponseDto.CarColor.BLACK
+        CarColor.UNRECOGNIZED -> CarResponseDto.CarColor.UNSPECIFIED
     }

@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Start NATS container
-        run: docker-compose -f docker-compose-github-actions.yml up
+        run: docker compose -f docker-compose-github-actions.yml up
 
       - name: Set up JDK
         uses: actions/setup-java@v4

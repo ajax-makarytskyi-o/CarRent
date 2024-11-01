@@ -8,12 +8,12 @@ import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.internalapi.commonmodels.order.AggregatedOrder
 import com.makarytskyi.internalapi.commonmodels.order.Order
-import com.makarytskyi.internalapi.commonmodels.order.Patch
+import com.makarytskyi.internalapi.commonmodels.order.Update
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
-import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 import java.util.Date
 
 @SuppressWarnings("TooManyFunctions")
@@ -38,7 +38,7 @@ object OrderMapper {
         price = price.toBigDecimal()
     )
 
-    fun UpdateOrderRequestDto.toProto(): Patch = Patch.newBuilder()
+    fun UpdateOrderRequestDto.toProto(): Update = Update.newBuilder()
         .setStartDate(dateToTimestamp(from))
         .setEndDate(dateToTimestamp(to))
         .build()
@@ -60,11 +60,11 @@ object OrderMapper {
         }
 
     @SuppressWarnings("TooGenericExceptionThrown")
-    fun PatchOrderResponse.toDto(): OrderResponseDto =
+    fun UpdateOrderResponse.toDto(): OrderResponseDto =
         when (responseCase) {
-            PatchOrderResponse.ResponseCase.SUCCESS -> success.order.toDto()
-            PatchOrderResponse.ResponseCase.FAILURE -> failure.throwException()
-            PatchOrderResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException(failure.message)
+            UpdateOrderResponse.ResponseCase.SUCCESS -> success.order.toDto()
+            UpdateOrderResponse.ResponseCase.FAILURE -> failure.throwException()
+            UpdateOrderResponse.ResponseCase.RESPONSE_NOT_SET -> throw RuntimeException(failure.message)
         }
 
     @SuppressWarnings("TooGenericExceptionThrown")
@@ -83,11 +83,11 @@ object OrderMapper {
         }
 
     @SuppressWarnings("TooGenericExceptionThrown")
-    private fun PatchOrderResponse.Failure.throwException(): Nothing =
+    private fun UpdateOrderResponse.Failure.throwException(): Nothing =
         when (errorCase) {
-            PatchOrderResponse.Failure.ErrorCase.NOT_FOUND -> throw NotFoundException(message)
-            PatchOrderResponse.Failure.ErrorCase.ILLEGAL_ARGUMENT -> throw IllegalArgumentException(message)
-            PatchOrderResponse.Failure.ErrorCase.ERROR_NOT_SET -> throw RuntimeException(message)
+            UpdateOrderResponse.Failure.ErrorCase.NOT_FOUND -> throw NotFoundException(message)
+            UpdateOrderResponse.Failure.ErrorCase.ILLEGAL_ARGUMENT -> throw IllegalArgumentException(message)
+            UpdateOrderResponse.Failure.ErrorCase.ERROR_NOT_SET -> throw RuntimeException(message)
         }
 
     @SuppressWarnings("TooGenericExceptionThrown")

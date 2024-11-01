@@ -9,14 +9,12 @@ import com.makarytskyi.rentcar.mapper.OrderMapper.toCreateResponse
 import com.makarytskyi.rentcar.mapper.OrderMapper.toDto
 import com.makarytskyi.rentcar.mapper.toCreateFailureResponse
 import com.makarytskyi.rentcar.service.OrderService
-import io.nats.client.Connection
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @Component
 class CreateOrderNatsController(
-    override val connection: Connection,
     private val orderService: OrderService
 ) : NatsController<CreateOrderRequest, CreateOrderResponse> {
     override val subject = CREATE

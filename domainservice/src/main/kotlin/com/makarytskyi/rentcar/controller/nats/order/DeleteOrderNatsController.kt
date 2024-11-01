@@ -7,13 +7,11 @@ import com.makarytskyi.internalapi.subject.NatsSubject.Order.DELETE
 import com.makarytskyi.rentcar.controller.nats.NatsController
 import com.makarytskyi.rentcar.mapper.OrderMapper.toDeleteFailureResponse
 import com.makarytskyi.rentcar.service.OrderService
-import io.nats.client.Connection
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
 @Component
 class DeleteOrderNatsController(
-    override val connection: Connection,
     private val orderService: OrderService
 ) : NatsController<DeleteOrderRequest, DeleteOrderResponse> {
     override val subject = DELETE

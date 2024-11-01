@@ -1,5 +1,6 @@
 package com.makarytskyi.rentcar.mapper
 
+import com.makarytskyi.core.dto.car.CarResponseDto
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
@@ -15,6 +16,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 
 class CarMapperTest {
     @Test
@@ -107,5 +111,29 @@ class CarMapperTest {
 
         // THEN
         assertEquals(entity, result)
+    }
+
+    @ParameterizedTest
+    @MethodSource("colorProvider")
+    fun `color mapper should return response color`(color: MongoCar.CarColor, colorDto: CarResponseDto.CarColor) {
+        // WHEN
+        val result = color.toResponse()
+
+        // THEN
+        assertEquals(colorDto, result)
+    }
+
+    companion object {
+        @JvmStatic
+        fun colorProvider() = listOf(
+            Arguments.of(MongoCar.CarColor.RED, CarResponseDto.CarColor.RED),
+            Arguments.of(MongoCar.CarColor.GREEN, CarResponseDto.CarColor.GREEN),
+            Arguments.of(MongoCar.CarColor.BLUE, CarResponseDto.CarColor.BLUE),
+            Arguments.of(MongoCar.CarColor.BLACK, CarResponseDto.CarColor.BLACK),
+            Arguments.of(MongoCar.CarColor.WHITE, CarResponseDto.CarColor.WHITE),
+            Arguments.of(MongoCar.CarColor.GREY, CarResponseDto.CarColor.GREY),
+            Arguments.of(MongoCar.CarColor.YELLOW, CarResponseDto.CarColor.YELLOW),
+            Arguments.of(MongoCar.CarColor.UNSPECIFIED, CarResponseDto.CarColor.UNSPECIFIED),
+        )
     }
 }

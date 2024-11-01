@@ -10,8 +10,8 @@ import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersRequest
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
-import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderRequest
-import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
 import com.makarytskyi.rentcar.mapper.toProto
@@ -62,7 +62,7 @@ object OrderProtoFixtures {
         }
         .build()
 
-    fun successfulPatchResponse(response: OrderResponseDto): PatchOrderResponse = PatchOrderResponse
+    fun successfulPatchResponse(response: OrderResponseDto): UpdateOrderResponse = UpdateOrderResponse
         .newBuilder()
         .apply {
             with(successBuilder.orderBuilder) {
@@ -76,7 +76,7 @@ object OrderProtoFixtures {
         }
         .build()
 
-    fun failurePatchResponse(exception: Exception): PatchOrderResponse = PatchOrderResponse.newBuilder()
+    fun failurePatchResponse(exception: Exception): UpdateOrderResponse = UpdateOrderResponse.newBuilder()
         .apply {
             with(failureBuilder) {
                 setMessage(exception.message)
@@ -88,12 +88,12 @@ object OrderProtoFixtures {
         }
         .build()
 
-    fun updateOrderRequest(id: String): PatchOrderRequest =
-        PatchOrderRequest.newBuilder()
+    fun updateOrderRequest(id: String): UpdateOrderRequest =
+        UpdateOrderRequest.newBuilder()
             .apply {
                 setId(id)
-                patchBuilder.setStartDate(dateToTimestamp(monthAfter))
-                patchBuilder.setEndDate(dateToTimestamp(monthAndDayAfter))
+                updateBuilder.setStartDate(dateToTimestamp(monthAfter))
+                updateBuilder.setEndDate(dateToTimestamp(monthAndDayAfter))
             }
             .build()
 

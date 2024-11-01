@@ -6,7 +6,7 @@ import "google/protobuf/timestamp.proto";
 
 option java_multiple_files = true;
 
-message Patch {
+message Update {
   optional google.protobuf.Timestamp startDate = 1;
   optional google.protobuf.Timestamp endDate = 2;
 }

@@ -26,12 +26,12 @@ import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersRequest
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
-import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.CREATE
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.DELETE
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_ALL
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.GET_BY_ID
-import com.makarytskyi.internalapi.subject.NatsSubject.Order.PATCH
+import com.makarytskyi.internalapi.subject.NatsSubject.Order.UPDATE
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -195,9 +195,9 @@ class OrderControllerTest {
 
         every {
             natsClient.request(
-                PATCH,
+                UPDATE,
                 patchOrderRequest,
-                PatchOrderResponse.parser()
+                UpdateOrderResponse.parser()
             )
         } returns updateResponse.toMono()
 
@@ -217,9 +217,9 @@ class OrderControllerTest {
 
         every {
             natsClient.request(
-                PATCH,
+                UPDATE,
                 patchOrderRequest,
-                PatchOrderResponse.parser()
+                UpdateOrderResponse.parser()
             )
         } returns updateResponse.toMono()
 

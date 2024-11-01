@@ -8,14 +8,12 @@ import com.makarytskyi.rentcar.controller.nats.NatsController
 import com.makarytskyi.rentcar.mapper.OrderMapper.toGetByIdResponse
 import com.makarytskyi.rentcar.mapper.toGetByIdFailureResponse
 import com.makarytskyi.rentcar.service.OrderService
-import io.nats.client.Connection
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @Component
 class GetByIdOrderNatsController(
-    override val connection: Connection,
     private val orderService: OrderService
 ) : NatsController<GetByIdOrderRequest, GetByIdOrderResponse> {
     override val subject = GET_BY_ID

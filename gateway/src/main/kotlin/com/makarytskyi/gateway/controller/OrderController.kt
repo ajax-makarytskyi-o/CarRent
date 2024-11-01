@@ -14,13 +14,13 @@ import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersRequest
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
-import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderRequest
-import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.CREATE
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.DELETE
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_ALL
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.GET_BY_ID
-import com.makarytskyi.internalapi.subject.NatsSubject.Order.PATCH
+import com.makarytskyi.internalapi.subject.NatsSubject.Order.UPDATE
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -85,9 +85,9 @@ class OrderController(private val natsClient: NatsClient) {
     @PatchMapping("/{id}")
     fun patch(@PathVariable id: String, @Valid @RequestBody patch: UpdateOrderRequestDto): Mono<OrderResponseDto> =
         natsClient.request(
-            PATCH,
-            PatchOrderRequest.newBuilder().setId(id).setPatch(patch.toProto()).build(),
-            PatchOrderResponse.parser()
+            UPDATE,
+            UpdateOrderRequest.newBuilder().setId(id).setUpdate(patch.toProto()).build(),
+            UpdateOrderResponse.parser()
         )
             .map { it.toDto() }
 }

@@ -1,8 +1,8 @@
 package com.makarytskyi.rentcar.controller
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
-import com.makarytskyi.internalapi.subject.NatsSubject.Order.PATCH
+import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
+import com.makarytskyi.internalapi.subject.NatsSubject.Order.UPDATE
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.responseOrderDto
@@ -40,14 +40,14 @@ class PatchOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
         val protoRequest = updateOrderRequest(order.id.toString())
         val updatedOrder =
             randomOrder(car.id, user.id).copy(
-                from = timestampToDate(protoRequest.patch.startDate),
-                to = timestampToDate(protoRequest.patch.endDate),
+                from = timestampToDate(protoRequest.update.startDate),
+                to = timestampToDate(protoRequest.update.endDate),
             )
         val responseDto = responseOrderDto(updatedOrder, car).copy(id = order.id.toString())
         val protoResponse = successfulPatchResponse(responseDto)
 
         // WHEN
-        val response = sendRequest(PATCH, protoRequest, PatchOrderResponse.parser())
+        val response = sendRequest(UPDATE, protoRequest, UpdateOrderResponse.parser())
 
         // THEN
         assertEquals(protoResponse, response)
@@ -62,7 +62,7 @@ class PatchOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
         val protoResponse = failurePatchResponse(exception)
 
         // WHEN
-        val response = sendRequest(PATCH, protoRequest, PatchOrderResponse.parser())
+        val response = sendRequest(UPDATE, protoRequest, UpdateOrderResponse.parser())
 
         // THEN
         assertEquals(protoResponse, response)

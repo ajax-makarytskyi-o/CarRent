@@ -2,6 +2,7 @@ package com.makarytskyi.rentcar.bpp
 
 import com.google.protobuf.GeneratedMessage
 import com.makarytskyi.rentcar.controller.nats.NatsController
+import io.nats.client.Connection
 import io.nats.client.Dispatcher
 import io.nats.client.MessageHandler
 import org.springframework.beans.factory.config.BeanPostProcessor
@@ -13,7 +14,10 @@ import reactor.kotlin.core.publisher.toMono
 
 @Component
 @Order(Ordered.LOWEST_PRECEDENCE)
-class NatsInitializerBeanPostProcessor(private val dispatcher: Dispatcher) : BeanPostProcessor {
+class NatsInitializerBeanPostProcessor(
+    private val dispatcher: Dispatcher,
+    private val connection: Connection
+) : BeanPostProcessor {
 
     override fun postProcessAfterInitialization(bean: Any, beanName: String): Any {
         if (bean is NatsController<*, *>) processBean(bean)
@@ -29,7 +33,7 @@ class NatsInitializerBeanPostProcessor(private val dispatcher: Dispatcher) : Bea
                 .flatMap { bean.handle(it) }
                 .onErrorResume { onParsingError(it, bean.defaultResponse) }
                 .subscribe {
-                    bean.connection.publish(message.replyTo, it.toByteArray())
+                    connection.publish(message.replyTo, it.toByteArray())
                 }
         }
         dispatcher.subscribe(bean.subject, bean.queueGroup, handler)

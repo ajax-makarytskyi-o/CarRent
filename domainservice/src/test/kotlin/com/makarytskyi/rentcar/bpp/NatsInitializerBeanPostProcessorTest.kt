@@ -24,7 +24,7 @@ class NatsInitializerBeanPostProcessorTest {
     @MockK
     lateinit var createController: CreateOrderNatsController
 
-    val natInitializer: NatsInitializerBeanPostProcessor = NatsInitializerBeanPostProcessor(dispatcher)
+    val natInitializer: NatsInitializerBeanPostProcessor = NatsInitializerBeanPostProcessor(dispatcher, natsConnection)
 
     @Test
     fun `beanPostProcessor should create dispatcher and subscribe on subject if bean is NatsController`() {

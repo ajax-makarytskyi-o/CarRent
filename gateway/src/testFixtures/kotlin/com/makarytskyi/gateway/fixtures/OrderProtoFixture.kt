@@ -16,8 +16,8 @@ import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
-import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderRequest
-import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderRequest
+import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 import java.util.Date
 import kotlin.random.Random
 import org.bson.types.ObjectId
@@ -34,12 +34,12 @@ object OrderProtoFixture {
         }
         .build()
 
-    fun patchRequest(id: String, request: UpdateOrderRequestDto): PatchOrderRequest =
-        PatchOrderRequest.newBuilder()
+    fun patchRequest(id: String, request: UpdateOrderRequestDto): UpdateOrderRequest =
+        UpdateOrderRequest.newBuilder()
             .apply {
                 setId(id)
-                patchBuilder.setStartDate(Timestamp.newBuilder().setSeconds(request.from!!.time).build())
-                patchBuilder.setEndDate(Timestamp.newBuilder().setSeconds(request.to!!.time).build())
+                updateBuilder.setStartDate(Timestamp.newBuilder().setSeconds(request.from!!.time).build())
+                updateBuilder.setEndDate(Timestamp.newBuilder().setSeconds(request.to!!.time).build())
             }
             .build()
 
@@ -92,8 +92,8 @@ object OrderProtoFixture {
             )
         }
 
-    fun successfulUpdateResponse(request: UpdateOrderRequestDto, price: Double): PatchOrderResponse =
-        PatchOrderResponse.newBuilder()
+    fun successfulUpdateResponse(request: UpdateOrderRequestDto, price: Double): UpdateOrderResponse =
+        UpdateOrderResponse.newBuilder()
             .apply {
                 successBuilder.orderBuilder.apply {
                     setId(ObjectId().toString())
@@ -106,7 +106,7 @@ object OrderProtoFixture {
             }
             .build()
 
-    fun failurePatchResponse(exception: Exception): PatchOrderResponse = PatchOrderResponse.newBuilder()
+    fun failurePatchResponse(exception: Exception): UpdateOrderResponse = UpdateOrderResponse.newBuilder()
         .apply {
             failureBuilder.apply {
                 setMessage(this.message)

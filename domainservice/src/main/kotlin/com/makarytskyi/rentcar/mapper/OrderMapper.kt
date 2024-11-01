@@ -6,13 +6,13 @@ import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.internalapi.commonmodels.order.AggregatedOrder
 import com.makarytskyi.internalapi.commonmodels.order.Order
-import com.makarytskyi.internalapi.commonmodels.order.Patch
+import com.makarytskyi.internalapi.commonmodels.order.Update
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
-import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.model.MongoUser
@@ -37,7 +37,7 @@ object OrderMapper {
     fun AggregatedOrderResponseDto.toGetByIdResponse(): GetByIdOrderResponse = GetByIdOrderResponse.newBuilder()
         .also { it.successBuilder.setOrder(this.toProto()) }.build()
 
-    fun OrderResponseDto.toPatchResponse(): PatchOrderResponse = PatchOrderResponse.newBuilder()
+    fun OrderResponseDto.toPatchResponse(): UpdateOrderResponse = UpdateOrderResponse.newBuilder()
         .also { it.successBuilder.setOrder(this.toProto()) }.build()
 
     fun toDeleteFailureResponse(): DeleteOrderResponse = DeleteOrderResponse.newBuilder()
@@ -50,7 +50,7 @@ object OrderMapper {
         to = Date(order.to.seconds),
     )
 
-    fun Patch.toDto(): UpdateOrderRequestDto = UpdateOrderRequestDto(
+    fun Update.toDto(): UpdateOrderRequestDto = UpdateOrderRequestDto(
         from = if (this.hasStartDate()) timestampToDate(startDate) else null,
         to = if (this.hasEndDate()) timestampToDate(endDate) else null,
     )

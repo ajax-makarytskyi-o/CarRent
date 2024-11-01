@@ -4,7 +4,7 @@ import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
-import com.makarytskyi.internalapi.input.reqreply.order.PatchOrderResponse
+import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 
 fun Throwable.toFindAllFailureResponse(): FindAllOrdersResponse =
     FindAllOrdersResponse.newBuilder()
@@ -34,8 +34,8 @@ fun Throwable.toCreateFailureResponse(): CreateOrderResponse =
         }
         .build()
 
-fun Throwable.toPatchFailureResponse(): PatchOrderResponse =
-    PatchOrderResponse.newBuilder()
+fun Throwable.toPatchFailureResponse(): UpdateOrderResponse =
+    UpdateOrderResponse.newBuilder()
         .also {
             it.failureBuilder.also { failure ->
                 failure.message = message.orEmpty()

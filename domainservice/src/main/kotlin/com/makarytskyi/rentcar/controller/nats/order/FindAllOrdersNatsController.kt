@@ -8,14 +8,12 @@ import com.makarytskyi.rentcar.controller.nats.NatsController
 import com.makarytskyi.rentcar.mapper.OrderMapper.toFindAllResponse
 import com.makarytskyi.rentcar.mapper.toFindAllFailureResponse
 import com.makarytskyi.rentcar.service.OrderService
-import io.nats.client.Connection
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
 @Component
 class FindAllOrdersNatsController(
-    override val connection: Connection,
     private val orderService: OrderService
 ) : NatsController<FindAllOrdersRequest, FindAllOrdersResponse> {
     override val subject = FIND_ALL

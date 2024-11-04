@@ -46,7 +46,7 @@ class CreateOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
     @Test
     fun `create should return error message if user doesn't exist`() {
         // GIVEN
-        val car = randomCar()
+        val car = carRepository.create(randomCar()).block()!!
         val user = randomUser().copy(id = null)
         val protoRequest = createOrderRequest(car, user)
         val exception = NotFoundException("User with id null is not found")

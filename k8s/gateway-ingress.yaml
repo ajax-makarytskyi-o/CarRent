@@ -8,10 +8,17 @@ spec:
     - host: rentcar.com
       http:
         paths:
-          - path: /
+          - path: /api/v1/orders
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8080
+          - path: /api/v1/cars
             pathType: Prefix
             backend:
               service:
                 name: app-service
                 port:
-                  number: 8080
+                  number: 8081

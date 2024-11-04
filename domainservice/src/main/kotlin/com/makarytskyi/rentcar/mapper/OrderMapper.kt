@@ -6,7 +6,7 @@ import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.internalapi.commonmodels.order.AggregatedOrder
 import com.makarytskyi.internalapi.commonmodels.order.Order
-import com.makarytskyi.internalapi.commonmodels.order.Update
+import com.makarytskyi.internalapi.commonmodels.order.OrderUpdate
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderResponse
@@ -50,7 +50,7 @@ object OrderMapper {
         to = Date(order.to.seconds),
     )
 
-    fun Update.toDto(): UpdateOrderRequestDto = UpdateOrderRequestDto(
+    fun OrderUpdate.toDto(): UpdateOrderRequestDto = UpdateOrderRequestDto(
         from = if (this.hasStartDate()) timestampToDate(startDate) else null,
         to = if (this.hasEndDate()) timestampToDate(endDate) else null,
     )

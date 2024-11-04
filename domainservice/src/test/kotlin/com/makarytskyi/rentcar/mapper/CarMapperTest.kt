@@ -7,6 +7,7 @@ import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
 import com.makarytskyi.rentcar.fixtures.CarFixture.carPatch
 import com.makarytskyi.rentcar.fixtures.CarFixture.createCarEntity
 import com.makarytskyi.rentcar.fixtures.CarFixture.createCarRequest
+import com.makarytskyi.rentcar.fixtures.CarFixture.dtoColor
 import com.makarytskyi.rentcar.fixtures.CarFixture.emptyResponseCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.responseCar
@@ -18,6 +19,7 @@ import org.bson.types.ObjectId
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 
 class CarMapperTest {
@@ -114,26 +116,15 @@ class CarMapperTest {
     }
 
     @ParameterizedTest
-    @MethodSource("colorProvider")
-    fun `color mapper should return response color`(color: MongoCar.CarColor, colorDto: CarResponseDto.CarColor) {
+    @EnumSource(MongoCar.CarColor::class)
+    fun `color mapper should return response color`(color: MongoCar.CarColor) {
+        // GIVEN
+        val expected = dtoColor(color)
+
         // WHEN
         val result = color.toResponse()
 
         // THEN
-        assertEquals(colorDto, result)
-    }
-
-    companion object {
-        @JvmStatic
-        fun colorProvider() = listOf(
-            Arguments.of(MongoCar.CarColor.RED, CarResponseDto.CarColor.RED),
-            Arguments.of(MongoCar.CarColor.GREEN, CarResponseDto.CarColor.GREEN),
-            Arguments.of(MongoCar.CarColor.BLUE, CarResponseDto.CarColor.BLUE),
-            Arguments.of(MongoCar.CarColor.BLACK, CarResponseDto.CarColor.BLACK),
-            Arguments.of(MongoCar.CarColor.WHITE, CarResponseDto.CarColor.WHITE),
-            Arguments.of(MongoCar.CarColor.GREY, CarResponseDto.CarColor.GREY),
-            Arguments.of(MongoCar.CarColor.YELLOW, CarResponseDto.CarColor.YELLOW),
-            Arguments.of(MongoCar.CarColor.UNSPECIFIED, CarResponseDto.CarColor.UNSPECIFIED),
-        )
+        assertEquals(expected, result)
     }
 }

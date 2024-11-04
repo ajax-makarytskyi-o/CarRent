@@ -20,8 +20,7 @@ class PatchOrderNatsController(
     override val subject = UPDATE
     override val queueGroup = QUEUE_GROUP
     override val parser: Parser<UpdateOrderRequest> = UpdateOrderRequest.parser()
-    override val defaultResponse: UpdateOrderResponse = UpdateOrderResponse.newBuilder()
-        .also { it.failureBuilder.message = "Error happend during parsing." }.build()
+    override val defaultResponse: UpdateOrderResponse = UpdateOrderResponse.getDefaultInstance()
 
     override fun handle(request: UpdateOrderRequest): Mono<UpdateOrderResponse> =
         orderService.patch(request.id, request.update.toDto())

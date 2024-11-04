@@ -8,7 +8,7 @@ import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.internalapi.commonmodels.order.AggregatedOrder
 import com.makarytskyi.internalapi.commonmodels.order.Order
-import com.makarytskyi.internalapi.commonmodels.order.Update
+import com.makarytskyi.internalapi.commonmodels.order.OrderUpdate
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
@@ -38,7 +38,7 @@ object OrderMapper {
         price = price.toBigDecimal()
     )
 
-    fun UpdateOrderRequestDto.toProto(): Update = Update.newBuilder()
+    fun UpdateOrderRequestDto.toProto(): OrderUpdate = OrderUpdate.newBuilder()
         .setStartDate(dateToTimestamp(from))
         .setEndDate(dateToTimestamp(to))
         .build()

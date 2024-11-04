@@ -121,4 +121,15 @@ object CarFixture {
 
     fun updatedCar(oldMongoCar: MongoCar, request: UpdateCarRequest) =
         oldMongoCar.copy(price = request.price, color = request.color)
+
+    fun dtoColor(color: MongoCar.CarColor) = when (color) {
+        MongoCar.CarColor.BLUE -> CarResponseDto.CarColor.BLUE
+        MongoCar.CarColor.WHITE -> CarResponseDto.CarColor.WHITE
+        MongoCar.CarColor.RED -> CarResponseDto.CarColor.RED
+        MongoCar.CarColor.GREY -> CarResponseDto.CarColor.GREY
+        MongoCar.CarColor.GREEN -> CarResponseDto.CarColor.GREEN
+        MongoCar.CarColor.YELLOW -> CarResponseDto.CarColor.YELLOW
+        MongoCar.CarColor.BLACK -> CarResponseDto.CarColor.BLACK
+        MongoCar.CarColor.UNSPECIFIED -> CarResponseDto.CarColor.UNSPECIFIED
+    }
 }

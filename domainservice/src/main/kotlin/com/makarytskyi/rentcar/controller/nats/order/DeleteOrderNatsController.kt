@@ -17,8 +17,7 @@ class DeleteOrderNatsController(
     override val subject = DELETE
     override val queueGroup = QUEUE_GROUP
     override val parser: Parser<DeleteOrderRequest> = DeleteOrderRequest.parser()
-    override val defaultResponse: DeleteOrderResponse = DeleteOrderResponse.newBuilder()
-        .also { it.failureBuilder.message = "Error happend during parsing." }.build()
+    override val defaultResponse: DeleteOrderResponse = DeleteOrderResponse.getDefaultInstance()
 
     override fun handle(request: DeleteOrderRequest): Mono<DeleteOrderResponse> =
         orderService.deleteById(request.id)

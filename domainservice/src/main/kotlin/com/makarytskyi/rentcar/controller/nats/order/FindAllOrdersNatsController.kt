@@ -19,8 +19,7 @@ class FindAllOrdersNatsController(
     override val subject = FIND_ALL
     override val queueGroup = QUEUE_GROUP
     override val parser: Parser<FindAllOrdersRequest> = FindAllOrdersRequest.parser()
-    override val defaultResponse: FindAllOrdersResponse = FindAllOrdersResponse.newBuilder()
-        .also { it.failureBuilder.message = "Error happend during parsing." }.build()
+    override val defaultResponse: FindAllOrdersResponse = FindAllOrdersResponse.getDefaultInstance()
 
     override fun handle(request: FindAllOrdersRequest): Mono<FindAllOrdersResponse> =
         orderService.findAll(request.page, request.size)

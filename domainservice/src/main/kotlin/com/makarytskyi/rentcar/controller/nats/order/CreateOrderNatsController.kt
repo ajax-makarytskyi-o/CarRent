@@ -20,8 +20,7 @@ class CreateOrderNatsController(
     override val subject = CREATE
     override val queueGroup = QUEUE_GROUP
     override val parser: Parser<CreateOrderRequest> = CreateOrderRequest.parser()
-    override val defaultResponse: CreateOrderResponse = CreateOrderResponse.newBuilder()
-        .also { it.failureBuilder.message = "Error happend during parsing." }.build()
+    override val defaultResponse: CreateOrderResponse = CreateOrderResponse.getDefaultInstance()
 
     override fun handle(request: CreateOrderRequest): Mono<CreateOrderResponse> =
         orderService.create(request.toDto())

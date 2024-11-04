@@ -4,13 +4,13 @@ package com.makarytskyi.internalapi.input.reqreply.order;
 
 import "com/makarytskyi/internalapi/commonmodels/error/error.proto";
 import "com/makarytskyi/internalapi/commonmodels/order/order.proto";
-import "com/makarytskyi/internalapi/commonmodels/order/update.proto";
+import "com/makarytskyi/internalapi/commonmodels/order/order_update.proto";
 
 option java_multiple_files = true;
 
 message UpdateOrderRequest {
   string id = 1;
-  commonmodels.order.Update update = 2;
+  commonmodels.order.OrderUpdate update = 2;
 }
 
 message UpdateOrderResponse {

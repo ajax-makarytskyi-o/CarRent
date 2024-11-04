@@ -19,8 +19,7 @@ class GetByIdOrderNatsController(
     override val subject = GET_BY_ID
     override val queueGroup = QUEUE_GROUP
     override val parser: Parser<GetByIdOrderRequest> = GetByIdOrderRequest.parser()
-    override val defaultResponse: GetByIdOrderResponse = GetByIdOrderResponse.newBuilder()
-        .also { it.failureBuilder.message = "Error happend during parsing." }.build()
+    override val defaultResponse: GetByIdOrderResponse = GetByIdOrderResponse.getDefaultInstance()
 
     override fun handle(request: GetByIdOrderRequest): Mono<GetByIdOrderResponse> =
         orderService.getById(request.id)

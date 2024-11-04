@@ -8,3 +8,4 @@ server:
 
 nats:
   url: ${NATS_URL}
+  timeout: 2

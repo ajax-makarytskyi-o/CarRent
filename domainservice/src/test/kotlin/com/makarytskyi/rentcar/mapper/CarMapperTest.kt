@@ -1,6 +1,5 @@
 package com.makarytskyi.rentcar.mapper
 
-import com.makarytskyi.core.dto.car.CarResponseDto
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
@@ -18,9 +17,7 @@ import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
-import org.junit.jupiter.params.provider.MethodSource
 
 class CarMapperTest {
     @Test

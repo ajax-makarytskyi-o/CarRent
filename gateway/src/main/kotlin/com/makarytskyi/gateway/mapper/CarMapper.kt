@@ -17,7 +17,6 @@ fun Car.toResponse(): CarResponseDto = CarResponseDto(
 
 fun CarColor.toDto(): CarResponseDto.CarColor =
     when (this) {
-        CarColor.CAR_COLOR_UNSPECIFIED -> CarResponseDto.CarColor.UNSPECIFIED
         CarColor.CAR_COLOR_RED -> CarResponseDto.CarColor.RED
         CarColor.CAR_COLOR_GREEN -> CarResponseDto.CarColor.GREEN
         CarColor.CAR_COLOR_BLUE -> CarResponseDto.CarColor.BLUE
@@ -25,5 +24,5 @@ fun CarColor.toDto(): CarResponseDto.CarColor =
         CarColor.CAR_COLOR_GREY -> CarResponseDto.CarColor.GREY
         CarColor.CAR_COLOR_YELLOW -> CarResponseDto.CarColor.YELLOW
         CarColor.CAR_COLOR_BLACK -> CarResponseDto.CarColor.BLACK
-        CarColor.UNRECOGNIZED -> CarResponseDto.CarColor.UNSPECIFIED
+        CarColor.UNRECOGNIZED, CarColor.CAR_COLOR_UNSPECIFIED -> CarResponseDto.CarColor.UNSPECIFIED
     }

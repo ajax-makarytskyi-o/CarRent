@@ -31,7 +31,7 @@ class NatsInitializerBeanPostProcessor(
             bean.parser.toMono()
                 .map { it.parseFrom(message.data) }
                 .flatMap { bean.handle(it) }
-                .onErrorResume { onParsingError(it, bean.defaultResponse) }
+                .onErrorResume { onUnexpectedError(it, bean.defaultResponse) }
                 .subscribe {
                     connection.publish(message.replyTo, it.toByteArray())
                 }
@@ -39,7 +39,7 @@ class NatsInitializerBeanPostProcessor(
         dispatcher.subscribe(bean.subject, bean.queueGroup, handler)
     }
 
-    private fun <ResponseT : GeneratedMessage> onParsingError(
+    private fun <ResponseT : GeneratedMessage> onUnexpectedError(
         throwable: Throwable,
         defaultResponse: ResponseT
     ): Mono<ResponseT> {

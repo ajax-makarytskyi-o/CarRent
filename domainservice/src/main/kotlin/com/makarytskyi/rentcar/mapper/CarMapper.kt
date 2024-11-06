@@ -8,13 +8,13 @@ import java.math.BigDecimal
 
 fun CarResponseDto.toProto(): Car = Car.newBuilder()
     .also {
-        it.setId(this.id)
-        it.setBrand(this.brand)
-        it.setModel(this.model)
-        it.setYear(this.year)
-        it.setColor(this.color.toProto())
-        it.setPlate(this.plate)
-        it.setPrice(this.price.toDouble())
+        it.setId(id)
+        it.setBrand(brand)
+        it.setModel(model)
+        it.setYear(year)
+        it.setColor(color.toProto())
+        it.setPlate(plate)
+        it.setPrice(price.toDouble())
     }
     .build()
 

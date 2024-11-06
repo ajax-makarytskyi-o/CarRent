@@ -21,7 +21,7 @@ internal class GlobalExceptionHandler {
         val errorResponse = ErrorResponse(
             HttpStatus.BAD_REQUEST.value(),
         )
-        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
     }
 
     internal data class ErrorResponse(

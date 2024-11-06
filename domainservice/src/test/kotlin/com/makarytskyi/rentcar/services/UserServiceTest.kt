@@ -186,7 +186,7 @@ internal class UserServiceTest {
         val user = randomUser()
         val request = updateUserRequest()
         every { userRepository.patch(user.id.toString(), userPatch(request)) } returns
-                DuplicateKeyException("key email is duplicated").toMono()
+            DuplicateKeyException("key email is duplicated").toMono()
 
         // WHEN // THEN
         userService.patch(user.id.toString(), request)

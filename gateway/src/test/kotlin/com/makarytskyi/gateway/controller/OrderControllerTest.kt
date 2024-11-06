@@ -60,6 +60,7 @@ class OrderControllerTest {
 
     @Test
     fun `getFullById should return order`() {
+        // GIVEN
         val id = ObjectId().toString()
         val order = randomAggregatedOrder()
         val protoResponse = successfulGetByIdResponse(order)
@@ -73,6 +74,7 @@ class OrderControllerTest {
             )
         } returns protoResponse.toMono()
 
+        // WHEN // THEN
         controller.getFullById(id)
             .test()
             .expectNext(aggregatedOrder)
@@ -81,6 +83,7 @@ class OrderControllerTest {
 
     @Test
     fun `getFullById should return exception if natsClient returned exception`() {
+        // GIVEN
         val id = ObjectId().toString()
         val exception = NotFoundException("Order with id is not found")
         val protoResponse = failureGetByIdResponse(exception)
@@ -93,6 +96,7 @@ class OrderControllerTest {
             )
         } returns protoResponse.toMono()
 
+        // WHEN // THEN
         controller.getFullById(id)
             .test()
             .verifyError<NotFoundException>()
@@ -100,6 +104,7 @@ class OrderControllerTest {
 
     @Test
     fun `findFullAll should return orders`() {
+        // GIVEN
         val page = 1
         val size = 10
         val protoResponse = findAllResponse()
@@ -113,6 +118,7 @@ class OrderControllerTest {
             )
         } returns protoResponse.toMono()
 
+        // WHEN // THEN
         controller.findFullAll(page, size).collectList()
             .test()
             .assertNext {
@@ -123,6 +129,7 @@ class OrderControllerTest {
 
     @Test
     fun `create should return created order`() {
+        // GIVEN
         val price = 100.0
         val request = randomCreateRequest()
         val createResponse = successfulCreateResponse(request, price)
@@ -136,6 +143,7 @@ class OrderControllerTest {
             )
         } returns createResponse.toMono()
 
+        // WHEN // THEN
         controller.create(request)
             .test()
             .expectNext(orderResponse)
@@ -144,6 +152,7 @@ class OrderControllerTest {
 
     @Test
     fun `create should return exception if natsClient returned exception`() {
+        // GIVEN
         val request = randomCreateRequest()
         val protoRequest = createRequest(request)
         val exception = IllegalArgumentException("Dates must be in future")
@@ -157,6 +166,7 @@ class OrderControllerTest {
             )
         } returns createResponse.toMono()
 
+        // WHEN // THEN
         controller.create(request)
             .test()
             .verifyError<IllegalArgumentException>()
@@ -164,6 +174,7 @@ class OrderControllerTest {
 
     @Test
     fun `delete should return Unit`() {
+        // GIVEN
         val id = ObjectId().toString()
 
         every {
@@ -174,6 +185,7 @@ class OrderControllerTest {
             )
         } returns Mono.empty()
 
+        // WHEN // THEN
         controller.delete(id)
             .test()
             .expectNext(Unit)
@@ -182,6 +194,7 @@ class OrderControllerTest {
 
     @Test
     fun `patch should return updated order`() {
+        // GIVEN
         val id = ObjectId().toString()
         val price = 100.0
         val updateRequest = randomUpdateRequest()
@@ -201,6 +214,7 @@ class OrderControllerTest {
             )
         } returns updateResponse.toMono()
 
+        // WHEN // THEN
         controller.patch(id, updateRequest)
             .test()
             .expectNext(orderResponse)
@@ -209,6 +223,7 @@ class OrderControllerTest {
 
     @Test
     fun `patch should return exception if natsClient returned exception`() {
+        // GIVEN
         val id = ObjectId().toString()
         val updateRequest = randomUpdateRequest()
         val patchOrderRequest = patchRequest(id, updateRequest)
@@ -223,6 +238,7 @@ class OrderControllerTest {
             )
         } returns updateResponse.toMono()
 
+        // WHEN // THEN
         controller.patch(id, updateRequest)
             .test()
             .verifyError<NotFoundException>()

@@ -57,23 +57,23 @@ object OrderMapper {
 
     fun OrderResponseDto.toProto(): Order = Order.newBuilder()
         .also {
-            it.setId(this.id)
-            it.setCarId(this.carId)
-            it.setUserId(this.userId)
-            it.setFrom(dateToTimestamp(this.from))
-            it.setTo(dateToTimestamp(this.to))
-            it.setPrice(this.price.toDouble())
+            it.setId(id)
+            it.setCarId(carId)
+            it.setUserId(userId)
+            it.setFrom(dateToTimestamp(from))
+            it.setTo(dateToTimestamp(to))
+            it.setPrice(price.toDouble())
         }
         .build()
 
     fun AggregatedOrderResponseDto.toProto(): AggregatedOrder = AggregatedOrder.newBuilder()
         .also {
-            it.setId(this.id)
-            it.setCar(this.car.toProto())
-            it.setUser(this.user.toProto())
-            it.setFrom(dateToTimestamp(this.from))
-            it.setTo(dateToTimestamp(this.to))
-            it.setPrice(this.price.toDouble())
+            it.setId(id)
+            it.setCar(car.toProto())
+            it.setUser(user.toProto())
+            it.setFrom(dateToTimestamp(from))
+            it.setTo(dateToTimestamp(to))
+            it.setPrice(price.toDouble())
         }
         .build()
 

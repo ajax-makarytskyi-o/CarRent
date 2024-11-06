@@ -6,11 +6,11 @@ import com.makarytskyi.rentcar.model.MongoUser
 
 fun UserResponseDto.toProto(): User = User.newBuilder()
     .also {
-        it.setId(this.id)
-        it.setName(this.name)
-        it.setEmail(this.email)
-        it.setPhoneNumber(this.phoneNumber)
-        it.setCity(this.city)
+        it.setId(id)
+        it.setName(name)
+        it.setEmail(email)
+        it.setPhoneNumber(phoneNumber)
+        it.setCity(city)
     }
     .build()
 

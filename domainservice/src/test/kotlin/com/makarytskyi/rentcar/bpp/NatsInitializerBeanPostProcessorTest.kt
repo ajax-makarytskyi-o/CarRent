@@ -28,30 +28,30 @@ class NatsInitializerBeanPostProcessorTest {
 
     @Test
     fun `beanPostProcessor should create dispatcher and subscribe on subject if bean is NatsController`() {
-        //GIVEN
+        // GIVEN
         val queueGroup = "create_order"
         every { createController.subject } returns CREATE
         every { createController.queueGroup } returns queueGroup
         val messageHandlerSlot = slot<MessageHandler>()
         every { dispatcher.subscribe(any(), any(), capture(messageHandlerSlot)) } returns mockk()
 
-        //WHEN
+        // WHEN
         natInitializer.postProcessAfterInitialization(createController, "createController")
 
-        //THEN
+        // THEN
         verify(exactly = 1) { dispatcher.subscribe(CREATE, queueGroup, any()) }
     }
 
     @Test
     fun `beanPostProcessor should do nothing if bean is not NatsController`() {
-        //GIVEN
+        // GIVEN
         every { createController.subject } returns CREATE
         every { natsConnection.createDispatcher(any()) } returns dispatcher
 
-        //WHEN
+        // WHEN
         natInitializer.postProcessAfterInitialization(Any(), "anyClass")
 
-        //THEN
+        // THEN
         verify(exactly = 0) { natsConnection.createDispatcher(any()) }
         verify(exactly = 0) { dispatcher.subscribe(CREATE, createController.queueGroup) }
     }

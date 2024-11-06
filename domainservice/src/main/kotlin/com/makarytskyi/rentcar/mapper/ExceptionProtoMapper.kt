@@ -8,7 +8,7 @@ import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 
 fun Throwable.toFindAllFailureResponse(): FindAllOrdersResponse =
     FindAllOrdersResponse.newBuilder()
-        .also { it.failureBuilder.message = this.message }
+        .also { it.failureBuilder.message = message }
         .build()
 
 fun Throwable.toGetByIdFailureResponse(): GetByIdOrderResponse =

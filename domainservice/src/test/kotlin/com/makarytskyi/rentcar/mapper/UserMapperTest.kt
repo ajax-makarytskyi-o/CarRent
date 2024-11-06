@@ -49,7 +49,6 @@ class UserMapperTest {
         assertEquals(response, emptyResponseUser().copy(id = emptyUser.id.toString()))
     }
 
-
     @Test
     fun `create request mapper should return entity successfully`() {
         // GIVEN

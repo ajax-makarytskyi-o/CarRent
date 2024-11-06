@@ -109,7 +109,7 @@ object OrderProtoFixture {
     fun failurePatchResponse(exception: Exception): UpdateOrderResponse = UpdateOrderResponse.newBuilder()
         .apply {
             failureBuilder.apply {
-                setMessage(this.message)
+                setMessage(message)
                 when (exception) {
                     is NotFoundException -> setNotFound(Error.getDefaultInstance())
                     is IllegalArgumentException -> setIllegalArgument(Error.getDefaultInstance())
@@ -136,7 +136,7 @@ object OrderProtoFixture {
         .newBuilder()
         .apply {
             failureBuilder.apply {
-                setMessage(this.message)
+                setMessage(message)
                 when (exception) {
                     is NotFoundException -> setNotFound(Error.getDefaultInstance())
                     is IllegalArgumentException -> setIllegalArgument(Error.getDefaultInstance())
@@ -154,7 +154,7 @@ object OrderProtoFixture {
         .newBuilder()
         .apply {
             failureBuilder.apply {
-                setMessage(this.message)
+                setMessage(message)
                 when (exception) {
                     is NotFoundException -> setNotFound(Error.getDefaultInstance())
                 }

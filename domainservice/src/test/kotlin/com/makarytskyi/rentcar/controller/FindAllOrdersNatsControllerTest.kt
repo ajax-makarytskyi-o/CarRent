@@ -20,7 +20,6 @@ import com.makarytskyi.rentcar.repository.UserRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import reactor.kotlin.test.test
 
 class FindAllOrdersNatsControllerTest : AbstractOrderNatsControllerTest() {
 
@@ -52,12 +51,8 @@ class FindAllOrdersNatsControllerTest : AbstractOrderNatsControllerTest() {
 
         // THEN
         assertThat(response.success.ordersList).containsAll(protoOrders)
-        orderRepository.findFullAll(page, size).collectList()
-            .test()
-            .assertNext {
-                assertThat(it).contains(aggregatedOrder)
-            }
-            .verifyComplete()
+        val actualOrders = orderRepository.findFullAll(page, size).collectList().block()!!
+        assertThat(actualOrders).contains(aggregatedOrder)
     }
 
     @Test

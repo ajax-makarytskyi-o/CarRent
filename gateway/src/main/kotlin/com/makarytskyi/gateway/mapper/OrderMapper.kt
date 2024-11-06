@@ -21,10 +21,10 @@ object OrderMapper {
     fun CreateOrderRequestDto.toProto(): CreateOrderRequest = CreateOrderRequest.newBuilder()
         .also {
             it.orderBuilder.also { order ->
-                order.setCarId(this.carId)
-                order.setUserId(this.userId)
-                order.setFrom(dateToTimestamp(this.from))
-                order.setTo(dateToTimestamp(this.to))
+                order.setCarId(carId)
+                order.setUserId(userId)
+                order.setFrom(dateToTimestamp(from))
+                order.setTo(dateToTimestamp(to))
             }
         }
         .build()
@@ -98,12 +98,12 @@ object OrderMapper {
         }
 
     private fun Order.toDto() = OrderResponseDto(
-        id = this.id,
-        carId = this.carId,
-        userId = this.userId,
-        from = Date(this.from.seconds),
-        to = Date(this.to.seconds),
-        price = this.price.toBigDecimal(),
+        id = id,
+        carId = carId,
+        userId = userId,
+        from = Date(from.seconds),
+        to = Date(to.seconds),
+        price = price.toBigDecimal(),
     )
 
     private fun dateToTimestamp(date: Date?): Timestamp =

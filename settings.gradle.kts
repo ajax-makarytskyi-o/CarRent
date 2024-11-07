@@ -1,2 +1,7 @@
 rootProject.name = "rentcar"
-include("carmanager")
+include(
+    "core",
+    "domainservice",
+    "gateway",
+    "internal-api"
+)

@@ -1,0 +1,13 @@
+plugins {
+    id("spring-conventions")
+    `java-test-fixtures`
+}
+
+dependencies {
+    implementation(project(":internal-api"))
+    implementation(project(":core"))
+    implementation("io.nats:jnats:2.16.14")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.2")
+    testImplementation("io.projectreactor:reactor-test:3.6.10")
+    testImplementation("io.mockk:mockk:1.13.12")
+}

@@ -20,14 +20,14 @@ spec:
           readinessProbe:
             httpGet:
               path: /api/v1/actuator/health
-              port: 8080
+              port: 8081
             initialDelaySeconds: 2
             periodSeconds: 5
             timeoutSeconds: 2
             failureThreshold: 4
           imagePullPolicy: Never
           ports:
-            - containerPort: 8080
+            - containerPort: 8081
           env:
             - name: DATABASE
               valueFrom:
@@ -54,6 +54,11 @@ spec:
                 configMapKeyRef:
                   name: mongo-configmap
                   key: mongo_port
+            - name: NATS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: nats-configmap
+                  key: nats_url
 
 ---
 apiVersion: v1
@@ -65,5 +70,5 @@ spec:
     app: app
   ports:
     - protocol: TCP
-      port: 8080
-      targetPort: 8080
+      port: 8081
+      targetPort: 8081

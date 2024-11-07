@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: rentcar.com
+      http:
+        paths:
+          - path: /api/v1/cars
+            pathType: Prefix
+            backend:
+              service:
+                name: app-service
+                port:
+                  number: 8081
+          - path: /api/v1/users
+            pathType: Prefix
+            backend:
+              service:
+                name: app-service
+                port:
+                  number: 8081
+          - path: /api/v1/repairings
+            pathType: Prefix
+            backend:
+              service:
+                name: app-service
+                port:
+                  number: 8081

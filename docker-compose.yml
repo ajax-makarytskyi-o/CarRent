@@ -57,7 +57,7 @@ services:
     depends_on:
       - mongo
     ports:
-      - "8085:8085"
+      - "8085:8081"
     environment:
       ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/
     profiles:

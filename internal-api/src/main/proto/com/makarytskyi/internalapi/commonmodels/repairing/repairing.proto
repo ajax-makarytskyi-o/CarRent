@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package com.makarytskyi.internalapi.commonmodels.repairing;
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+
+message Repairing {
+  enum RepairingStatus {
+    UNSPECIFIED = 0;
+    PENDING = 1;
+    IN_PROGRESS = 2;
+    COMPLETED = 3;
+  }
+
+  string id = 1;
+  string carId = 2;
+  google.protobuf.Timestamp date = 3;
+  double price = 4;
+  RepairingStatus status = 5;
+}

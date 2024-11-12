@@ -14,7 +14,7 @@ import reactor.kafka.receiver.ReceiverOptions
 
 @Configuration
 class TestConfiguration(
-    @Value("\${kafka.bootstrap-servers}") private val bootstrapServers: String,
+    @Value("\${spring.kafka.bootstrap-servers}") private val bootstrapServers: String,
     private val kafkaProperties: KafkaProperties,
 ) {
     @Bean("testReceiver")

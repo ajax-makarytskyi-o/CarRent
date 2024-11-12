@@ -117,8 +117,7 @@ object OrderMapper {
     )
 
     fun OrderResponseDto.toNotification(): OrderCancellationUserNotification = OrderCancellationUserNotification
-        .newBuilder()
-        .also {
+        .newBuilder().also {
             it.userId = this.userId
             it.order = this.toProto()
         }

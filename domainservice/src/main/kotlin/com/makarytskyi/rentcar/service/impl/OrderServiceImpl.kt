@@ -62,16 +62,16 @@ internal class OrderServiceImpl(
     override fun deleteById(id: String): Mono<Unit> = orderRepository.deleteById(id)
 
     override fun findByUser(userId: String): Flux<OrderResponseDto> = orderRepository.findByUserId(userId)
-        .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
+        .flatMap { it.toMono().zipWith(getCarPrice(it.carId.toString())) }
         .map { (order, carPrice) -> order.toResponse(carPrice) }
 
     override fun findByCar(carId: String): Flux<OrderResponseDto> = orderRepository.findByCarId(carId)
-        .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
+        .flatMap { it.toMono().zipWith(getCarPrice(it.carId.toString())) }
         .map { (order, carPrice) -> order.toResponse(carPrice) }
 
     override fun findByCarAndUser(carId: String, userId: String): Flux<OrderResponseDto> =
         orderRepository.findByCarIdAndUserId(carId, userId)
-            .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
+            .flatMap { it.toMono().zipWith(getCarPrice(it.carId.toString())) }
             .map { (order, carPrice) -> order.toResponse(carPrice) }
 
     override fun patch(id: String, orderRequest: UpdateOrderRequestDto): Mono<OrderResponseDto> =
@@ -91,7 +91,7 @@ internal class OrderServiceImpl(
 
     override fun findOrderByDateAndCar(date: Date, carId: String): Mono<OrderResponseDto> =
         orderRepository.findOrderByDateAndCarId(date, carId)
-            .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
+            .flatMap { it.toMono().zipWith(getCarPrice(it.carId.toString())) }
             .map { (order, carPrice) -> order.toResponse(carPrice) }
 
     private fun validateDates(from: Date?, to: Date?) {

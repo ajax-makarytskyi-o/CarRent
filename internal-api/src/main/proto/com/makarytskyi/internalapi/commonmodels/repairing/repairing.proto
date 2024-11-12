@@ -8,10 +8,10 @@ option java_multiple_files = true;
 
 message Repairing {
   enum RepairingStatus {
-    UNSPECIFIED = 0;
-    PENDING = 1;
-    IN_PROGRESS = 2;
-    COMPLETED = 3;
+    REPAIRING_STATUS_UNSPECIFIED = 0;
+    REPAIRING_STATUS_PENDING = 1;
+    REPAIRING_STATUS_IN_PROGRESS = 2;
+    REPAIRING_STATUS_COMPLETED = 3;
   }
 
   string id = 1;

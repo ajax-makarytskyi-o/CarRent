@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.service.impl
 
 import com.makarytskyi.core.exception.NotFoundException
+import com.makarytskyi.internalapi.subject.KafkaTopic
 import com.makarytskyi.rentcar.annotation.InvocationTracker
 import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
@@ -14,6 +15,7 @@ import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.RepairingRepository
 import com.makarytskyi.rentcar.service.RepairingService
 import java.util.Date
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -37,7 +39,14 @@ internal class RepairingServiceImpl(
             .flatMap { validateCarExists(repairingRequest.carId) }
             .flatMap { repairingRepository.create(CreateRepairingRequest.toEntity(repairingRequest)) }
             .doOnNext {
-                repairingKafkaProducer.sendCreateRepairing(it.toProto()).subscribe()
+                repairingKafkaProducer.sendCreateRepairing(it.toProto())
+                    .doOnError { error ->
+                        log.error(
+                            "Error happened during sending message to ${KafkaTopic.REPAIRING_CREATE} topic",
+                            error
+                        )
+                    }
+                    .subscribe()
             }
             .map { RepairingResponse.from(it) }
 
@@ -66,5 +75,9 @@ internal class RepairingServiceImpl(
 
     private fun validateDate(date: Date?) {
         require(date?.after(Date()) == true) { "Date must be in future" }
+    }
+
+    companion object {
+        val log = LoggerFactory.getLogger(RepairingServiceImpl::class.java)
     }
 }

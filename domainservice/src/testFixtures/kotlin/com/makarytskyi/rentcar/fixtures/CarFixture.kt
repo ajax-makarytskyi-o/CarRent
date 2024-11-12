@@ -4,8 +4,10 @@ import com.makarytskyi.core.dto.car.CarResponseDto
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.car.CreateCarRequest
 import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
+import com.makarytskyi.rentcar.dto.user.UserResponse
 import com.makarytskyi.rentcar.fixtures.Utils.generateString
 import com.makarytskyi.rentcar.model.MongoCar
+import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -132,4 +134,22 @@ object CarFixture {
         MongoCar.CarColor.BLACK -> CarResponseDto.CarColor.BLACK
         MongoCar.CarColor.UNSPECIFIED -> CarResponseDto.CarColor.UNSPECIFIED
     }
+
+    fun mongoCar(car: CarResponse): MongoCar = MongoCar(
+        id = ObjectId(car.id),
+        brand = car.brand,
+        model = car.model,
+        price = car.price,
+        year = car.year,
+        plate = car.plate,
+        color = car.color,
+    )
+
+    fun mongoUser(user: UserResponse): MongoUser = MongoUser(
+        id = ObjectId(user.id),
+        name = user.name,
+        email = user.email,
+        phoneNumber = user.phoneNumber,
+        city = user.city,
+    )
 }

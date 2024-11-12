@@ -11,11 +11,11 @@ import reactor.kotlin.core.publisher.toMono
 
 @Component
 class UserNotificationKafkaProducer(
-    private val kafkaSender: KafkaSender<String, ByteArray>
+    private val userNotificationKafkaSender: KafkaSender<String, ByteArray>
 ) {
 
     fun sendNotification(notification: OrderCancellationUserNotification): Mono<Unit> =
-        kafkaSender.send(
+        userNotificationKafkaSender.send(
             SenderRecord.create(
                 ProducerRecord(
                     KafkaTopic.NOTIFICATION,

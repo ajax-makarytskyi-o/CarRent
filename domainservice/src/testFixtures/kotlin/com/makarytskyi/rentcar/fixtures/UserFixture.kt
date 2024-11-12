@@ -9,6 +9,9 @@ import com.makarytskyi.rentcar.model.patch.MongoUserPatch
 import org.bson.types.ObjectId
 
 object UserFixture {
+    val firstPage = 0
+    val defaultSize = 30
+
     fun randomName(): String {
         return generateString(10)
     }

@@ -7,7 +7,6 @@ import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.kafka.common.serialization.ByteArraySerializer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -18,27 +17,43 @@ import reactor.kafka.sender.SenderOptions
 
 @Configuration
 class KafkaConfiguration(
-    @Value("\${spring.kafka.bootstrap-servers}") private val bootstrapServers: String,
     private val kafkaProperties: KafkaProperties
 ) {
 
     @Bean
-    fun kafkaSender(): KafkaSender<String, ByteArray> = KafkaSender.create(
-        SenderOptions.create(producerOptions())
-    )
+    fun kafkaSender(): KafkaSender<String, ByteArray> {
+        return createProducer(producerOptions())
+    }
 
     @Bean
-    fun kafkaReceiver(): KafkaReceiver<String, ByteArray> {
-        val options = ReceiverOptions.create<String, ByteArray>(consumerOptions())
-            .subscription(setOf(KafkaTopic.REPAIRING_CREATE))
+    fun createRepairingKafkaReceiver(): KafkaReceiver<String, ByteArray> {
+        return createReceiver(consumerOptions(), GROUP_ID, KafkaTopic.REPAIRING_CREATE)
+    }
+
+    private fun createReceiver(
+        receiverOptions: MutableMap<String, Any>,
+        groupId: String,
+        topic: String
+    ): KafkaReceiver<String, ByteArray> {
+        receiverOptions[ConsumerConfig.GROUP_ID_CONFIG] = groupId
+        val options = ReceiverOptions.create<String, ByteArray>(receiverOptions)
+            .subscription(setOf(topic))
         return KafkaReceiver.create(options)
+    }
+
+    private fun createProducer(
+        producerOptions: MutableMap<String, Any>
+    ): KafkaSender<String, ByteArray> {
+        return KafkaSender.create(
+            SenderOptions.create(producerOptions)
+        )
     }
 
     private fun producerOptions(): MutableMap<String, Any> {
         val options = mutableMapOf(
-            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServers,
+            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaProperties.bootstrapServers,
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to ByteArraySerializer::class.java.name,
+            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to ByteArraySerializer::class.java,
         )
         val buildProperties = kafkaProperties.producer.buildProperties(null)
         buildProperties.putAll(options)
@@ -47,10 +62,9 @@ class KafkaConfiguration(
 
     private fun consumerOptions(): MutableMap<String, Any> {
         val options = mutableMapOf(
-            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServers,
+            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaProperties.bootstrapServers,
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to ByteArrayDeserializer::class.java.name,
-            ConsumerConfig.GROUP_ID_CONFIG to GROUP_ID,
+            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to ByteArrayDeserializer::class.java,
         )
         val buildProperties = kafkaProperties.consumer.buildProperties(null)
         buildProperties.putAll(options)

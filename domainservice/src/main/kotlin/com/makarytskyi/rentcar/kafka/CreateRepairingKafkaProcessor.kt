@@ -4,20 +4,21 @@ import com.makarytskyi.internalapi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.mapper.OrderMapper.toNotification
 import com.makarytskyi.rentcar.service.OrderService
 import com.makarytskyi.rentcar.util.timestampToDate
-import jakarta.annotation.PostConstruct
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import reactor.kafka.receiver.KafkaReceiver
 
 @Component
 class CreateRepairingKafkaProcessor(
-    val kafkaReceiver: KafkaReceiver<String, ByteArray>,
-    val userNotificationKafkaProducer: UserNotificationKafkaProducer,
-    val orderService: OrderService
+    private val createRepairingKafkaReceiver: KafkaReceiver<String, ByteArray>,
+    private val userNotificationKafkaProducer: UserNotificationKafkaProducer,
+    private val orderService: OrderService
 ) {
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent::class)
     fun consume() {
-        kafkaReceiver.receive()
+        createRepairingKafkaReceiver.receive()
             .flatMap { record ->
                 val repairing = Repairing.parser().parseFrom(record.value())
                 orderService.findOrderByDateAndCar(timestampToDate(repairing.date), repairing.carId)

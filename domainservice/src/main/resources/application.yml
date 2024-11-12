@@ -8,7 +8,7 @@ spring:
       properties:
         session.timeout.ms: 10000
         max.poll.interval.ms: 10000
-    bootstrap-servers: http://kafka:29092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
   data:
     mongodb:

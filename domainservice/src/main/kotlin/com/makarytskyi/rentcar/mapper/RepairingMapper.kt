@@ -7,17 +7,17 @@ import com.makarytskyi.rentcar.util.dateToTimestamp
 
 fun MongoRepairing.toProto(): Repairing = Repairing.newBuilder()
     .also {
-        it.setId(this.id.toString())
-        it.setCarId(this.carId.toString())
-        it.setPrice(this.price?.toDouble() ?: 0.0)
-        it.setDate(this.date?.let { date -> dateToTimestamp(date) })
-        it.setStatus(this.status?.toProto())
+        it.id = this.id.toString()
+        it.carId = this.carId.toString()
+        it.price = this.price?.toDouble() ?: 0.0
+        it.date = this.date?.let { date -> dateToTimestamp(date) }
+        it.status = this.status?.toProto()
     }
     .build()
 
 fun RepairingStatus.toProto(): Repairing.RepairingStatus =
     when (this) {
-        RepairingStatus.PENDING -> Repairing.RepairingStatus.PENDING
-        RepairingStatus.IN_PROGRESS -> Repairing.RepairingStatus.IN_PROGRESS
-        RepairingStatus.COMPLETED -> Repairing.RepairingStatus.COMPLETED
+        RepairingStatus.PENDING -> Repairing.RepairingStatus.REPAIRING_STATUS_PENDING
+        RepairingStatus.IN_PROGRESS -> Repairing.RepairingStatus.REPAIRING_STATUS_IN_PROGRESS
+        RepairingStatus.COMPLETED -> Repairing.RepairingStatus.REPAIRING_STATUS_COMPLETED
     }

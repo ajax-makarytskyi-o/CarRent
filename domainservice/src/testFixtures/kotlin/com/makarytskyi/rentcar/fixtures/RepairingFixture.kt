@@ -127,8 +127,8 @@ object RepairingFixture {
     )
 
     fun protoStatus(status: RepairingStatus) = when (status) {
-        RepairingStatus.PENDING -> Repairing.RepairingStatus.PENDING
-        RepairingStatus.IN_PROGRESS -> Repairing.RepairingStatus.IN_PROGRESS
-        RepairingStatus.COMPLETED -> Repairing.RepairingStatus.COMPLETED
+        RepairingStatus.PENDING -> Repairing.RepairingStatus.REPAIRING_STATUS_PENDING
+        RepairingStatus.IN_PROGRESS -> Repairing.RepairingStatus.REPAIRING_STATUS_IN_PROGRESS
+        RepairingStatus.COMPLETED -> Repairing.RepairingStatus.REPAIRING_STATUS_COMPLETED
     }
 }

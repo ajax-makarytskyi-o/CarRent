@@ -88,6 +88,12 @@ internal class OrderServiceImpl(
             .flatMap { orderRepository.patch(id, it.toPatch()) }
             .flatMap { order -> getCarPrice(order.carId.toString()).map { order.toResponse(it) } }
 
+
+    override fun findOrderByDateAndCar(date: Date, carId: String): Mono<OrderResponseDto> =
+        orderRepository.findOrderByDateAndCarId(date, carId)
+            .flatMap { Mono.just(it).zipWith(getCarPrice(it.carId.toString())) }
+            .map { (order, carPrice) -> order.toResponse(carPrice) }
+
     private fun validateDates(from: Date?, to: Date?) {
         require(to?.after(from) == true) { "Start date must be before end date" }
         require(from?.after(Date()) == true) { "Dates must be in future" }

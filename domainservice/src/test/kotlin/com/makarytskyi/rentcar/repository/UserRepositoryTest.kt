@@ -44,7 +44,7 @@ internal class UserRepositoryTest : ContainerBase {
         val insertedUser2 = userRepository.create(randomUser()).block()
 
         // WHEN
-        val allUsers = userRepository.findAll(0, 20)
+        val allUsers = userRepository.findAll(0, 30)
 
         // THEN
         allUsers.collectList()

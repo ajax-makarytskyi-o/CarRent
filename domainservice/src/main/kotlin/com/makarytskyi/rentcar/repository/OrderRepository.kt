@@ -3,6 +3,7 @@ package com.makarytskyi.rentcar.repository
 import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
+import java.util.Date
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -25,4 +26,6 @@ internal interface OrderRepository {
     fun patch(id: String, orderPatch: MongoOrderPatch): Mono<MongoOrder>
 
     fun findByCarIdAndUserId(carId: String, userId: String): Flux<MongoOrder>
+
+    fun findOrderByDateAndCarId(date: Date, carId: String): Mono<MongoOrder>
 }

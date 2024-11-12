@@ -2,6 +2,13 @@ spring:
   application:
     name: rentcar
 
+  kafka:
+    consumer:
+      auto-offset-reset: latest
+      properties:
+        session.timeout.ms: 10000
+        max.poll.interval.ms: 10000
+
   data:
     mongodb:
       uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${DATABASE}?authSource=admin
@@ -22,3 +29,6 @@ management:
 
 nats:
   url: ${NATS_URL}
+
+kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}

@@ -7,6 +7,7 @@ import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
 import com.makarytskyi.rentcar.repository.OrderRepository
+import java.util.Date
 import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -107,5 +108,15 @@ internal class OrderRepositoryImpl(private val template: ReactiveMongoTemplate) 
                 .and(MongoOrder::userId.name).isEqualTo(ObjectId(userId))
         )
         return template.find(query, MongoOrder::class.java)
+    }
+
+    override fun findOrderByDateAndCarId(date: Date, carId: String): Mono<MongoOrder> {
+        val query = Query(
+            Criteria
+                .where(MongoOrder::carId.name).isEqualTo(ObjectId(carId))
+                .and(MongoOrder::from.name).lte(date)
+                .and(MongoOrder::to.name).gte(date)
+        )
+        return template.findOne(query, MongoOrder::class.java)
     }
 }

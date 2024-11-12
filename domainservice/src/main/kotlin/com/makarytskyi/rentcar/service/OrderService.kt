@@ -4,6 +4,7 @@ import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
 import com.makarytskyi.core.dto.order.CreateOrderRequestDto
 import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
+import java.util.Date
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -24,4 +25,6 @@ interface OrderService {
     fun findByCarAndUser(carId: String, userId: String): Flux<OrderResponseDto>
 
     fun patch(id: String, orderRequest: UpdateOrderRequestDto): Mono<OrderResponseDto>
+
+    fun findOrderByDateAndCar(date: Date, carId: String): Mono<OrderResponseDto>
 }

@@ -6,6 +6,8 @@ import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
+import com.makarytskyi.rentcar.kafka.CreateRepairingKafkaProducer
+import com.makarytskyi.rentcar.mapper.toProto
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.repository.CarRepository
@@ -23,6 +25,7 @@ import reactor.kotlin.core.publisher.toMono
 internal class RepairingServiceImpl(
     private val repairingRepository: RepairingRepository,
     private val carRepository: CarRepository,
+    private val repairingKafkaProducer: CreateRepairingKafkaProducer,
 ) : RepairingService {
 
     override fun findFullAll(page: Int, size: Int): Flux<AggregatedRepairingResponse> =
@@ -33,6 +36,9 @@ internal class RepairingServiceImpl(
             .doOnNext { validateDate(it.date) }
             .flatMap { validateCarExists(repairingRequest.carId) }
             .flatMap { repairingRepository.create(CreateRepairingRequest.toEntity(repairingRequest)) }
+            .doOnNext {
+                repairingKafkaProducer.sendCreateRepairing(it.toProto()).subscribe()
+            }
             .map { RepairingResponse.from(it) }
 
     override fun getFullById(id: String): Mono<AggregatedRepairingResponse> = repairingRepository.findFullById(id)

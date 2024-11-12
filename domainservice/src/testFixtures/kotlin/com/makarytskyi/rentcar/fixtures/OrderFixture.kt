@@ -19,6 +19,7 @@ object OrderFixture {
     var yesterday = getDateFromNow(-1)
     var tomorrow = getDateFromNow(1)
     var twoDaysAfter = getDateFromNow(2)
+    var threeDaysAfter = getDateFromNow(3)
     var monthAfter = getDateFromNow(30)
     var monthAndDayAfter = getDateFromNow(31)
 

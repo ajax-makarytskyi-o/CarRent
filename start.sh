@@ -1,9 +1,6 @@
 #!/bin/zsh
 
-./gradlew build
+docker build -t domainservice domainservice/
+docker build -t gateway gateway/
 
-if [ $? -eq 0 ]; then
-    docker-compose -f docker-compose.yml up
-else
-    echo "Build failed. Docker Compose will not be run."
-fi
+docker-compose -f docker-compose.yml --profile dev up

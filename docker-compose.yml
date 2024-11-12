@@ -1,14 +1,37 @@
 services:
   application:
-    build:
-      context: .
-    container_name: application
+    image: domainservice
+    container_name: domain-service
     env_file:
       - .env
     depends_on:
+      - nats
       - mongo
     ports:
+      - "8081:8081"
+    profiles:
+      - dev
+
+  gateway:
+    image: gateway
+    container_name: gateway
+    env_file:
+      - .env
+    ports:
       - "8080:8080"
+    depends_on:
+      - nats
+    profiles:
+      - dev
+
+  nats:
+    image: nats:2.10.22
+    container_name: nats-server
+    ports:
+      - "4222:4222"
+    profiles:
+      - test
+      - dev
 
   mongo:
     image: mongo:7.0.12
@@ -23,6 +46,8 @@ services:
     volumes:
       - mongo_data:/data/db
       - mongo_config:/data/configdb
+    profiles:
+      - dev
 
   mongo-express:
     image: mongo-express:1.0.2
@@ -32,9 +57,11 @@ services:
     depends_on:
       - mongo
     ports:
-      - "8081:8081"
+      - "8085:8081"
     environment:
       ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/
+    profiles:
+      - dev
 
 volumes:
   mongo_data:

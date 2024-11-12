@@ -1,5 +1,6 @@
 package com.makarytskyi.rentcar.fixtures
 
+import com.makarytskyi.internalapi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
@@ -124,4 +125,10 @@ object RepairingFixture {
         price = repairing.price,
         status = repairing.status,
     )
+
+    fun protoStatus(status: RepairingStatus) = when (status) {
+        RepairingStatus.PENDING -> Repairing.RepairingStatus.PENDING
+        RepairingStatus.IN_PROGRESS -> Repairing.RepairingStatus.IN_PROGRESS
+        RepairingStatus.COMPLETED -> Repairing.RepairingStatus.COMPLETED
+    }
 }

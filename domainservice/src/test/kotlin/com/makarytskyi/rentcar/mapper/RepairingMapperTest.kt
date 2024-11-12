@@ -9,16 +9,20 @@ import com.makarytskyi.rentcar.fixtures.RepairingFixture.createRepairingEntity
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.createRepairingRequest
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyAggregatedRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyRepairing
+import com.makarytskyi.rentcar.fixtures.RepairingFixture.protoStatus
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomAggregatedRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.repairingPatch
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.responseAggregatedRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.responseRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.updateRepairingRequest
+import com.makarytskyi.rentcar.model.MongoRepairing
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 class RepairingMapperTest {
     @Test
@@ -131,5 +135,18 @@ class RepairingMapperTest {
 
         // WHEN // THEN
         assertThrows<IllegalArgumentException> { AggregatedRepairingResponse.from(repairing) }
+    }
+
+    @ParameterizedTest
+    @EnumSource(MongoRepairing.RepairingStatus::class)
+    fun `status mapper should return proto status`(status: MongoRepairing.RepairingStatus) {
+        // GIVEN
+        val expected = protoStatus(status)
+
+        // WHEN
+        val result = status.toProto()
+
+        // THEN
+        assertEquals(expected, result)
     }
 }

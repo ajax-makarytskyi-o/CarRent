@@ -10,4 +10,4 @@ spring:
         max.poll.interval.ms: 10000
 
 kafka:
-  bootstrap-servers: http://localhost:9092
+  bootstrap-servers: http://kafka:9092

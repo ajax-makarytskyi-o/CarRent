@@ -89,9 +89,11 @@ internal class OrderServiceImpl(
             .flatMap { order -> getCarPrice(order.carId.toString()).map { order.toResponse(it) } }
 
 
-    override fun findOrderByDateAndCar(date: Date, carId: String): Mono<OrderResponseDto> =
-        orderRepository.findOrderByDateAndCarId(date, carId)
-            .flatMap { it.toMono().zipWith(getCarPrice(it.carId.toString())) }
+    override fun findOrderByCarAndDate(carId: String, date: Date): Mono<OrderResponseDto> =
+        Mono.zip(
+            orderRepository.findOrderByCarIdAndDate(carId, date),
+            getCarPrice(carId),
+        )
             .map { (order, carPrice) -> order.toResponse(carPrice) }
 
     private fun validateDates(from: Date?, to: Date?) {

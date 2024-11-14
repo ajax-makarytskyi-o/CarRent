@@ -26,5 +26,5 @@ interface OrderService {
 
     fun patch(id: String, orderRequest: UpdateOrderRequestDto): Mono<OrderResponseDto>
 
-    fun findOrderByDateAndCar(date: Date, carId: String): Mono<OrderResponseDto>
+    fun findOrderByCarAndDate(carId: String, date: Date): Mono<OrderResponseDto>
 }

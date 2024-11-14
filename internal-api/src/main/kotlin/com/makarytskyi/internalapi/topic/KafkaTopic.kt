@@ -1,4 +1,4 @@
-package com.makarytskyi.internalapi.subject
+package com.makarytskyi.internalapi.topic
 
 object KafkaTopic {
     private const val REPAIRING_BASE = "repairing"

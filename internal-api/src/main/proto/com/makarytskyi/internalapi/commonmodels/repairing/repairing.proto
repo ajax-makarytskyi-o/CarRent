@@ -15,7 +15,7 @@ message Repairing {
   }
 
   string id = 1;
-  string carId = 2;
+  string car_id = 2;
   google.protobuf.Timestamp date = 3;
   double price = 4;
   RepairingStatus status = 5;

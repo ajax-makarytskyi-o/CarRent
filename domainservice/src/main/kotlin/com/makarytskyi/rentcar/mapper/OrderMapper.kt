@@ -6,7 +6,7 @@ import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.internalapi.commonmodels.order.AggregatedOrder
 import com.makarytskyi.internalapi.commonmodels.order.Order
-import com.makarytskyi.internalapi.commonmodels.order.OrderCancellationUserNotification
+import com.makarytskyi.internalapi.commonmodels.order.OrderCancellationNotification
 import com.makarytskyi.internalapi.commonmodels.order.OrderUpdate
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
@@ -116,7 +116,7 @@ object OrderMapper {
         to = to,
     )
 
-    fun OrderResponseDto.toNotification(): OrderCancellationUserNotification = OrderCancellationUserNotification
+    fun OrderResponseDto.toNotification(): OrderCancellationNotification = OrderCancellationNotification
         .newBuilder().also {
             it.userId = this.userId
             it.order = this.toProto()

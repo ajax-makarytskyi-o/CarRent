@@ -7,6 +7,6 @@ import "google/protobuf/timestamp.proto";
 option java_multiple_files = true;
 
 message OrderUpdate {
-  google.protobuf.Timestamp startDate = 1;
-  google.protobuf.Timestamp endDate = 2;
+  google.protobuf.Timestamp start_date = 1;
+  google.protobuf.Timestamp end_date = 2;
 }

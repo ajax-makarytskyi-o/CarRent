@@ -110,7 +110,7 @@ internal class OrderRepositoryImpl(private val template: ReactiveMongoTemplate) 
         return template.find(query, MongoOrder::class.java)
     }
 
-    override fun findOrderByDateAndCarId(date: Date, carId: String): Mono<MongoOrder> {
+    override fun findOrderByCarIdAndDate(carId: String, date: Date): Mono<MongoOrder> {
         val query = Query(
             Criteria
                 .where(MongoOrder::carId.name).isEqualTo(ObjectId(carId))

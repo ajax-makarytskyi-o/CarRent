@@ -6,7 +6,7 @@ import "com/makarytskyi/internalapi/commonmodels/order/order.proto";
 
 option java_multiple_files = true;
 
-message OrderCancellationUserNotification {
-  string userId = 1;
+message OrderCancellationNotification {
+  string user_id = 1;
   Order order = 2;
 }

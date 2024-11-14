@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.config
 
-import com.makarytskyi.internalapi.subject.KafkaTopic
+import com.makarytskyi.internalapi.topic.KafkaTopic
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
@@ -42,15 +42,15 @@ class KafkaConfiguration(
     }
 
     private fun createProducer(
-        producerOptions: MutableMap<String, Any>
+        producerOptions: Map<String, Any>
     ): KafkaSender<String, ByteArray> {
         return KafkaSender.create(
             SenderOptions.create(producerOptions)
         )
     }
 
-    private fun producerOptions(): MutableMap<String, Any> {
-        val options = mutableMapOf(
+    private fun producerOptions(): Map<String, Any> {
+        val options = mapOf(
             ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaProperties.bootstrapServers,
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
             ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to ByteArraySerializer::class.java,
@@ -61,7 +61,7 @@ class KafkaConfiguration(
     }
 
     private fun consumerOptions(): MutableMap<String, Any> {
-        val options = mutableMapOf(
+        val options = mapOf(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaProperties.bootstrapServers,
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to ByteArrayDeserializer::class.java,

@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.kafka
 
-import com.makarytskyi.internalapi.commonmodels.order.OrderCancellationUserNotification
+import com.makarytskyi.internalapi.commonmodels.order.OrderCancellationNotification
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.NotificationFixture.notification
 import com.makarytskyi.rentcar.fixtures.OrderFixture.createOrderRequestDto
@@ -45,13 +45,13 @@ class KafkaIntegrationTest : ContainerBase {
         val user = userRepository.create(randomUser()).block()!!
         val order =
             orderService.create(createOrderRequestDto(car, user).copy(from = tomorrow, to = threeDaysAfter)).block()!!
-        val notificationList = mutableListOf<OrderCancellationUserNotification>()
+        val notificationList = mutableListOf<OrderCancellationNotification>()
         val repairingRequest = createRepairingRequest(car).copy(date = twoDaysAfter)
         val expectedNotification = notification(order)
 
         notificationReceiver.receive()
             .map {
-                notificationList.add(OrderCancellationUserNotification.parser().parseFrom(it.value()))
+                notificationList.add(OrderCancellationNotification.parser().parseFrom(it.value()))
             }
             .subscribe()
 

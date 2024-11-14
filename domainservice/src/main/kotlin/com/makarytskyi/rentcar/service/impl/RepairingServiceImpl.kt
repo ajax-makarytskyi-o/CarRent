@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.service.impl
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.internalapi.subject.KafkaTopic
+import com.makarytskyi.internalapi.topic.KafkaTopic
 import com.makarytskyi.rentcar.annotation.InvocationTracker
 import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest

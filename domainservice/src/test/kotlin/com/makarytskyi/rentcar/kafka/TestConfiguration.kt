@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.kafka
 
-import com.makarytskyi.internalapi.subject.KafkaTopic
+import com.makarytskyi.internalapi.topic.KafkaTopic
 import java.util.UUID
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
@@ -34,7 +34,7 @@ class TestConfiguration(
     }
 
     private fun consumerOptions(): MutableMap<String, Any> {
-        val options = mutableMapOf(
+        val options = mapOf(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaProperties.bootstrapServers,
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to ByteArrayDeserializer::class.java.name,

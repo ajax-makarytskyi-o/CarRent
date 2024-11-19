@@ -1,6 +1,5 @@
 package com.makarytskyi.rentcar.fixtures
 
-import com.makarytskyi.internalapi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
@@ -46,14 +45,6 @@ object RepairingFixture {
         date = mongoRepairing.date,
         price = mongoRepairing.price,
         status = mongoRepairing.status,
-    )
-
-    fun emptyRepairingResponse() = RepairingResponse(
-        id = "",
-        carId = "",
-        date = null,
-        price = null,
-        status = null,
     )
 
     fun responseAggregatedRepairing(mongoRepairing: AggregatedMongoRepairing) = AggregatedRepairingResponse(
@@ -110,14 +101,6 @@ object RepairingFixture {
         status = null,
     )
 
-    fun emptyAggregatedRepairingResponse() = AggregatedRepairingResponse(
-        id = "",
-        car = CarResponse.from(MongoCar()),
-        date = null,
-        price = null,
-        status = null,
-    )
-
     fun aggregatedRepairing(repairing: MongoRepairing, car: MongoCar) = AggregatedMongoRepairing(
         id = repairing.id,
         car = car,
@@ -125,10 +108,4 @@ object RepairingFixture {
         price = repairing.price,
         status = repairing.status,
     )
-
-    fun protoStatus(status: RepairingStatus) = when (status) {
-        RepairingStatus.PENDING -> Repairing.RepairingStatus.REPAIRING_STATUS_PENDING
-        RepairingStatus.IN_PROGRESS -> Repairing.RepairingStatus.REPAIRING_STATUS_IN_PROGRESS
-        RepairingStatus.COMPLETED -> Repairing.RepairingStatus.REPAIRING_STATUS_COMPLETED
-    }
 }

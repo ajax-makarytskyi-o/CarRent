@@ -1,5 +1,6 @@
 package com.makarytskyi.rentcar.mapper
 
+import com.makarytskyi.internalapi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
@@ -15,10 +16,16 @@ import com.makarytskyi.rentcar.fixtures.RepairingFixture.repairingPatch
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.responseAggregatedRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.responseRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.updateRepairingRequest
+import com.makarytskyi.rentcar.model.MongoRepairing
+import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.Arguments.arguments
+import org.junit.jupiter.params.provider.MethodSource
 
 class RepairingMapperTest {
     @Test
@@ -131,5 +138,37 @@ class RepairingMapperTest {
 
         // WHEN // THEN
         assertThrows<IllegalArgumentException> { AggregatedRepairingResponse.from(repairing) }
+    }
+
+    @ParameterizedTest
+    @MethodSource("statusMappingTestParameters")
+    fun `status mapper should return proto status`(
+        status: MongoRepairing.RepairingStatus,
+        expectedStatus: Repairing.RepairingStatus,
+    ) {
+        // WHEN
+        val result = status.toProto()
+
+        // THEN
+        assertEquals(expectedStatus, result)
+    }
+
+    companion object {
+        @SuppressWarnings("UnusedPrivateMember")
+        @JvmStatic
+        private fun statusMappingTestParameters(): List<Arguments> {
+            return MongoRepairing.RepairingStatus.entries
+                .map {
+                    val expected: Repairing.RepairingStatus = when (it) {
+                        RepairingStatus.PENDING -> Repairing.RepairingStatus.REPAIRING_STATUS_PENDING
+                        RepairingStatus.IN_PROGRESS -> Repairing.RepairingStatus.REPAIRING_STATUS_IN_PROGRESS
+                        RepairingStatus.COMPLETED -> Repairing.RepairingStatus.REPAIRING_STATUS_COMPLETED
+                    }
+                    it to expected
+                }
+                .map { (actual, expected) ->
+                    arguments(actual, expected)
+                }
+        }
     }
 }

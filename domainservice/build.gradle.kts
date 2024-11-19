@@ -7,6 +7,8 @@ dependencies {
     implementation(project(":internal-api"))
     implementation(project(":core"))
     implementation("io.nats:jnats:2.16.14")
+    implementation("org.springframework.kafka:spring-kafka")
+    implementation("io.projectreactor.kafka:reactor-kafka")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     implementation("io.mongock:mongock-springboot-v3:5.4.4")

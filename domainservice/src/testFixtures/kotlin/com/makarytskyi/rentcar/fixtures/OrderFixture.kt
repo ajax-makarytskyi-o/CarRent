@@ -11,14 +11,13 @@ import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
-import java.math.BigDecimal
-import java.util.Date
 import org.bson.types.ObjectId
 
 object OrderFixture {
     var yesterday = getDateFromNow(-1)
     var tomorrow = getDateFromNow(1)
     var twoDaysAfter = getDateFromNow(2)
+    var threeDaysAfter = getDateFromNow(3)
     var monthAfter = getDateFromNow(30)
     var monthAndDayAfter = getDateFromNow(31)
 
@@ -76,15 +75,6 @@ object OrderFixture {
         price = mongoCar.price!!,
     )
 
-    fun emptyResponseOrderDto() = OrderResponseDto(
-        id = "",
-        carId = "",
-        userId = "",
-        from = Date(),
-        to = Date(),
-        price = BigDecimal.ZERO,
-    )
-
     fun responseAggregatedOrderDto(mongoOrder: AggregatedMongoOrder, mongoCar: MongoCar) = AggregatedOrderResponseDto(
         id = mongoOrder.id.toString(),
         car = mongoOrder.car!!.toResponse(),
@@ -92,15 +82,6 @@ object OrderFixture {
         from = mongoOrder.from!!,
         to = mongoOrder.to!!,
         price = mongoCar.price!!,
-    )
-
-    fun emptyResponseAggregatedOrderDto() = AggregatedOrderResponseDto(
-        id = "",
-        car = MongoCar().toResponse(),
-        user = MongoUser().toResponse(),
-        from = Date(),
-        to = Date(),
-        price = BigDecimal.ZERO,
     )
 
     fun createOrderRequestDto(mongoCar: MongoCar, mongoUser: MongoUser) = CreateOrderRequestDto(

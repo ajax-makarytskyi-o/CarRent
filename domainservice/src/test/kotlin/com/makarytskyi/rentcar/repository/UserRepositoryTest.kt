@@ -1,6 +1,8 @@
 package com.makarytskyi.rentcar.repository
 
+import com.makarytskyi.rentcar.fixtures.UserFixture.defaultSize
 import com.makarytskyi.rentcar.fixtures.UserFixture.emptyUserPatch
+import com.makarytskyi.rentcar.fixtures.UserFixture.firstPage
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomCity
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomEmail
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomName
@@ -44,7 +46,7 @@ internal class UserRepositoryTest : ContainerBase {
         val insertedUser2 = userRepository.create(randomUser()).block()
 
         // WHEN
-        val allUsers = userRepository.findAll(0, 20)
+        val allUsers = userRepository.findAll(firstPage, defaultSize)
 
         // THEN
         allUsers.collectList()

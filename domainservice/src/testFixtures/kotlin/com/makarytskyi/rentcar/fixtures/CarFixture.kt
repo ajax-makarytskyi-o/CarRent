@@ -73,16 +73,6 @@ object CarFixture {
         color = null,
     )
 
-    fun emptyResponseCarDto() = CarResponseDto(
-        id = "",
-        brand = "",
-        model = "",
-        price = BigDecimal.ZERO,
-        year = 0,
-        plate = "",
-        color = CarResponseDto.CarColor.UNSPECIFIED,
-    )
-
     fun createCarRequest() = CreateCarRequest(
         brand = randomBrand(),
         model = randomModel(),

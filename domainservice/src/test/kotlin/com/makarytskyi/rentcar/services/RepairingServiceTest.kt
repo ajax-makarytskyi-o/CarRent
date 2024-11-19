@@ -12,6 +12,7 @@ import com.makarytskyi.rentcar.fixtures.RepairingFixture.responseAggregatedRepai
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.responseRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.updateRepairingRequest
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.updatedRepairing
+import com.makarytskyi.rentcar.kafka.CreateRepairingKafkaProducer
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.RepairingRepository
 import com.makarytskyi.rentcar.service.impl.RepairingServiceImpl
@@ -39,6 +40,9 @@ internal class RepairingServiceTest {
 
     @MockK
     lateinit var carRepository: CarRepository
+
+    @MockK
+    lateinit var kafkaProducer: CreateRepairingKafkaProducer
 
     @InjectMockKs
     lateinit var repairingService: RepairingServiceImpl
@@ -126,6 +130,7 @@ internal class RepairingServiceTest {
         val response = responseRepairing(createdRepairing)
         every { repairingRepository.create(requestEntity) } returns createdRepairing.toMono()
         every { carRepository.findById(car.id.toString()) } returns car.toMono()
+        every { kafkaProducer.sendCreateRepairing(any()) } returns Mono.empty()
 
         // WHEN
         val result = repairingService.create(request)

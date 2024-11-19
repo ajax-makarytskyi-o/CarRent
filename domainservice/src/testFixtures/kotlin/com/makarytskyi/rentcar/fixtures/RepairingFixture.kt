@@ -47,14 +47,6 @@ object RepairingFixture {
         status = mongoRepairing.status,
     )
 
-    fun emptyRepairingResponse() = RepairingResponse(
-        id = "",
-        carId = "",
-        date = null,
-        price = null,
-        status = null,
-    )
-
     fun responseAggregatedRepairing(mongoRepairing: AggregatedMongoRepairing) = AggregatedRepairingResponse(
         id = mongoRepairing.id.toString(),
         car = CarResponse.from(mongoRepairing.car ?: MongoCar()),
@@ -104,14 +96,6 @@ object RepairingFixture {
     fun emptyAggregatedRepairing() = AggregatedMongoRepairing(
         id = null,
         car = null,
-        date = null,
-        price = null,
-        status = null,
-    )
-
-    fun emptyAggregatedRepairingResponse() = AggregatedRepairingResponse(
-        id = "",
-        car = CarResponse.from(MongoCar()),
         date = null,
         price = null,
         status = null,

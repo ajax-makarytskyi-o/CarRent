@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Start NATS container
+      - name: Start test environment
         run: docker compose --profile test up -d
 
       - name: Set up JDK
@@ -35,13 +35,6 @@ jobs:
 
       - name: Run gradle build
         run: ./gradlew build -x deltaCoverage
-
-      - name: Upload test report
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-report
-          path: domainservice/build/reports/tests/test/
 
       - name: Delta Coverage check
         if: ${{ github.event_name == 'pull_request' && success() }}

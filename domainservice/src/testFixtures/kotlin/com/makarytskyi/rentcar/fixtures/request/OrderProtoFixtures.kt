@@ -1,7 +1,6 @@
 package com.makarytskyi.rentcar.fixtures.request
 
 import com.makarytskyi.commonmodels.error.Error
-import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
 import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
@@ -14,7 +13,6 @@ import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
-import com.makarytskyi.rentcar.mapper.toProto
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.util.Utils.dateToTimestamp
@@ -101,21 +99,6 @@ object OrderProtoFixtures {
         .newBuilder()
         .setId(id)
         .build()
-
-    fun successGetByIdResponse(response: AggregatedOrderResponseDto): GetByIdOrderResponse =
-        GetByIdOrderResponse
-            .newBuilder()
-            .apply {
-                with(successBuilder.orderBuilder) {
-                    setId(response.id)
-                    setCar(response.car.toProto())
-                    setUser(response.user.toProto())
-                    setFrom(dateToTimestamp(response.from))
-                    setTo(dateToTimestamp(response.to))
-                    setPrice(response.price.toDouble())
-                }
-            }
-            .build()
 
     fun failureGetByIdResponse(exception: Exception): GetByIdOrderResponse =
         GetByIdOrderResponse.newBuilder()

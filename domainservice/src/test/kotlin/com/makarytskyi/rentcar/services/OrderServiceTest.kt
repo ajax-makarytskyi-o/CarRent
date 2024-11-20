@@ -42,8 +42,6 @@ import reactor.kotlin.test.verifyError
 
 @ExtendWith(MockKExtension::class)
 internal class OrderServiceTest {
-    @MockK
-    lateinit var natsConnection: Connection
 
     @MockK
     lateinit var orderCreateOrderKafkaProducer: CreateOrderKafkaProducer

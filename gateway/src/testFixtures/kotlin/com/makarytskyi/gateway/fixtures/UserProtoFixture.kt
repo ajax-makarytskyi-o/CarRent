@@ -1,7 +1,7 @@
 package com.makarytskyi.gateway.fixtures
 
+import com.makarytskyi.commonmodels.user.User
 import com.makarytskyi.gateway.fixtures.Utils.generateString
-import com.makarytskyi.internalapi.commonmodels.user.User
 import org.bson.types.ObjectId
 
 object UserProtoFixture {

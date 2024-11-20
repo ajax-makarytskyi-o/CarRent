@@ -1,21 +1,27 @@
 package com.makarytskyi.gateway.mapper
 
 import com.google.protobuf.Timestamp
+import com.makarytskyi.commonmodels.order.AggregatedOrder
+import com.makarytskyi.commonmodels.order.Order
+import com.makarytskyi.commonmodels.order.OrderUpdate
 import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
 import com.makarytskyi.core.dto.order.CreateOrderRequestDto
 import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.core.exception.UnspecifiedServiceException
-import com.makarytskyi.internalapi.commonmodels.order.AggregatedOrder
-import com.makarytskyi.internalapi.commonmodels.order.Order
-import com.makarytskyi.internalapi.commonmodels.order.OrderUpdate
+import com.makarytskyi.gateway.util.Util.timestampToDate
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
+import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 import java.util.Date
+import com.makarytskyi.grpcapi.input.reqreply.order.CreateOrderRequest as GrpcCreateOrderRequest
+import com.makarytskyi.grpcapi.input.reqreply.order.CreateOrderResponse as GrpcCreateOrderResponse
+import com.makarytskyi.grpcapi.input.reqreply.order.GetByIdOrderRequest as GrpcGetByIdOrderRequest
+import com.makarytskyi.grpcapi.input.reqreply.order.GetByIdOrderResponse as GrpcGetByIdOrderResponse
 
 @SuppressWarnings("TooManyFunctions")
 object OrderMapper {
@@ -34,8 +40,8 @@ object OrderMapper {
         id = id,
         car = car.toResponse(),
         user = user.toResponse(),
-        from = Date(from.seconds),
-        to = Date(to.seconds),
+        from = timestampToDate(from),
+        to = timestampToDate(to),
         price = price.toBigDecimal()
     )
 
@@ -71,6 +77,40 @@ object OrderMapper {
             else -> throw UnspecifiedServiceException(failure.message)
         }
 
+    fun GrpcGetByIdOrderRequest.toInternalProto(): GetByIdOrderRequest = GetByIdOrderRequest
+        .newBuilder().also {
+            it.id = this.id
+        }
+        .build()
+
+    fun GetByIdOrderResponse.toGrpcProto(): GrpcGetByIdOrderResponse = GrpcGetByIdOrderResponse
+        .newBuilder().also {
+            when (this.responseCase) {
+                GetByIdOrderResponse.ResponseCase.SUCCESS -> it.successBuilder.order = this.success.order
+                GetByIdOrderResponse.ResponseCase.FAILURE -> this.failure.throwException()
+                GetByIdOrderResponse.ResponseCase.RESPONSE_NOT_SET ->
+                    throw UnspecifiedServiceException(this.failure.message)
+            }
+        }
+        .build()
+
+    fun GrpcCreateOrderRequest.toInternalProto(): CreateOrderRequest = CreateOrderRequest.newBuilder()
+        .also {
+            it.order = this.order
+        }
+        .build()
+
+    fun CreateOrderResponse.toGrpcProto(): GrpcCreateOrderResponse = GrpcCreateOrderResponse
+        .newBuilder().also {
+            when (this.responseCase) {
+                CreateOrderResponse.ResponseCase.SUCCESS -> it.successBuilder.order = this.success.order
+                CreateOrderResponse.ResponseCase.FAILURE -> this.failure.throwException()
+                CreateOrderResponse.ResponseCase.RESPONSE_NOT_SET ->
+                    throw UnspecifiedServiceException(this.failure.message)
+            }
+        }
+        .build()
+
     private fun CreateOrderResponse.Failure.throwException(): Nothing =
         when (errorCase) {
             CreateOrderResponse.Failure.ErrorCase.NOT_FOUND -> throw NotFoundException(message)
@@ -95,13 +135,15 @@ object OrderMapper {
         id = id,
         carId = carId,
         userId = userId,
-        from = Date(from.seconds),
-        to = Date(to.seconds),
+        from = timestampToDate(from),
+        to = timestampToDate(to),
         price = price.toBigDecimal(),
     )
 
     private fun dateToTimestamp(date: Date?): Timestamp =
         Timestamp.newBuilder()
-            .setSeconds(date?.time ?: 0)
+            .setSeconds(date?.time?.div(MILLIS_IN_SECOND) ?: 0)
             .build()
+
+    private const val MILLIS_IN_SECOND = 1000
 }

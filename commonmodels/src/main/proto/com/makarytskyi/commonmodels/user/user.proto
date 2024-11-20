@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package com.makarytskyi.commonmodels.user;
+
+option java_multiple_files = true;
+
+message User {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string phone_number = 4;
+  string city = 5;
+}

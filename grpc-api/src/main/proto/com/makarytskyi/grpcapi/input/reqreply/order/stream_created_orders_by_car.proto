@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package com.makarytskyi.grpcapi.input.reqreply.order;
+
+import "com/makarytskyi/commonmodels/order/order.proto";
+
+message StreamCreatedOrdersByUserIdRequest {
+  string user_id = 1;
+}
+
+message StreamCreatedOrdersByUserIdResponse {
+  commonmodels.order.Order order = 1;
+}

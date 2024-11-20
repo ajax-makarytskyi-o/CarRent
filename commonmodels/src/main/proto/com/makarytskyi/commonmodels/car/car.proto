@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package com.makarytskyi.commonmodels.car;
+
+option java_multiple_files = true;
+
+message Car {
+  string id = 1;
+  string brand = 2;
+  string model = 3;
+  double price = 4;
+  uint32 year = 5;
+  string plate = 6;
+  CarColor color = 7;
+
+  enum CarColor {
+    CAR_COLOR_UNSPECIFIED = 0;
+    CAR_COLOR_RED = 1;
+    CAR_COLOR_GREEN = 2;
+    CAR_COLOR_BLUE = 3;
+    CAR_COLOR_WHITE = 4;
+    CAR_COLOR_GREY = 5;
+    CAR_COLOR_YELLOW = 6;
+    CAR_COLOR_BLACK = 7;
+  }
+}

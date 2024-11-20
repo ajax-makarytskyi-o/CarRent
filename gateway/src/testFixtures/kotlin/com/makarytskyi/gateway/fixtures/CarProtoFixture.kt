@@ -1,9 +1,9 @@
 package com.makarytskyi.gateway.fixtures
 
+import com.makarytskyi.commonmodels.car.Car
+import com.makarytskyi.commonmodels.car.Car.CarColor
 import com.makarytskyi.core.dto.car.CarResponseDto
 import com.makarytskyi.gateway.fixtures.Utils.generateString
-import com.makarytskyi.internalapi.commonmodels.car.Car
-import com.makarytskyi.internalapi.commonmodels.car.Car.CarColor
 import kotlin.random.Random
 import org.bson.types.ObjectId
 

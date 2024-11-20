@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package com.makarytskyi.commonmodels.order;
+
+import "com/makarytskyi/commonmodels/order/order.proto";
+
+option java_multiple_files = true;
+
+message OrderCancellationNotification {
+  string user_id = 1;
+  Order order = 2;
+}

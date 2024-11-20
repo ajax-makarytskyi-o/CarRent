@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package com.makarytskyi.internalapi.input.reqreply.order;
 
-import "com/makarytskyi/internalapi/commonmodels/error/error.proto";
+import "com/makarytskyi/commonmodels/error/error.proto";
 
 option java_multiple_files = true;
 

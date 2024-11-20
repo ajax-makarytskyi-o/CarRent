@@ -2,7 +2,7 @@ package com.makarytskyi.rentcar.mapper
 
 import com.makarytskyi.commonmodels.order.AggregatedOrder
 import com.makarytskyi.commonmodels.order.Order
-import com.makarytskyi.commonmodels.order.OrderCancellationUserNotification
+import com.makarytskyi.commonmodels.order.OrderCancellationNotification
 import com.makarytskyi.commonmodels.order.OrderUpdate
 import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
 import com.makarytskyi.core.dto.order.CreateOrderRequestDto
@@ -115,7 +115,7 @@ object OrderMapper {
         to = to,
     )
 
-    fun OrderResponseDto.toNotification(): OrderCancellationUserNotification = OrderCancellationUserNotification
+    fun OrderResponseDto.toNotification(): OrderCancellationNotification = OrderCancellationNotification
         .newBuilder().also {
             it.userId = this.userId
             it.order = this.toProto()

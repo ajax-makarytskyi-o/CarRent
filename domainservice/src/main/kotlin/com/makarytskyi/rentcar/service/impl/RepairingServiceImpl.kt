@@ -41,10 +41,11 @@ internal class RepairingServiceImpl(
             .doOnNext {
                 repairingKafkaProducer.sendCreateRepairing(it.toProto())
                     .doOnError { error ->
-                        log.error(
-                            "Error happened during sending message to ${KafkaTopic.REPAIRING_CREATE} topic",
-                            error
-                        )
+                        log.atError()
+                            .setMessage("Error happened during sending message to {} topic")
+                            .addArgument(KafkaTopic.REPAIRING_CREATE)
+                            .setCause(error)
+                            .log()
                     }
                     .subscribe()
             }

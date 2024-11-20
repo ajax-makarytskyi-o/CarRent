@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.kafka
 
 import com.makarytskyi.commonmodels.order.Order
-import com.makarytskyi.internalapi.subject.KafkaTopic
+import com.makarytskyi.internalapi.topic.KafkaTopic
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono

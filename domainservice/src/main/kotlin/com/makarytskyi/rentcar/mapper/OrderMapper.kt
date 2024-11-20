@@ -1,13 +1,13 @@
 package com.makarytskyi.rentcar.mapper
 
+import com.makarytskyi.commonmodels.order.AggregatedOrder
+import com.makarytskyi.commonmodels.order.Order
+import com.makarytskyi.commonmodels.order.OrderCancellationUserNotification
+import com.makarytskyi.commonmodels.order.OrderUpdate
 import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
 import com.makarytskyi.core.dto.order.CreateOrderRequestDto
 import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
-import com.makarytskyi.internalapi.commonmodels.order.AggregatedOrder
-import com.makarytskyi.internalapi.commonmodels.order.Order
-import com.makarytskyi.internalapi.commonmodels.order.OrderCancellationNotification
-import com.makarytskyi.internalapi.commonmodels.order.OrderUpdate
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderResponse
@@ -19,11 +19,10 @@ import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
-import com.makarytskyi.rentcar.util.dateToTimestamp
-import com.makarytskyi.rentcar.util.timestampToDate
+import com.makarytskyi.rentcar.util.Utils.dateToTimestamp
+import com.makarytskyi.rentcar.util.Utils.timestampToDate
 import java.math.BigDecimal
 import java.time.temporal.ChronoUnit
-import java.util.Date
 import org.bson.types.ObjectId
 
 @SuppressWarnings("TooManyFunctions")
@@ -47,8 +46,8 @@ object OrderMapper {
     fun CreateOrderRequest.toDto() = CreateOrderRequestDto(
         carId = order.carId,
         userId = order.userId,
-        from = Date(order.from.seconds),
-        to = Date(order.to.seconds),
+        from = timestampToDate(order.from),
+        to = timestampToDate(order.to),
     )
 
     fun OrderUpdate.toDto(): UpdateOrderRequestDto = UpdateOrderRequestDto(
@@ -116,7 +115,7 @@ object OrderMapper {
         to = to,
     )
 
-    fun OrderResponseDto.toNotification(): OrderCancellationNotification = OrderCancellationNotification
+    fun OrderResponseDto.toNotification(): OrderCancellationUserNotification = OrderCancellationUserNotification
         .newBuilder().also {
             it.userId = this.userId
             it.order = this.toProto()

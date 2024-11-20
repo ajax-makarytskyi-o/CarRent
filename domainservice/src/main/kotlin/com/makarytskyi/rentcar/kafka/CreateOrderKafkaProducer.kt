@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.kafka
 
-import com.makarytskyi.commonmodels.order.OrderCancellationUserNotification
+import com.makarytskyi.commonmodels.order.Order
 import com.makarytskyi.internalapi.subject.KafkaTopic
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.stereotype.Component
@@ -10,17 +10,17 @@ import reactor.kafka.sender.SenderRecord
 import reactor.kotlin.core.publisher.toMono
 
 @Component
-class UserNotificationKafkaProducer(
-    private val userNotificationKafkaSender: KafkaSender<String, ByteArray>
+class CreateOrderKafkaProducer(
+    private val createOrderKafkaSender: KafkaSender<String, ByteArray>
 ) {
 
-    fun sendNotification(notification: OrderCancellationUserNotification): Mono<Unit> =
-        userNotificationKafkaSender.send(
+    fun sendCreateRepairing(order: Order): Mono<Unit> =
+        createOrderKafkaSender.send(
             SenderRecord.create(
                 ProducerRecord(
-                    KafkaTopic.NOTIFICATION,
-                    notification.userId,
-                    notification.toByteArray()
+                    KafkaTopic.ORDER_CREATE,
+                    order.userId,
+                    order.toByteArray()
                 ),
                 null
             ).toMono()

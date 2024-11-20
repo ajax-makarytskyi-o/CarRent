@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.kafka
 
-import com.makarytskyi.internalapi.topic.KafkaTopic
+import com.makarytskyi.internalapi.subject.KafkaTopic
 import java.util.UUID
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.ByteArrayDeserializer

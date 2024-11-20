@@ -1,8 +1,8 @@
 package com.makarytskyi.rentcar.mapper
 
+import com.makarytskyi.commonmodels.car.Car
+import com.makarytskyi.commonmodels.car.Car.CarColor
 import com.makarytskyi.core.dto.car.CarResponseDto
-import com.makarytskyi.internalapi.commonmodels.car.Car
-import com.makarytskyi.internalapi.commonmodels.car.Car.CarColor
 import com.makarytskyi.rentcar.model.MongoCar
 import java.math.BigDecimal
 

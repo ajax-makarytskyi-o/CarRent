@@ -13,7 +13,7 @@ import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.updateOrderRe
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
-import com.makarytskyi.rentcar.util.timestampToDate
+import com.makarytskyi.rentcar.util.Utils.timestampToDate
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test

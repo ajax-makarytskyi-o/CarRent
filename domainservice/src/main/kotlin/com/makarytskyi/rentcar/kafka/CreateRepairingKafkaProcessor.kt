@@ -1,9 +1,9 @@
 package com.makarytskyi.rentcar.kafka
 
-import com.makarytskyi.internalapi.commonmodels.repairing.Repairing
+import com.makarytskyi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.mapper.OrderMapper.toNotification
 import com.makarytskyi.rentcar.service.OrderService
-import com.makarytskyi.rentcar.util.timestampToDate
+import com.makarytskyi.rentcar.util.Utils.timestampToDate
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener

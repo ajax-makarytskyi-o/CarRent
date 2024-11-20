@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":internal-api"))
+    implementation(project(":commonmodels"))
     implementation(project(":core"))
     implementation("io.nats:jnats:2.16.14")
     implementation("org.springframework.kafka:spring-kafka")

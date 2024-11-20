@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.service.impl
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.internalapi.topic.KafkaTopic
+import com.makarytskyi.internalapi.subject.KafkaTopic
 import com.makarytskyi.rentcar.annotation.InvocationTracker
 import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
@@ -41,11 +41,10 @@ internal class RepairingServiceImpl(
             .doOnNext {
                 repairingKafkaProducer.sendCreateRepairing(it.toProto())
                     .doOnError { error ->
-                        log.atError()
-                            .setMessage("Error happened during sending message to {} topic")
-                            .addArgument(KafkaTopic.REPAIRING_CREATE)
-                            .setCause(error)
-                            .log()
+                        log.error(
+                            "Error happened during sending message to ${KafkaTopic.REPAIRING_CREATE} topic",
+                            error
+                        )
                     }
                     .subscribe()
             }

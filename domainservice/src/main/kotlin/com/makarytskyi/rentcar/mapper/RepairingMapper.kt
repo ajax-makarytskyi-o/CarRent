@@ -1,17 +1,18 @@
 package com.makarytskyi.rentcar.mapper
 
-import com.makarytskyi.internalapi.commonmodels.repairing.Repairing
+import com.google.protobuf.Timestamp
+import com.makarytskyi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.model.MongoRepairing
 import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus
-import com.makarytskyi.rentcar.util.dateToTimestamp
+import com.makarytskyi.rentcar.util.Utils.dateToTimestamp
 
 fun MongoRepairing.toProto(): Repairing = Repairing.newBuilder()
     .also {
-        it.id = this.id.toString()
-        it.carId = this.carId.toString()
+        it.id = this.id?.toString().orEmpty()
+        it.carId = this.carId?.toString().orEmpty()
         it.price = this.price?.toDouble() ?: 0.0
-        it.date = this.date?.let { date -> dateToTimestamp(date) }
-        it.status = this.status?.toProto()
+        it.date = this.date?.let { date -> dateToTimestamp(date) } ?: Timestamp.getDefaultInstance()
+        it.status = this.status?.toProto() ?: Repairing.RepairingStatus.REPAIRING_STATUS_UNSPECIFIED
     }
     .build()
 

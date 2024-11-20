@@ -6,8 +6,10 @@ import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.rentcar.annotation.InvocationTracker
+import com.makarytskyi.rentcar.kafka.CreateOrderKafkaProducer
 import com.makarytskyi.rentcar.mapper.OrderMapper.toEntity
 import com.makarytskyi.rentcar.mapper.OrderMapper.toPatch
+import com.makarytskyi.rentcar.mapper.OrderMapper.toProto
 import com.makarytskyi.rentcar.mapper.OrderMapper.toResponse
 import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.repository.CarRepository
@@ -31,6 +33,7 @@ internal class OrderServiceImpl(
     private val orderRepository: OrderRepository,
     private val carRepository: CarRepository,
     private val userRepository: UserRepository,
+    private val orderCreateOrderKafkaProducer: CreateOrderKafkaProducer,
 ) : OrderService {
 
     override fun getById(id: String): Mono<AggregatedOrderResponseDto> =
@@ -57,6 +60,10 @@ internal class OrderServiceImpl(
             }
             .flatMap { orderRepository.create(createOrderRequest.toEntity()) }
             .flatMap { order -> getCarPrice(createOrderRequest.carId).map { order.toResponse(it) } }
+            .doOnNext {
+                orderCreateOrderKafkaProducer.sendCreateRepairing(it.toProto())
+                    .subscribe()
+            }
     }
 
     override fun deleteById(id: String): Mono<Unit> = orderRepository.deleteById(id)
@@ -91,7 +98,7 @@ internal class OrderServiceImpl(
 
     override fun findOrderByCarAndDate(carId: String, date: Date): Mono<OrderResponseDto> =
         Mono.zip(
-            orderRepository.findOrderByCarIdAndDate(carId, date),
+            orderRepository.findOrderByDateAndCarId(date, carId),
             getCarPrice(carId),
         )
             .map { (order, carPrice) -> order.toResponse(carPrice) }

@@ -10,7 +10,7 @@ import org.bson.types.ObjectId
 
 object UserFixture {
     val firstPage = 0
-    const val defaultSize = 30
+    val defaultSize = 30
 
     fun randomName(): String {
         return generateString(10)

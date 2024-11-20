@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.config
 
-import com.makarytskyi.internalapi.topic.KafkaTopic
+import com.makarytskyi.internalapi.subject.KafkaTopic
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
@@ -27,7 +27,12 @@ class KafkaConfiguration(
 
     @Bean
     fun createRepairingKafkaReceiver(): KafkaReceiver<String, ByteArray> {
-        return createReceiver(consumerOptions(), GROUP_ID, KafkaTopic.REPAIRING_CREATE)
+        return createReceiver(consumerOptions(), GROUP_ID_REPAIRING, KafkaTopic.REPAIRING_CREATE)
+    }
+
+    @Bean
+    fun createOrderKafkaReceiver(): KafkaReceiver<String, ByteArray> {
+        return createReceiver(consumerOptions(), GROUP_ID_ORDER, KafkaTopic.ORDER_CREATE)
     }
 
     private fun createReceiver(
@@ -72,6 +77,7 @@ class KafkaConfiguration(
     }
 
     companion object {
-        const val GROUP_ID = "group-rentcar"
+        const val GROUP_ID_REPAIRING = "group-rentcar-repairing"
+        const val GROUP_ID_ORDER = "group-rentcar-order"
     }
 }

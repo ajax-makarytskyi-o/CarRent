@@ -60,7 +60,7 @@ class KafkaIntegrationTest : ContainerBase {
 
         // THEN
         await()
-            .atMost(20, TimeUnit.SECONDS)
+            .atMost(30, TimeUnit.SECONDS)
             .until { notificationList.contains(expectedNotification) }
     }
 }

@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package com.makarytskyi.internalapi.commonmodels.order;
+package com.makarytskyi.commonmodels.order;
 
 import "google/protobuf/timestamp.proto";
-import "com/makarytskyi/internalapi/commonmodels/car/car.proto";
-import "com/makarytskyi/internalapi/commonmodels/user/user.proto";
+import "com/makarytskyi/commonmodels/car/car.proto";
+import "com/makarytskyi/commonmodels/user/user.proto";
 
 option java_multiple_files = true;
 

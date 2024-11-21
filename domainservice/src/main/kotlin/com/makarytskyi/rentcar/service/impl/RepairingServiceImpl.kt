@@ -43,7 +43,7 @@ internal class RepairingServiceImpl(
                     .doOnError { error ->
                         log.atError()
                             .setMessage("Error happened during sending message to {} topic")
-                            .addArgument(KafkaTopic.REPAIRING_CREATE)
+                            .addArgument(KafkaTopic.Repairing.REPAIRING_CREATE)
                             .setCause(error)
                             .log()
                     }

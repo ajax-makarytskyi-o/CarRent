@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.makarytskyi.internalapi.commonmodels.repairing;
+package com.makarytskyi.commonmodels.repairing;
 
 import "google/protobuf/timestamp.proto";
 

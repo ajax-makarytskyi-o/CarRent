@@ -17,6 +17,7 @@ import com.makarytskyi.rentcar.fixtures.OrderFixture.updateOrderRequestDto
 import com.makarytskyi.rentcar.fixtures.OrderFixture.updatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.yesterday
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
+import com.makarytskyi.rentcar.kafka.CreateOrderKafkaProducer
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
@@ -26,6 +27,7 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import io.nats.client.Connection
 import java.math.BigDecimal
 import kotlin.test.Test
 import org.assertj.core.api.Assertions.assertThat
@@ -40,6 +42,10 @@ import reactor.kotlin.test.verifyError
 
 @ExtendWith(MockKExtension::class)
 internal class OrderServiceTest {
+
+    @MockK
+    lateinit var orderCreateOrderKafkaProducer: CreateOrderKafkaProducer
+
     @MockK
     lateinit var orderRepository: OrderRepository
 
@@ -140,6 +146,7 @@ internal class OrderServiceTest {
         every { carRepository.findById(car.id.toString()) } returns car.toMono()
         every { userRepository.findById(user.id.toString()) } returns user.toMono()
         every { orderRepository.findByCarId(car.id.toString()) } returns Flux.empty()
+        every { orderCreateOrderKafkaProducer.sendCreateRepairing(any()) } returns Mono.empty()
 
         // WHEN
         val result = orderService.create(request)

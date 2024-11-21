@@ -1,11 +1,12 @@
 plugins {
     id("spring-conventions")
+    id("grpc-conventions")
     `java-test-fixtures`
 }
 
 dependencies {
-    implementation(project(":internal-api"))
     implementation(project(":core"))
+    implementation(project(":grpc-api"))
     implementation("io.nats:jnats:2.16.14")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.2")
     testImplementation("io.projectreactor:reactor-test:3.6.10")

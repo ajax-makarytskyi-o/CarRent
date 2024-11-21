@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package com.makarytskyi.internalapi.commonmodels.car;
+package com.makarytskyi.commonmodels.car;
 
 option java_multiple_files = true;
 

@@ -9,5 +9,7 @@ object NatsSubject {
         const val DELETE = "$ORDER_BASE.delete"
         const val GET_BY_ID = "$ORDER_BASE.get_by_id"
         const val FIND_ALL = "$ORDER_BASE.find_all"
+
+        fun createOrderOnCar(userId: String) = "$CREATE-$userId"
     }
 }

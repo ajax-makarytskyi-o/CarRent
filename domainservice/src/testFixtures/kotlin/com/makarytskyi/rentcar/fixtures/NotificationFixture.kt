@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.fixtures
 
+import com.makarytskyi.commonmodels.order.OrderCancellationNotification
 import com.makarytskyi.core.dto.order.OrderResponseDto
-import com.makarytskyi.internalapi.commonmodels.order.OrderCancellationNotification
 import com.makarytskyi.rentcar.mapper.OrderMapper.toProto
 
 object NotificationFixture {

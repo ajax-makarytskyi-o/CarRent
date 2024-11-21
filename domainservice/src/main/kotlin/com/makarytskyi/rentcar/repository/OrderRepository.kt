@@ -27,5 +27,5 @@ internal interface OrderRepository {
 
     fun findByCarIdAndUserId(carId: String, userId: String): Flux<MongoOrder>
 
-    fun findOrderByCarIdAndDate(carId: String, date: Date): Mono<MongoOrder>
+    fun findOrderByDateAndCarId(date: Date, carId: String): Mono<MongoOrder>
 }

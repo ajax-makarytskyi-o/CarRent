@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package com.makarytskyi.internalapi.commonmodels.order;
+package com.makarytskyi.commonmodels.order;
 
-import "com/makarytskyi/internalapi/commonmodels/order/order.proto";
+import "com/makarytskyi/commonmodels/order/order.proto";
 
 option java_multiple_files = true;
 

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package com.makarytskyi.grpcapi.service;
+
+import "com/makarytskyi/grpcapi/input/reqreply/order/create.proto";
+import "com/makarytskyi/grpcapi/input/reqreply/order/get_by_id.proto";
+import "com/makarytskyi/grpcapi/input/reqreply/order/stream_created_orders_by_car.proto";
+
+service OrderService {
+
+  rpc getFullById(input.reqreply.order.GetByIdOrderRequest) returns (input.reqreply.order.GetByIdOrderResponse);
+
+  rpc create(input.reqreply.order.CreateOrderRequest) returns (input.reqreply.order.CreateOrderResponse);
+
+  rpc streamCreatedOrdersByUserId(input.reqreply.order.StreamCreatedOrdersByUserIdRequest)
+      returns (stream input.reqreply.order.StreamCreatedOrdersByUserIdResponse);
+}

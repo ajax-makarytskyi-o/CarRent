@@ -19,7 +19,7 @@ class TestConfiguration(
     @Bean("notificationReceiver")
     @Scope("prototype")
     fun notificationReceiver(): KafkaReceiver<String, ByteArray> {
-        return createReceiver(consumerOptions(), "$TEST_GROUP_ID-${UUID.randomUUID()}", KafkaTopic.NOTIFICATION)
+        return createReceiver(consumerOptions(), "$TEST_GROUP_ID-${UUID.randomUUID()}", KafkaTopic.User.NOTIFICATION)
     }
 
     private fun createReceiver(

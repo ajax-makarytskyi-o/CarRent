@@ -1,8 +1,8 @@
 package com.makarytskyi.rentcar.fixtures.request
 
+import com.makarytskyi.commonmodels.error.Error
 import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.internalapi.commonmodels.error.Error
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderRequest
@@ -15,7 +15,7 @@ import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.MongoUser
-import com.makarytskyi.rentcar.util.dateToTimestamp
+import com.makarytskyi.rentcar.util.Utils.dateToTimestamp
 
 object OrderProtoFixtures {
     val firstPage = 0

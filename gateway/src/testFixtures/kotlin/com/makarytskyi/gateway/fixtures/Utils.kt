@@ -14,8 +14,9 @@ internal object Utils {
     }
 
     internal fun getDateFromNow(days: Long): Date {
-        return Date.from(
+        return Date(
             Clock.offset(Clock.systemDefaultZone(), Duration.ofDays(days)).instant()
+                .epochSecond.times(1000)
         )
     }
 }

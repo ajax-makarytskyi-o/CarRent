@@ -4,7 +4,8 @@ nats:
 spring:
   kafka:
     consumer:
-      auto-offset-reset: latest
+      auto-offset-reset: earliest
+
       properties:
         session.timeout.ms: 10000
         max.poll.interval.ms: 10000

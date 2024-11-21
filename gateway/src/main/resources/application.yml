@@ -9,3 +9,9 @@ server:
 nats:
   url: ${NATS_URL}
   timeout: 2
+
+grpc:
+  server:
+    port: 50051
+    security:
+      enabled: false

@@ -50,6 +50,9 @@ import reactor.kotlin.test.verifyError
 class OrderControllerTest {
 
     @MockK
+    lateinit var connection: Connection
+
+    @MockK
     lateinit var natsClient: NatsClient
 
     @InjectMockKs

@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package com.makarytskyi.grpcapi.input.reqreply.order;
+
+import "com/makarytskyi/commonmodels/error/error.proto";
+import "com/makarytskyi/commonmodels/order/order.proto";
+
+option java_multiple_files = true;
+
+message CreateOrderRequest {
+  commonmodels.order.Order order = 1;
+}
+
+message CreateOrderResponse {
+  oneof response {
+    Success success = 1;
+    Failure failure = 2;
+  }
+
+  message Success {
+    commonmodels.order.Order order = 1;
+  }
+
+  message Failure {
+    string message = 100;
+    oneof error {
+      commonmodels.error.Error not_found = 1;
+      commonmodels.error.Error illegal_argument = 2;
+    }
+  }
+}

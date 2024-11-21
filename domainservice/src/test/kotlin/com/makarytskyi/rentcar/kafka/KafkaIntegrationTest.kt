@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.kafka
 
-import com.makarytskyi.internalapi.commonmodels.order.OrderCancellationNotification
+import com.makarytskyi.commonmodels.order.OrderCancellationNotification
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.NotificationFixture.notification
 import com.makarytskyi.rentcar.fixtures.OrderFixture.createOrderRequestDto

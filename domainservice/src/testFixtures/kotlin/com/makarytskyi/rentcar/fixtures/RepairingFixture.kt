@@ -1,5 +1,7 @@
 package com.makarytskyi.rentcar.fixtures
 
+import com.google.protobuf.Timestamp
+import com.makarytskyi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.dto.car.CarResponse
 import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
@@ -33,6 +35,16 @@ object RepairingFixture {
         price = null,
         status = null,
     )
+
+    fun emptyProtoRepairing() = Repairing
+        .newBuilder().also {
+            it.id = ""
+            it.carId = ""
+            it.price = 0.0
+            it.date = Timestamp.getDefaultInstance()
+            it.status = Repairing.RepairingStatus.REPAIRING_STATUS_UNSPECIFIED
+        }
+        .build()
 
     fun emptyRepairingPatch() = MongoRepairingPatch(
         price = null,

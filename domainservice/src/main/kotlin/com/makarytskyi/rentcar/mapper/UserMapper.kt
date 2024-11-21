@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.mapper
 
+import com.makarytskyi.commonmodels.user.User
 import com.makarytskyi.core.dto.user.UserResponseDto
-import com.makarytskyi.internalapi.commonmodels.user.User
 import com.makarytskyi.rentcar.model.MongoUser
 
 fun UserResponseDto.toProto(): User = User.newBuilder()

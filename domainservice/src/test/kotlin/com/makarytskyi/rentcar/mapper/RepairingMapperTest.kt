@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.mapper
 
-import com.makarytskyi.internalapi.commonmodels.repairing.Repairing
+import com.makarytskyi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
 import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
@@ -9,6 +9,7 @@ import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.createRepairingEntity
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.createRepairingRequest
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyAggregatedRepairing
+import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyProtoRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomAggregatedRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomRepairing
@@ -140,10 +141,23 @@ class RepairingMapperTest {
         assertThrows<IllegalArgumentException> { AggregatedRepairingResponse.from(repairing) }
     }
 
+    @Test
+    fun `repairing mapper should return proto with default fields if repairing has empty fields`() {
+        // GIVEN
+        val repairing = emptyRepairing()
+        val expected = emptyProtoRepairing()
+
+        // WHEN
+        val result = repairing.toProto()
+
+        // THEN
+        assertEquals(expected, result)
+    }
+
     @ParameterizedTest
     @MethodSource("statusMappingTestParameters")
     fun `status mapper should return proto status`(
-        status: MongoRepairing.RepairingStatus,
+        status: RepairingStatus,
         expectedStatus: Repairing.RepairingStatus,
     ) {
         // WHEN
@@ -154,9 +168,9 @@ class RepairingMapperTest {
     }
 
     companion object {
-        @SuppressWarnings("UnusedPrivateMember")
+
         @JvmStatic
-        private fun statusMappingTestParameters(): List<Arguments> {
+        fun statusMappingTestParameters(): List<Arguments> {
             return MongoRepairing.RepairingStatus.entries
                 .map {
                     val expected: Repairing.RepairingStatus = when (it) {

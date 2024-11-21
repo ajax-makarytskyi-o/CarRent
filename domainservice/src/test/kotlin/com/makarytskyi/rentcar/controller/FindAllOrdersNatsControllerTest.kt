@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.controller
 
+import com.makarytskyi.commonmodels.order.AggregatedOrder
 import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
-import com.makarytskyi.internalapi.commonmodels.order.AggregatedOrder
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_ALL
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar

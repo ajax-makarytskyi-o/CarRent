@@ -6,7 +6,7 @@ import com.makarytskyi.gateway.fixtures.OrderProtoFixture.createOrderGrpcRespons
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.createRequest
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.failureCreateResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.failureGetByIdResponse
-import com.makarytskyi.gateway.fixtures.OrderProtoFixture.grpcGetFullByIdRequest
+import com.makarytskyi.gateway.fixtures.OrderProtoFixture.grpcGetByIdRequest
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.randomAggregatedOrder
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.randomPrice
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.streamCreatedOrderResponse
@@ -51,7 +51,7 @@ class OrderGrpcServiceTest {
         // GIVEN
         val id = ObjectId().toString()
         val order = randomAggregatedOrder()
-        val request = grpcGetFullByIdRequest(id)
+        val request = grpcGetByIdRequest(id)
         val protoResponse = successfulGetByIdResponse(order)
         val grpcProtoResponse = successfulGrpcGetByIdResponse(order)
 
@@ -74,7 +74,7 @@ class OrderGrpcServiceTest {
     fun `getFullById should return exception if NATS client returned exception`() {
         // GIVEN
         val id = ObjectId().toString()
-        val request = grpcGetFullByIdRequest(id)
+        val request = grpcGetByIdRequest(id)
         val exception = NotFoundException("Order with id is not found")
         val protoResponse = failureGetByIdResponse(exception)
 

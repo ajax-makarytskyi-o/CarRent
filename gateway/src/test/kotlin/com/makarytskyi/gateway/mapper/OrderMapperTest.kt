@@ -6,15 +6,15 @@ import com.makarytskyi.gateway.fixtures.OrderProtoFixture.createOrderResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.createRequest
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.failureCreateResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.failureGetByIdResponse
-import com.makarytskyi.gateway.fixtures.OrderProtoFixture.failureGetFullByIdRandomResponse
+import com.makarytskyi.gateway.fixtures.OrderProtoFixture.failureGetByIdRandomResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.failurePatchResponse
-import com.makarytskyi.gateway.fixtures.OrderProtoFixture.getFullByIdRequest
-import com.makarytskyi.gateway.fixtures.OrderProtoFixture.grpcGetFullByIdRequest
+import com.makarytskyi.gateway.fixtures.OrderProtoFixture.getByIdRequest
+import com.makarytskyi.gateway.fixtures.OrderProtoFixture.grpcGetByIdRequest
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.randomAggregatedOrder
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulCreateRandomResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulCreateResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulGetByIdResponse
-import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulGetFullByIdRandomResponse
+import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulGetByIdRandomResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulGrpcCreateResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulGrpcGetByIdResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulUpdateResponse
@@ -117,8 +117,8 @@ class OrderMapperTest {
     fun `grpc proto request mapper should return internal proto request`() {
         // GIVEN
         val id = ObjectId().toString()
-        val grpcRequest = grpcGetFullByIdRequest(id)
-        val internalRequest = getFullByIdRequest(id)
+        val grpcRequest = grpcGetByIdRequest(id)
+        val internalRequest = getByIdRequest(id)
 
         // WHEN
         val result = grpcRequest.toInternalProto()
@@ -130,7 +130,7 @@ class OrderMapperTest {
     @Test
     fun `internal getFullById mapper should return grpc response mapper if response is successful`() {
         // GIVEN
-        val internalResponse = successfulGetFullByIdRandomResponse()
+        val internalResponse = successfulGetByIdRandomResponse()
         val grpcResponse = successfulGrpcGetByIdResponse(internalResponse.success.order)
 
         // WHEN
@@ -144,7 +144,7 @@ class OrderMapperTest {
     fun `internal getFullById mapper should throw exception if response is failure`() {
         // GIVEN
         val exception = NotFoundException("Order is not found")
-        val internalResponse = failureGetFullByIdRandomResponse(exception)
+        val internalResponse = failureGetByIdRandomResponse(exception)
 
         // WHEN // THEN
         assertThrows<NotFoundException> { internalResponse.toGrpcProto() }

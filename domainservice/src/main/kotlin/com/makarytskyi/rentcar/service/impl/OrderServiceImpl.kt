@@ -18,6 +18,7 @@ import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.service.OrderService
 import java.math.BigDecimal
 import java.util.Date
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -62,6 +63,12 @@ internal class OrderServiceImpl(
             .flatMap { order -> getCarPrice(createOrderRequest.carId).map { order.toResponse(it) } }
             .doOnNext {
                 orderCreateOrderKafkaProducer.sendCreateRepairing(it.toProto())
+                    .doOnError { e ->
+                        log.atError()
+                            .setMessage("Error happened during sending message to Kafka: {}")
+                            .addArgument(e.message)
+                            .setCause(e)
+                    }
                     .subscribe()
             }
     }
@@ -124,4 +131,8 @@ internal class OrderServiceImpl(
         carRepository.findById(carId)
             .map { it.price ?: BigDecimal.ZERO }
             .defaultIfEmpty(BigDecimal.ZERO)
+
+    companion object {
+        val log = LoggerFactory.getLogger(OrderServiceImpl::class.java)
+    }
 }

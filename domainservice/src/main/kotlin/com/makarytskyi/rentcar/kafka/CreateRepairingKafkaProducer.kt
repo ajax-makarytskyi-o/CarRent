@@ -11,14 +11,14 @@ import reactor.kotlin.core.publisher.toMono
 
 @Component
 class CreateRepairingKafkaProducer(
-    private val createRepairingKafkaSender: KafkaSender<String, ByteArray>
+    private val createRepairingKafkaSender: KafkaSender<String, ByteArray>,
 ) {
 
     fun sendCreateRepairing(repairing: Repairing): Mono<Unit> =
         createRepairingKafkaSender.send(
             SenderRecord.create(
                 ProducerRecord(
-                    KafkaTopic.REPAIRING_CREATE,
+                    KafkaTopic.Repairing.REPAIRING_CREATE,
                     repairing.carId,
                     repairing.toByteArray()
                 ),

@@ -27,12 +27,12 @@ class KafkaConfiguration(
 
     @Bean
     fun createRepairingKafkaReceiver(): KafkaReceiver<String, ByteArray> {
-        return createReceiver(consumerOptions(), GROUP_ID_REPAIRING, KafkaTopic.REPAIRING_CREATE)
+        return createReceiver(consumerOptions(), GROUP_ID_REPAIRING, KafkaTopic.Repairing.REPAIRING_CREATE)
     }
 
     @Bean
     fun createOrderKafkaReceiver(): KafkaReceiver<String, ByteArray> {
-        return createReceiver(consumerOptions(), GROUP_ID_ORDER, KafkaTopic.ORDER_CREATE)
+        return createReceiver(consumerOptions(), GROUP_ID_ORDER, KafkaTopic.Order.ORDER_CREATE)
     }
 
     private fun createReceiver(

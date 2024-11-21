@@ -1,11 +1,18 @@
 package com.makarytskyi.internalapi.topic
 
 object KafkaTopic {
-    private const val REPAIRING_BASE = "repairing"
-    private const val ORDER_BASE = "order"
-    private const val USER_BASE = "user"
+    object Repairing {
+        private const val REPAIRING_BASE = "repairing"
+        const val REPAIRING_CREATE = "$REPAIRING_BASE.create"
+    }
 
-    const val ORDER_CREATE = "$ORDER_BASE.create"
-    const val REPAIRING_CREATE = "$REPAIRING_BASE.create"
-    const val NOTIFICATION = "$USER_BASE.notification"
+    object Order {
+        private const val ORDER_BASE = "order"
+        const val ORDER_CREATE = "$ORDER_BASE.create"
+    }
+
+    object User {
+        private const val USER_BASE = "user"
+        const val NOTIFICATION = "$USER_BASE.notification"
+    }
 }

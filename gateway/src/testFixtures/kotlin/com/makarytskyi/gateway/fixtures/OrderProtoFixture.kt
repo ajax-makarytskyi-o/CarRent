@@ -207,18 +207,18 @@ object OrderProtoFixture {
 
     fun successfulGrpcGetByIdResponse(order: AggregatedOrder): GrpcGetByIdOrderResponse = GrpcGetByIdOrderResponse
         .newBuilder()
-        .apply { successBuilder.setOrder(order).build() }
+        .apply { successBuilder.order = order }
         .build()
 
-    fun grpcGetFullByIdRequest(id: String): GrpcGetByIdOrderRequest = GrpcGetByIdOrderRequest
+    fun grpcGetByIdRequest(id: String): GrpcGetByIdOrderRequest = GrpcGetByIdOrderRequest
         .newBuilder().also { it.id = id }
         .build()
 
-    fun getFullByIdRequest(id: String): GetByIdOrderRequest = GetByIdOrderRequest
+    fun getByIdRequest(id: String): GetByIdOrderRequest = GetByIdOrderRequest
         .newBuilder().also { it.id = id }
         .build()
 
-    fun successfulGetFullByIdRandomResponse(): GetByIdOrderResponse = GetByIdOrderResponse
+    fun successfulGetByIdRandomResponse(): GetByIdOrderResponse = GetByIdOrderResponse
         .newBuilder().also {
             it.successBuilder.orderBuilder.also { order ->
                 order.id = ObjectId().toString()
@@ -246,12 +246,10 @@ object OrderProtoFixture {
         .apply { successBuilder.setOrder(order).build() }
         .build()
 
-    fun failureGetFullByIdRandomResponse(exception: Exception): GetByIdOrderResponse = GetByIdOrderResponse
-        .newBuilder().also {
-            it.failureBuilder.also {
-                it.message = exception.message
-                it.notFoundBuilder
-            }
+    fun failureGetByIdRandomResponse(exception: Exception): GetByIdOrderResponse = GetByIdOrderResponse
+        .newBuilder().apply {
+            failureBuilder.message = exception.message
+            failureBuilder.notFoundBuilder
         }
         .build()
 

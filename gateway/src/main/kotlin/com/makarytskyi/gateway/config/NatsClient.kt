@@ -18,7 +18,7 @@ class NatsClient(
     private val natsConnection: Connection,
     @Value("\${nats.timeout}")
     private val timeoutDuration: Long,
-    private val dispatcher: Dispatcher
+    private val dispatcher: Dispatcher,
 ) {
     fun <RequestT : GeneratedMessage, ResponseT : GeneratedMessage> request(
         subject: String,

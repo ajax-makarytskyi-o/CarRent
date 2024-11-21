@@ -11,14 +11,14 @@ import reactor.kotlin.core.publisher.toMono
 
 @Component
 class CreateOrderKafkaProducer(
-    private val createOrderKafkaSender: KafkaSender<String, ByteArray>
+    private val createOrderKafkaSender: KafkaSender<String, ByteArray>,
 ) {
 
     fun sendCreateRepairing(order: Order): Mono<Unit> =
         createOrderKafkaSender.send(
             SenderRecord.create(
                 ProducerRecord(
-                    KafkaTopic.ORDER_CREATE,
+                    KafkaTopic.Order.ORDER_CREATE,
                     order.userId,
                     order.toByteArray()
                 ),

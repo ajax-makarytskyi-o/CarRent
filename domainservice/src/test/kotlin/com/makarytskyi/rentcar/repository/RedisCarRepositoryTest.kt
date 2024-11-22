@@ -5,7 +5,6 @@ import com.makarytskyi.rentcar.fixtures.CarFixture.carPatch
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.updateCarRequest
 import com.makarytskyi.rentcar.model.MongoCar
-import org.awaitility.Awaitility.await
 import com.makarytskyi.rentcar.repository.impl.MongoCarRepository
 import com.makarytskyi.rentcar.repository.impl.RedisCarRepository
 import com.makarytskyi.rentcar.repository.impl.RedisCarRepository.Companion.idRedisKey
@@ -13,6 +12,7 @@ import com.makarytskyi.rentcar.repository.impl.RedisCarRepository.Companion.plat
 import java.time.Duration
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.ReactiveRedisTemplate

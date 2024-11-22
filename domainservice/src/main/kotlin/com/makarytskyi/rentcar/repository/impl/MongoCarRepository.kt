@@ -3,6 +3,7 @@ package com.makarytskyi.rentcar.repository.impl
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import com.makarytskyi.rentcar.repository.CarRepository
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -17,7 +18,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
-internal class CarRepositoryImpl(private val template: ReactiveMongoTemplate) : CarRepository {
+internal class MongoCarRepository(private val template: ReactiveMongoTemplate) : CarRepository {
 
     override fun findById(id: String): Mono<MongoCar> {
         return template.findById<MongoCar>(id)

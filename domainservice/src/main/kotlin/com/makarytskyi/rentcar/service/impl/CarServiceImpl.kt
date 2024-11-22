@@ -15,7 +15,9 @@ import reactor.kotlin.core.publisher.switchIfEmpty
 
 @InvocationTracker
 @Service
-internal class CarServiceImpl(private val repository: CarRepository) : CarService {
+internal class CarServiceImpl(
+    private val repository: CarRepository
+) : CarService {
 
     override fun getById(id: String): Mono<CarResponse> = repository.findById(id)
         .switchIfEmpty { Mono.error(NotFoundException("Car with id $id is not found")) }

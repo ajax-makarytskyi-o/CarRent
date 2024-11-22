@@ -13,11 +13,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import reactor.kotlin.test.test
 
-internal class CarRepositoryTest : ContainerBase {
+internal class MongoCarRepositoryTest : ContainerBase {
 
     @Autowired
+    @Qualifier("mongoCarRepository")
     lateinit var carRepository: CarRepository
 
     @Test
@@ -57,12 +59,31 @@ internal class CarRepositoryTest : ContainerBase {
     }
 
     @Test
-    fun `patch should partially update car`() {
+    fun `patch should partially update color of car`() {
         // GIVEN
-        val price = randomPrice()
         val color = MongoCar.CarColor.BLUE
         val car = carRepository.create(randomCar()).block()!!
-        val updateCar = emptyCarPatch().copy(price = price, color = color)
+        val updateCar = emptyCarPatch().copy(color = color)
+
+        // WHEN
+        val updated = carRepository.patch(car.id.toString(), updateCar)
+
+        // THEN
+        updated
+            .test()
+            .assertNext {
+                assertEquals(car.price, it.price)
+                assertEquals(color, it.color)
+            }
+            .verifyComplete()
+    }
+
+    @Test
+    fun `patch should partially update price of car`() {
+        // GIVEN
+        val price = randomPrice()
+        val car = carRepository.create(randomCar()).block()!!
+        val updateCar = emptyCarPatch().copy(price = price)
 
         // WHEN
         val updated = carRepository.patch(car.id.toString(), updateCar)
@@ -72,7 +93,7 @@ internal class CarRepositoryTest : ContainerBase {
             .test()
             .assertNext {
                 assertEquals(price, it.price)
-                assertEquals(color, it.color)
+                assertEquals(car.color, it.color)
             }
             .verifyComplete()
     }

@@ -1,13 +1,13 @@
 package com.makarytskyi.rentcar.repository
 
-import com.makarytskyi.rentcar.fixtures.UserFixture.defaultSize
 import com.makarytskyi.rentcar.fixtures.UserFixture.emptyUserPatch
-import com.makarytskyi.rentcar.fixtures.UserFixture.firstPage
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomCity
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomEmail
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomName
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomPhoneNumber
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
+import com.makarytskyi.rentcar.fixtures.Utils.defaultSize
+import com.makarytskyi.rentcar.fixtures.Utils.firstPage
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals

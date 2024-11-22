@@ -15,6 +15,7 @@ dependencies {
     implementation("io.mongock:mongock-springboot-v3:5.4.4")
     implementation("io.mongock:mongodb-springdata-v4-driver:5.4.4")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.2.2")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
     testImplementation("org.testcontainers:testcontainers:1.19.0")
     testImplementation("org.testcontainers:mongodb:1.19.0")

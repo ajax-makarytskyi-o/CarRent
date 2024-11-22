@@ -9,10 +9,10 @@ import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.responseAggregatedOrderDto
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.defaultSize
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.emptySize
+import com.makarytskyi.rentcar.fixtures.Utils.defaultSize
+import com.makarytskyi.rentcar.fixtures.Utils.emptySize
+import com.makarytskyi.rentcar.fixtures.Utils.firstPage
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.findAllOrderRequest
-import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.firstPage
 import com.makarytskyi.rentcar.mapper.OrderMapper.toProto
 import com.makarytskyi.rentcar.repository.CarRepository
 import com.makarytskyi.rentcar.repository.OrderRepository

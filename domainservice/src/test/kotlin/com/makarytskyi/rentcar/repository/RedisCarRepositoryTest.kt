@@ -4,13 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.makarytskyi.rentcar.fixtures.CarFixture.carPatch
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.updateCarRequest
-import com.makarytskyi.rentcar.fixtures.Utils.defaultSize
-import com.makarytskyi.rentcar.fixtures.Utils.firstPage
 import com.makarytskyi.rentcar.model.MongoCar
+import org.awaitility.Awaitility.await
 import com.makarytskyi.rentcar.repository.impl.MongoCarRepository
 import com.makarytskyi.rentcar.repository.impl.RedisCarRepository
 import com.makarytskyi.rentcar.repository.impl.RedisCarRepository.Companion.idRedisKey
-import com.makarytskyi.rentcar.repository.impl.RedisCarRepository.Companion.paginationRedisKey
 import com.makarytskyi.rentcar.repository.impl.RedisCarRepository.Companion.plateRedisKey
 import java.time.Duration
 import kotlin.test.assertEquals
@@ -33,8 +31,6 @@ internal class RedisCarRepositoryTest : ContainerBase {
     @Autowired
     lateinit var mapper: ObjectMapper
 
-    private val ttlSeconds: Long = 5
-
     @Test
     fun `redis repository should cache the car after calling getById`() {
         // GIVEN
@@ -45,18 +41,22 @@ internal class RedisCarRepositoryTest : ContainerBase {
         redisCarRepository.findById(carId).block()
 
         // THEN
-        redisTemplate.hasKey(idRedisKey(carId))
-            .test()
-            .expectNext(true)
-            .verifyComplete()
+        await()
+            .atMost(Duration.ofSeconds(AWAIT_SECONDS))
+            .untilAsserted {
+                redisTemplate.hasKey(idRedisKey(carId))
+                    .test()
+                    .expectNext(true)
+                    .verifyComplete()
 
-        redisTemplate.opsForValue().get(idRedisKey(carId))
-            .test()
-            .assertNext {
-                val cachedCar = mapper.readValue(it, MongoCar::class.java)
-                assertEquals(car, cachedCar)
+                redisTemplate.opsForValue().get(idRedisKey(carId))
+                    .test()
+                    .assertNext {
+                        val cachedCar = mapper.readValue(it, MongoCar::class.java)
+                        assertEquals(car, cachedCar)
+                    }
+                    .verifyComplete()
             }
-            .verifyComplete()
     }
 
     @Test
@@ -65,21 +65,25 @@ internal class RedisCarRepositoryTest : ContainerBase {
         val car = randomCar()
         val carId = car.id.toString()
         redisTemplate.opsForValue()
-            .set(idRedisKey(carId), mapper.writeValueAsBytes(car), Duration.ofSeconds(ttlSeconds)).block()
+            .set(idRedisKey(carId), mapper.writeValueAsBytes(car), Duration.ofSeconds(TTL_SECONDS)).block()
 
         // WHEN
         val redisResult = redisCarRepository.findById(carId)
 
         // THEN
-        redisTemplate.hasKey(idRedisKey(carId))
-            .test()
-            .expectNext(true)
-            .verifyComplete()
+        await()
+            .atMost(Duration.ofSeconds(AWAIT_SECONDS))
+            .untilAsserted {
+                redisTemplate.hasKey(idRedisKey(carId))
+                    .test()
+                    .expectNext(true)
+                    .verifyComplete()
 
-        redisResult
-            .test()
-            .expectNext(car)
-            .verifyComplete()
+                redisResult
+                    .test()
+                    .expectNext(car)
+                    .verifyComplete()
+            }
     }
 
     @Test
@@ -92,17 +96,21 @@ internal class RedisCarRepositoryTest : ContainerBase {
         redisCarRepository.findById(carId).block()
 
         // THEN
-        redisTemplate.hasKey(idRedisKey(carId))
-            .test()
-            .expectNext(true)
-            .verifyComplete()
+        await()
+            .atMost(Duration.ofSeconds(AWAIT_SECONDS))
+            .untilAsserted {
+                redisTemplate.hasKey(idRedisKey(carId))
+                    .test()
+                    .expectNext(true)
+                    .verifyComplete()
 
-        redisTemplate.opsForValue().get(idRedisKey(carId))
-            .test()
-            .assertNext {
-                assertTrue(it.isEmpty(), "Redis should cache unexisting cars with empty byte array")
+                redisTemplate.opsForValue().get(idRedisKey(carId))
+                    .test()
+                    .assertNext {
+                        assertTrue(it.isEmpty(), "Redis should cache unexisting cars with empty byte array")
+                    }
+                    .verifyComplete()
             }
-            .verifyComplete()
     }
 
     @Test
@@ -114,33 +122,38 @@ internal class RedisCarRepositoryTest : ContainerBase {
         redisCarRepository.create(car).block()!!
 
         // THEN
-        redisTemplate.hasKey(idRedisKey(car.id.toString()))
-            .test()
-            .expectNext(true)
-            .verifyComplete()
+        await()
+            .atMost(Duration.ofSeconds(AWAIT_SECONDS))
+            .untilAsserted {
+                redisTemplate.hasKey(idRedisKey(car.id.toString()))
+                    .test()
+                    .expectNext(true)
+                    .verifyComplete()
 
-        redisTemplate.hasKey(plateRedisKey(car.plate!!))
-            .test()
-            .expectNext(true)
-            .verifyComplete()
+                redisTemplate.hasKey(plateRedisKey(car.plate!!))
+                    .test()
+                    .expectNext(true)
+                    .verifyComplete()
+            }
     }
 
     @Test
     fun `delete should remove car from redis`() {
         // GIVEN
         val car = redisCarRepository.create(randomCar()).block()!!
-        val isKeyPresent = redisTemplate.hasKey(idRedisKey(car.id.toString())).block()!!
 
         // WHEN
         redisCarRepository.deleteById(car.id.toString()).block()
 
         // THEN
-        assertTrue(isKeyPresent, "Id of car should be in redis after creation")
-
-        redisTemplate.hasKey(idRedisKey(car.id.toString()))
-            .test()
-            .expectNext(false)
-            .verifyComplete()
+        await()
+            .atMost(Duration.ofSeconds(AWAIT_SECONDS))
+            .untilAsserted {
+                redisTemplate.hasKey(idRedisKey(car.id.toString()))
+                    .test()
+                    .expectNext(false)
+                    .verifyComplete()
+            }
     }
 
     @Test
@@ -148,27 +161,30 @@ internal class RedisCarRepositoryTest : ContainerBase {
         // GIVEN
         val car = redisCarRepository.create(randomCar()).block()!!
         val patch = carPatch(updateCarRequest())
-        redisTemplate.opsForValue().get(idRedisKey(car.id.toString())).block()!!
 
         // WHEN
         val updatedCar = redisCarRepository.patch(car.id.toString(), patch).block()!!
 
         // THEN
-        redisTemplate.opsForValue().get(idRedisKey(car.id.toString()))
-            .map { mapper.readValue(it, MongoCar::class.java) }
-            .test()
-            .expectNext(updatedCar)
-            .verifyComplete()
+        await()
+            .atMost(Duration.ofSeconds(AWAIT_SECONDS))
+            .untilAsserted {
+                redisTemplate.opsForValue().get(idRedisKey(car.id.toString()))
+                    .map { mapper.readValue(it, MongoCar::class.java) }
+                    .test()
+                    .expectNext(updatedCar)
+                    .verifyComplete()
 
-        redisTemplate.opsForValue().get(plateRedisKey(car.plate!!))
-            .map { mapper.readValue(it, MongoCar::class.java) }
-            .test()
-            .expectNext(updatedCar)
-            .verifyComplete()
+                redisTemplate.opsForValue().get(plateRedisKey(car.plate!!))
+                    .map { mapper.readValue(it, MongoCar::class.java) }
+                    .test()
+                    .expectNext(updatedCar)
+                    .verifyComplete()
+            }
     }
 
     @Test
-    fun `redis repository should cache the car after calling getByPlate`() {
+    fun `redis repository should cache the car after calling findByPlate`() {
         // GIVEN
         val car = mongoCarRepository.create(randomCar()).block()!!
         val plate = car.plate!!
@@ -177,18 +193,22 @@ internal class RedisCarRepositoryTest : ContainerBase {
         redisCarRepository.findByPlate(plate).block()
 
         // THEN
-        redisTemplate.hasKey(plateRedisKey(plate))
-            .test()
-            .expectNext(true)
-            .verifyComplete()
+        await()
+            .atMost(Duration.ofSeconds(AWAIT_SECONDS))
+            .untilAsserted {
+                redisTemplate.hasKey(plateRedisKey(plate))
+                    .test()
+                    .expectNext(true)
+                    .verifyComplete()
 
-        redisTemplate.opsForValue().get(plateRedisKey(plate))
-            .test()
-            .assertNext {
-                val cachedCar = mapper.readValue(it, MongoCar::class.java)
-                assertEquals(car, cachedCar)
+                redisTemplate.opsForValue().get(plateRedisKey(plate))
+                    .test()
+                    .assertNext {
+                        val cachedCar = mapper.readValue(it, MongoCar::class.java)
+                        assertEquals(car, cachedCar)
+                    }
+                    .verifyComplete()
             }
-            .verifyComplete()
     }
 
     @Test
@@ -197,21 +217,25 @@ internal class RedisCarRepositoryTest : ContainerBase {
         val car = randomCar()
         val plate = car.plate!!
         redisTemplate.opsForValue()
-            .set(plateRedisKey(plate), mapper.writeValueAsBytes(car), Duration.ofSeconds(ttlSeconds)).block()
+            .set(plateRedisKey(plate), mapper.writeValueAsBytes(car), Duration.ofSeconds(TTL_SECONDS)).block()
 
         // WHEN
         val redisResult = redisCarRepository.findByPlate(plate)
 
         // THEN
-        redisTemplate.hasKey(plateRedisKey(plate))
-            .test()
-            .expectNext(true)
-            .verifyComplete()
+        await()
+            .atMost(Duration.ofSeconds(AWAIT_SECONDS))
+            .untilAsserted {
+                redisTemplate.hasKey(plateRedisKey(plate))
+                    .test()
+                    .expectNext(true)
+                    .verifyComplete()
 
-        redisResult
-            .test()
-            .expectNext(car)
-            .verifyComplete()
+                redisResult
+                    .test()
+                    .expectNext(car)
+                    .verifyComplete()
+            }
     }
 
     @Test
@@ -224,16 +248,25 @@ internal class RedisCarRepositoryTest : ContainerBase {
         redisCarRepository.findByPlate(plate).block()
 
         // THEN
-        redisTemplate.hasKey(plateRedisKey(plate))
-            .test()
-            .expectNext(true)
-            .verifyComplete()
+        await()
+            .atMost(Duration.ofSeconds(AWAIT_SECONDS))
+            .untilAsserted {
+                redisTemplate.hasKey(plateRedisKey(plate))
+                    .test()
+                    .expectNext(true)
+                    .verifyComplete()
 
-        redisTemplate.opsForValue().get(plateRedisKey(plate))
-            .test()
-            .assertNext {
-                assertTrue(it.isEmpty(), "Redis should cache unexisting cars with empty byte array")
+                redisTemplate.opsForValue().get(plateRedisKey(plate))
+                    .test()
+                    .assertNext {
+                        assertTrue(it.isEmpty(), "Redis should cache unexisting cars with empty byte array")
+                    }
+                    .verifyComplete()
             }
-            .verifyComplete()
+    }
+
+    companion object {
+        private const val TTL_SECONDS: Long = 5
+        private const val AWAIT_SECONDS: Long = 3
     }
 }

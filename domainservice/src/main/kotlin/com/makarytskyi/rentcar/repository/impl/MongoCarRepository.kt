@@ -3,7 +3,6 @@ package com.makarytskyi.rentcar.repository.impl
 import com.makarytskyi.rentcar.model.MongoCar
 import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import com.makarytskyi.rentcar.repository.CarRepository
-import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate

@@ -51,17 +51,18 @@ internal class RedisCarRepository(
 
     override fun create(mongoCar: MongoCar): Mono<MongoCar> =
         mongoCarRepository.create(mongoCar)
-            .doOnNext {
-                val operations = mutableMapOf(idRedisKey(it.id.toString()) to mapper.writeValueAsBytes(it))
-                it.plate?.let { plate -> operations[plateRedisKey(plate)] = mapper.writeValueAsBytes(it) }
+            .doOnNext { car ->
+                val operations = mutableMapOf(idRedisKey(car.id.toString()) to mapper.writeValueAsBytes(car))
+                car.plate?.let { plate -> operations[plateRedisKey(plate)] = mapper.writeValueAsBytes(car) }
                 reactiveRedisTemplate.opsForValue()
                     .multiSet(operations)
+                    .subscribeOn(Schedulers.boundedElastic())
                     .retryWhen(retryOnRedisError())
+                    .doOnSuccess {
+                        setExpirationOnKey(idRedisKey(car.id.toString()), ttlSeconds)
+                        car.plate?.let { plate -> setExpirationOnKey(plateRedisKey(plate), ttlSeconds) }
+                    }
                     .subscribe()
-            }
-            .doOnSuccess {
-                setExpirationOnKey(idRedisKey(it.id.toString()), ttlSeconds)
-                it.plate?.let { plate -> setExpirationOnKey(plateRedisKey(plate), ttlSeconds) }
             }
 
     override fun deleteById(id: String): Mono<Unit> =
@@ -69,23 +70,25 @@ internal class RedisCarRepository(
             .doOnSuccess {
                 reactiveRedisTemplate.opsForValue()
                     .delete(idRedisKey(id))
+                    .subscribeOn(Schedulers.boundedElastic())
                     .retryWhen(retryOnRedisError())
                     .subscribe()
             }
 
     override fun patch(id: String, carPatch: MongoCarPatch): Mono<MongoCar> =
         mongoCarRepository.patch(id, carPatch)
-            .doOnNext {
-                val operations = mutableMapOf(idRedisKey(it.id.toString()) to mapper.writeValueAsBytes(it))
-                it.plate?.let { plate -> operations[plateRedisKey(plate)] = mapper.writeValueAsBytes(it) }
+            .doOnNext { car ->
+                val operations = mutableMapOf(idRedisKey(car.id.toString()) to mapper.writeValueAsBytes(car))
+                car.plate?.let { plate -> operations[plateRedisKey(plate)] = mapper.writeValueAsBytes(car) }
                 reactiveRedisTemplate.opsForValue()
                     .multiSet(operations)
+                    .subscribeOn(Schedulers.boundedElastic())
                     .retryWhen(retryOnRedisError())
+                    .doOnSuccess {
+                        setExpirationOnKey(idRedisKey(car.id.toString()), ttlSeconds)
+                        car.plate?.let { plate -> setExpirationOnKey(plateRedisKey(plate), ttlSeconds) }
+                    }
                     .subscribe()
-            }
-            .doOnSuccess {
-                setExpirationOnKey(idRedisKey(it.id.toString()), ttlSeconds)
-                it.plate?.let { plate -> setExpirationOnKey(plateRedisKey(plate), ttlSeconds) }
             }
 
     override fun findByPlate(plate: String): Mono<MongoCar> =
@@ -124,6 +127,7 @@ internal class RedisCarRepository(
     private fun setRedisKey(key: String, value: ByteArray, ttlSeconds: Long) =
         reactiveRedisTemplate.opsForValue()
             .set(key, value, Duration.ofSeconds(ttlSeconds))
+            .subscribeOn(Schedulers.boundedElastic())
             .retryWhen(retryOnRedisError())
             .onErrorResume { Mono.empty() }
             .subscribe()
@@ -132,6 +136,5 @@ internal class RedisCarRepository(
         private const val KEY_CAR_PREFIX = "car-redis-prefix"
         fun idRedisKey(id: String): String = "$KEY_CAR_PREFIX-$id"
         fun plateRedisKey(plate: String): String = "$KEY_CAR_PREFIX-$plate"
-        fun paginationRedisKey(page: Int, size: Int): String = "$KEY_CAR_PREFIX-$page-$size"
     }
 }

@@ -184,6 +184,22 @@ internal class RedisCarRepositoryTest : ContainerBase {
     }
 
     @Test
+    fun `patch should not replace cached car by plate if it is null`() {
+        // GIVEN
+        val car = redisCarRepository.create(randomCar().copy(plate = null)).block()!!
+        val patch = carPatch(updateCarRequest())
+
+        // WHEN
+        redisCarRepository.patch(car.id.toString(), patch).block()!!
+
+        // THEN
+        redisTemplate.hasKey(plateRedisKey(car.plate.toString()))
+            .test()
+            .expectNext(false)
+            .verifyComplete()
+    }
+
+    @Test
     fun `redis repository should cache the car after calling findByPlate`() {
         // GIVEN
         val car = mongoCarRepository.create(randomCar()).block()!!
@@ -262,6 +278,21 @@ internal class RedisCarRepositoryTest : ContainerBase {
             .assertNext {
                 assertTrue(it.isEmpty(), "Redis should cache unexisting cars with empty byte array")
             }
+            .verifyComplete()
+    }
+
+    @Test
+    fun `redis repository should not cache car by plate if it is null`() {
+        // GIVEN
+        val car = randomCar().copy(plate = null)
+
+        // WHEN
+        redisCarRepository.create(car).block()
+
+        // THEN
+        redisTemplate.hasKey(plateRedisKey(car.plate.toString()))
+            .test()
+            .expectNext(false)
             .verifyComplete()
     }
 

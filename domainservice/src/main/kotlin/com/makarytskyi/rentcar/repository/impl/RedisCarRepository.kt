@@ -99,7 +99,6 @@ internal class RedisCarRepository(
             .set(key, value, Duration.ofSeconds(ttlSeconds))
             .subscribeOn(Schedulers.boundedElastic())
             .retryWhen(retryOnRedisError())
-            .onErrorResume { Mono.empty() }
             .subscribe()
 
     companion object {

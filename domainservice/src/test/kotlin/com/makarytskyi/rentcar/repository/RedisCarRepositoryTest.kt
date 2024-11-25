@@ -48,15 +48,15 @@ internal class RedisCarRepositoryTest : ContainerBase {
                     .test()
                     .expectNext(true)
                     .verifyComplete()
-
-                redisTemplate.opsForValue().get(idRedisKey(carId))
-                    .test()
-                    .assertNext {
-                        val cachedCar = mapper.readValue(it, MongoCar::class.java)
-                        assertEquals(car, cachedCar)
-                    }
-                    .verifyComplete()
             }
+
+        redisTemplate.opsForValue().get(idRedisKey(carId))
+            .test()
+            .assertNext {
+                val cachedCar = mapper.readValue(it, MongoCar::class.java)
+                assertEquals(car, cachedCar)
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -78,12 +78,12 @@ internal class RedisCarRepositoryTest : ContainerBase {
                     .test()
                     .expectNext(true)
                     .verifyComplete()
-
-                redisResult
-                    .test()
-                    .expectNext(car)
-                    .verifyComplete()
             }
+
+        redisResult
+            .test()
+            .expectNext(car)
+            .verifyComplete()
     }
 
     @Test
@@ -103,14 +103,14 @@ internal class RedisCarRepositoryTest : ContainerBase {
                     .test()
                     .expectNext(true)
                     .verifyComplete()
-
-                redisTemplate.opsForValue().get(idRedisKey(carId))
-                    .test()
-                    .assertNext {
-                        assertTrue(it.isEmpty(), "Redis should cache unexisting cars with empty byte array")
-                    }
-                    .verifyComplete()
             }
+
+        redisTemplate.opsForValue().get(idRedisKey(carId))
+            .test()
+            .assertNext {
+                assertTrue(it.isEmpty(), "Redis should cache unexisting cars with empty byte array")
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -129,12 +129,12 @@ internal class RedisCarRepositoryTest : ContainerBase {
                     .test()
                     .expectNext(true)
                     .verifyComplete()
-
-                redisTemplate.hasKey(plateRedisKey(car.plate!!))
-                    .test()
-                    .expectNext(true)
-                    .verifyComplete()
             }
+
+        redisTemplate.hasKey(plateRedisKey(car.plate!!))
+            .test()
+            .expectNext(true)
+            .verifyComplete()
     }
 
     @Test
@@ -174,13 +174,13 @@ internal class RedisCarRepositoryTest : ContainerBase {
                     .test()
                     .expectNext(updatedCar)
                     .verifyComplete()
-
-                redisTemplate.opsForValue().get(plateRedisKey(car.plate!!))
-                    .map { mapper.readValue(it, MongoCar::class.java) }
-                    .test()
-                    .expectNext(updatedCar)
-                    .verifyComplete()
             }
+
+        redisTemplate.opsForValue().get(plateRedisKey(car.plate!!))
+            .map { mapper.readValue(it, MongoCar::class.java) }
+            .test()
+            .expectNext(updatedCar)
+            .verifyComplete()
     }
 
     @Test
@@ -200,15 +200,15 @@ internal class RedisCarRepositoryTest : ContainerBase {
                     .test()
                     .expectNext(true)
                     .verifyComplete()
-
-                redisTemplate.opsForValue().get(plateRedisKey(plate))
-                    .test()
-                    .assertNext {
-                        val cachedCar = mapper.readValue(it, MongoCar::class.java)
-                        assertEquals(car, cachedCar)
-                    }
-                    .verifyComplete()
             }
+
+        redisTemplate.opsForValue().get(plateRedisKey(plate))
+            .test()
+            .assertNext {
+                val cachedCar = mapper.readValue(it, MongoCar::class.java)
+                assertEquals(car, cachedCar)
+            }
+            .verifyComplete()
     }
 
     @Test
@@ -230,12 +230,12 @@ internal class RedisCarRepositoryTest : ContainerBase {
                     .test()
                     .expectNext(true)
                     .verifyComplete()
-
-                redisResult
-                    .test()
-                    .expectNext(car)
-                    .verifyComplete()
             }
+
+        redisResult
+            .test()
+            .expectNext(car)
+            .verifyComplete()
     }
 
     @Test
@@ -255,14 +255,14 @@ internal class RedisCarRepositoryTest : ContainerBase {
                     .test()
                     .expectNext(true)
                     .verifyComplete()
-
-                redisTemplate.opsForValue().get(plateRedisKey(plate))
-                    .test()
-                    .assertNext {
-                        assertTrue(it.isEmpty(), "Redis should cache unexisting cars with empty byte array")
-                    }
-                    .verifyComplete()
             }
+
+        redisTemplate.opsForValue().get(plateRedisKey(plate))
+            .test()
+            .assertNext {
+                assertTrue(it.isEmpty(), "Redis should cache unexisting cars with empty byte array")
+            }
+            .verifyComplete()
     }
 
     companion object {

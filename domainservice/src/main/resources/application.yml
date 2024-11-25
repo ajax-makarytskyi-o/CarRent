@@ -37,3 +37,4 @@ redis:
   timeout: ${REDIS_TIMEOUT}
   key-ttl: ${REDIS_TTL}
   retries: ${REDIS_RETRIES}
+  retry_timeout: ${REDIS_RETRY_TIMEOUT}

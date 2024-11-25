@@ -30,6 +30,8 @@ internal class RedisCarRepository(
     private val ttlSeconds: Long,
     @Value("\${redis.retries}")
     private val retries: Long,
+    @Value("\${redis.retry-timeout}")
+    private val retryTimeout: Long,
 ) : CarRepository by mongoCarRepository {
 
     override fun findById(id: String): Mono<MongoCar> =
@@ -38,7 +40,7 @@ internal class RedisCarRepository(
             .onErrorResume { Mono.empty() }
             .switchIfEmpty {
                 mongoCarRepository.findById(id)
-                    .publishOn(Schedulers.boundedElastic())
+                    .subscribeOn(Schedulers.boundedElastic())
                     .doOnNext {
                         setRedisKey(idRedisKey(id), mapper.writeValueAsBytes(it), ttlSeconds)
                     }
@@ -51,24 +53,14 @@ internal class RedisCarRepository(
     override fun create(mongoCar: MongoCar): Mono<MongoCar> =
         mongoCarRepository.create(mongoCar)
             .doOnNext { car ->
-                val operations = mutableMapOf(idRedisKey(car.id.toString()) to mapper.writeValueAsBytes(car))
-                car.plate?.let { plate -> operations[plateRedisKey(plate)] = mapper.writeValueAsBytes(car) }
-                reactiveRedisTemplate.opsForValue()
-                    .multiSet(operations)
-                    .subscribeOn(Schedulers.boundedElastic())
-                    .retryWhen(retryOnRedisError())
-                    .doOnSuccess {
-                        setExpirationOnKey(idRedisKey(car.id.toString()), ttlSeconds)
-                        car.plate?.let { plate -> setExpirationOnKey(plateRedisKey(plate), ttlSeconds) }
-                    }
-                    .subscribe()
+                setRedisKey(idRedisKey(car.id.toString()), mapper.writeValueAsBytes(car), ttlSeconds)
+                car.plate?.let { plate -> setRedisKey(plateRedisKey(plate), mapper.writeValueAsBytes(car), ttlSeconds) }
             }
 
     override fun deleteById(id: String): Mono<Unit> =
         mongoCarRepository.deleteById(id)
             .doOnSuccess {
-                reactiveRedisTemplate.opsForValue()
-                    .delete(idRedisKey(id))
+                reactiveRedisTemplate.unlink(idRedisKey(id))
                     .subscribeOn(Schedulers.boundedElastic())
                     .retryWhen(retryOnRedisError())
                     .subscribe()
@@ -77,18 +69,10 @@ internal class RedisCarRepository(
     override fun patch(id: String, carPatch: MongoCarPatch): Mono<MongoCar> =
         mongoCarRepository.patch(id, carPatch)
             .doOnNext { car ->
-                val operations = mutableMapOf(idRedisKey(car.id.toString()) to mapper.writeValueAsBytes(car))
-                car.plate?.let { plate -> operations[plateRedisKey(plate)] = mapper.writeValueAsBytes(car) }
-                reactiveRedisTemplate.opsForValue()
-                    .multiSet(operations)
-                    .subscribeOn(Schedulers.boundedElastic())
-                    .retryWhen(retryOnRedisError())
-                    .doOnSuccess {
-                        setExpirationOnKey(idRedisKey(car.id.toString()), ttlSeconds)
-                        car.plate?.let { plate -> setExpirationOnKey(plateRedisKey(plate), ttlSeconds) }
-                    }
-                    .subscribe()
+                setRedisKey(idRedisKey(car.id.toString()), mapper.writeValueAsBytes(car), ttlSeconds)
+                car.plate?.let { plate -> setRedisKey(plateRedisKey(plate), mapper.writeValueAsBytes(car), ttlSeconds) }
             }
+
 
     override fun findByPlate(plate: String): Mono<MongoCar> =
         reactiveRedisTemplate.opsForValue().get(plateRedisKey(plate))
@@ -107,21 +91,8 @@ internal class RedisCarRepository(
             }
 
     private fun retryOnRedisError() =
-        Retry.fixedDelay(retries, Duration.ofSeconds(2))
-            .filter { throwable -> throwable::class in setOf(
-                    SocketException::class,
-                    RedisException::class,
-                    RedisConnectionFailureException::class,
-                    QueryTimeoutException::class,
-                )
-            }
-
-    private fun setExpirationOnKey(key: String, ttlSeconds: Long) =
-        reactiveRedisTemplate
-            .expire(key, Duration.ofSeconds(ttlSeconds))
-            .retryWhen(retryOnRedisError())
-            .subscribeOn(Schedulers.boundedElastic())
-            .subscribe()
+        Retry.backoff(retries, Duration.ofSeconds(retryTimeout))
+            .filter { throwable -> throwable::class in redisErrorSet }
 
     private fun setRedisKey(key: String, value: ByteArray, ttlSeconds: Long) =
         reactiveRedisTemplate.opsForValue()
@@ -135,5 +106,12 @@ internal class RedisCarRepository(
         private const val KEY_CAR_PREFIX = "car-redis-prefix"
         fun idRedisKey(id: String): String = "$KEY_CAR_PREFIX-$id"
         fun plateRedisKey(plate: String): String = "$KEY_CAR_PREFIX-$plate"
+
+        val redisErrorSet = hashSetOf(
+            SocketException::class,
+            RedisException::class,
+            RedisConnectionFailureException::class,
+            QueryTimeoutException::class,
+        )
     }
 }

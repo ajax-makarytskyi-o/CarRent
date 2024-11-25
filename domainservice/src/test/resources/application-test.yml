@@ -17,3 +17,4 @@ redis:
   timeout: 40
   key-ttl: 60
   retries: 5
+  retry_timeout: 2

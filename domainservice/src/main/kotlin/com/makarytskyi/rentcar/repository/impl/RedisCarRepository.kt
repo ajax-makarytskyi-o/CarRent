@@ -32,15 +32,7 @@ internal class RedisCarRepository(
             .map { mapper.readValue(it, MongoCar::class.java) }
             .onErrorResume { Mono.empty() }
             .switchIfEmpty {
-                mongoCarRepository.findById(id)
-                    .subscribeOn(Schedulers.boundedElastic())
-                    .doOnNext {
-                        setRedisKey(idRedisKey(id), mapper.writeValueAsBytes(it), redisProperties.ttlSeconds)
-                    }
-                    .switchIfEmpty {
-                        setRedisKey(idRedisKey(id), byteArrayOf(), redisProperties.ttlSeconds)
-                        Mono.empty()
-                    }
+                findByIdInMongoAndCache(id)
             }
 
     override fun create(mongoCar: MongoCar): Mono<MongoCar> =
@@ -78,21 +70,32 @@ internal class RedisCarRepository(
                 }
             }
 
-
     override fun findByPlate(plate: String): Mono<MongoCar> =
         reactiveRedisTemplate.opsForValue().get(plateRedisKey(plate))
             .map { mapper.readValue(it, MongoCar::class.java) }
             .onErrorResume { Mono.empty() }
             .switchIfEmpty {
-                mongoCarRepository.findByPlate(plate)
-                    .publishOn(Schedulers.boundedElastic())
-                    .doOnNext {
-                        setRedisKey(plateRedisKey(plate), mapper.writeValueAsBytes(it), redisProperties.ttlSeconds)
-                    }
-                    .switchIfEmpty {
-                        setRedisKey(plateRedisKey(plate), byteArrayOf(), redisProperties.ttlSeconds)
-                        Mono.empty()
-                    }
+                findByPlateInMongoAndCache(plate)
+            }
+
+    private fun findByIdInMongoAndCache(id: String): Mono<MongoCar> =
+        mongoCarRepository.findById(id)
+            .doOnNext {
+                setRedisKey(idRedisKey(id), mapper.writeValueAsBytes(it), redisProperties.ttlSeconds)
+            }
+            .switchIfEmpty {
+                setRedisKey(idRedisKey(id), byteArrayOf(), redisProperties.ttlSeconds)
+                Mono.empty()
+            }
+
+    private fun findByPlateInMongoAndCache(plate: String): Mono<MongoCar> =
+        mongoCarRepository.findByPlate(plate)
+            .doOnNext {
+                setRedisKey(plateRedisKey(plate), mapper.writeValueAsBytes(it), redisProperties.ttlSeconds)
+            }
+            .switchIfEmpty {
+                setRedisKey(plateRedisKey(plate), byteArrayOf(), redisProperties.ttlSeconds)
+                Mono.empty()
             }
 
     private fun retryOnRedisError() =

@@ -1,7 +1,6 @@
 package com.makarytskyi.rentcar.mongock.migration
 
 import com.makarytskyi.rentcar.model.MongoCar
-import com.makarytskyi.rentcar.model.MongoUser
 import io.mongock.api.annotations.ChangeUnit
 import io.mongock.api.annotations.Execution
 import io.mongock.api.annotations.RollbackExecution

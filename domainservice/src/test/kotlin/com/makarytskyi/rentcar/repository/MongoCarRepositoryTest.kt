@@ -20,7 +20,7 @@ internal class MongoCarRepositoryTest : ContainerBase {
 
     @Autowired
     @Qualifier("mongoCarRepository")
-    lateinit var carRepository: CarRepository
+    private lateinit var carRepository: CarRepository
 
     @Test
     fun `create should insert car and return it with id`() {

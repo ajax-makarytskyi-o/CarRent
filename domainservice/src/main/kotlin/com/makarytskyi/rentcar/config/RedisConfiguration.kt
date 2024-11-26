@@ -3,7 +3,7 @@ package com.makarytskyi.rentcar.config
 import io.lettuce.core.ClientOptions
 import io.lettuce.core.TimeoutOptions
 import java.time.Duration
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -21,14 +21,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 @EnableCaching
 class RedisConfiguration {
 
-    @Value("\${redis.host}")
-    private lateinit var host: String
-
-    @Value("\${redis.port}")
-    private lateinit var port: String
-
-    @Value("\${redis.timeout}")
-    private lateinit var timeout: String
+    private lateinit var redisProperties: RedisProperties
 
     @Bean
     fun reactiveRedisTemplate(connectionFactory: ReactiveRedisConnectionFactory):
@@ -44,9 +37,9 @@ class RedisConfiguration {
     @Bean
     @Primary
     fun reactiveRedisConnectionFactory(): ReactiveRedisConnectionFactory {
-        val config = RedisStandaloneConfiguration(host, port.toInt())
-        val options =
-            ClientOptions.builder().timeoutOptions(TimeoutOptions.enabled(Duration.ofMillis(timeout.toLong()))).build()
+        val config = RedisStandaloneConfiguration(redisProperties.host, redisProperties.port)
+        val options = ClientOptions.builder()
+            .timeoutOptions(TimeoutOptions.enabled(Duration.ofMillis(redisProperties.timeout.toLong()))).build()
         return LettuceConnectionFactory(config, LettuceClientConfiguration.builder().clientOptions(options).build())
     }
 }

@@ -21,6 +21,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 @EnableCaching
 class RedisConfiguration {
 
+    @Autowired
     private lateinit var redisProperties: RedisProperties
 
     @Bean

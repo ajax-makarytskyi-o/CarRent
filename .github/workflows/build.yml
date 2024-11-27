@@ -12,7 +12,7 @@ env:
   gradle_cmd: ./gradlew
     -PAWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
     -PAWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    -Prepository=${{ secrets.PRIVATEMAVENREPO }}
+    -Prepository=${{ secrets.REPOSITORY }}
 
 jobs:
   build:

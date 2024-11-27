@@ -4,7 +4,6 @@ import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
 import com.makarytskyi.core.dto.order.CreateOrderRequestDto
 import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
-import com.makarytskyi.gateway.config.NatsClient
 import com.makarytskyi.gateway.mapper.OrderMapper.toDto
 import com.makarytskyi.gateway.mapper.OrderMapper.toProto
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
@@ -35,10 +34,11 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @RestController
 @RequestMapping("/orders")
-class OrderController(private val natsClient: NatsClient) {
+class OrderController(private val natsClient: NatsMessagePublisher) {
 
     @GetMapping("/{id}")
     fun getFullById(@PathVariable id: String): Mono<AggregatedOrderResponseDto> =

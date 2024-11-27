@@ -145,7 +145,7 @@ internal class OrderServiceTest {
         every { carRepository.findById(car.id.toString()) } returns car.toMono()
         every { userRepository.findById(user.id.toString()) } returns user.toMono()
         every { orderRepository.findByCarId(car.id.toString()) } returns Flux.empty()
-        every { orderCreateOrderKafkaProducer.sendCreateRepairing(any()) } returns Mono.empty()
+        every { orderCreateOrderKafkaProducer.sendCreateOrder(any()) } returns Mono.empty()
 
         // WHEN
         val result = orderService.create(request)

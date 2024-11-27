@@ -1,6 +1,7 @@
 package com.makarytskyi.rentcar.kafka
 
 import com.makarytskyi.commonmodels.order.OrderCancellationNotification
+import com.makarytskyi.internalapi.topic.KafkaTopic
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.NotificationFixture.notification
 import com.makarytskyi.rentcar.fixtures.OrderFixture.createOrderRequestDto
@@ -14,12 +15,11 @@ import com.makarytskyi.rentcar.repository.ContainerBase
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.service.OrderService
 import com.makarytskyi.rentcar.service.RepairingService
-import java.util.concurrent.TimeUnit
-import org.awaitility.Awaitility.await
+import kotlin.test.assertNotNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
-import reactor.kafka.receiver.KafkaReceiver
+import systems.ajax.kafka.mock.KafkaMockExtension
 
 class KafkaIntegrationTest : ContainerBase {
     @Autowired
@@ -34,10 +34,6 @@ class KafkaIntegrationTest : ContainerBase {
     @Autowired
     private lateinit var repairingService: RepairingService
 
-    @Qualifier("notificationReceiver")
-    @Autowired
-    private lateinit var notificationReceiver: KafkaReceiver<String, ByteArray>
-
     @Test
     fun `notification should be in kafka topic after repairing cancelling order was created`() {
         // GIVEN
@@ -45,22 +41,26 @@ class KafkaIntegrationTest : ContainerBase {
         val user = userRepository.create(randomUser()).block()!!
         val order =
             orderService.create(createOrderRequestDto(car, user).copy(from = tomorrow, to = threeDaysAfter)).block()!!
-        val notificationList = mutableListOf<OrderCancellationNotification>()
         val repairingRequest = createRepairingRequest(car).copy(date = twoDaysAfter)
         val expectedNotification = notification(order)
-
-        notificationReceiver.receive()
-            .map {
-                notificationList.add(OrderCancellationNotification.parser().parseFrom(it.value()))
-            }
-            .subscribe()
 
         // WHEN
         repairingService.create(repairingRequest).block()!!
 
         // THEN
-        await()
-            .atMost(15, TimeUnit.SECONDS)
-            .until { notificationList.contains(expectedNotification) }
+        val provider = kafkaMock.listen<OrderCancellationNotification>(
+            KafkaTopic.User.NOTIFICATION,
+            OrderCancellationNotification.parser()
+        )
+
+        val notification = provider.awaitFirst({ it == expectedNotification })
+
+        assertNotNull(notification)
+    }
+
+    companion object {
+        @JvmField
+        @RegisterExtension
+        val kafkaMock = KafkaMockExtension()
     }
 }

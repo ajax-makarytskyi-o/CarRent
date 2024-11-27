@@ -1,7 +1,6 @@
 package com.makarytskyi.gateway.controller
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.gateway.config.NatsClient
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.aggregatedOrderDto
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.createOrderResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.createRequest
@@ -36,7 +35,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.nats.client.Connection
 import kotlin.test.Test
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
@@ -45,15 +43,13 @@ import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @ExtendWith(MockKExtension::class)
 class OrderControllerTest {
 
     @MockK
-    lateinit var connection: Connection
-
-    @MockK
-    lateinit var natsClient: NatsClient
+    lateinit var natsClient: NatsMessagePublisher
 
     @InjectMockKs
     lateinit var controller: OrderController

@@ -1,47 +1,36 @@
 package com.makarytskyi.rentcar.kafka
 
+import com.google.protobuf.Parser
 import com.makarytskyi.commonmodels.order.Order
 import com.makarytskyi.internalapi.subject.NatsSubject
+import com.makarytskyi.internalapi.topic.KafkaTopic
 import io.nats.client.Connection
 import java.time.Duration
-import org.slf4j.LoggerFactory
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.EventListener
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
-import reactor.kafka.receiver.KafkaReceiver
 import reactor.kotlin.core.publisher.toMono
 import reactor.util.retry.Retry
+import systems.ajax.kafka.handler.KafkaEvent
+import systems.ajax.kafka.handler.KafkaHandler
+import systems.ajax.kafka.handler.subscription.topic.TopicSingle
 
 @Component
-class CreateOrderKafkaProcessor(
-    private val createOrderKafkaReceiver: KafkaReceiver<String, ByteArray>,
-    private val natsConnection: Connection,
-) {
+class CreateOrderKafkaProcessor : KafkaHandler<Order, TopicSingle> {
+    @Autowired
+    private lateinit var natsConnection: Connection
 
-    @EventListener(ApplicationReadyEvent::class)
-    fun consume() {
-        createOrderKafkaReceiver.receive()
-            .concatMap { record ->
-                record.value().toMono()
-                    .map { Order.parser().parseFrom(it) }
-                    .onErrorResume {
-                        log.atError()
-                            .setMessage("Error happened during parsing: {}")
-                            .addArgument(it.message)
-                            .setCause(it)
-                            .log()
+    override val subscriptionTopics: TopicSingle = TopicSingle(KafkaTopic.Order.ORDER_CREATE)
 
-                        Mono.empty()
-                    }
-                    .flatMap { sendCreateEvent(it) }
-                    .retryWhen(retryOnNatsConnection())
-                    .doFinally {
-                        record.receiverOffset().acknowledge()
-                    }
-            }
-            .subscribe()
-    }
+    override val groupId: String = GROUP_ID_ORDER
+
+    override val parser: Parser<Order> = Order.parser()
+
+    override fun handle(kafkaEvent: KafkaEvent<Order>): Mono<Unit> =
+        kafkaEvent.toMono()
+            .flatMap { sendCreateEvent(it.data).retryWhen(retryOnNatsError()) }
+            .doFinally { kafkaEvent.ack() }
+            .then(Unit.toMono())
 
     private fun sendCreateEvent(order: Order): Mono<Unit> {
         return Mono.defer { natsConnection.status.toMono() }
@@ -57,12 +46,10 @@ class CreateOrderKafkaProcessor(
             }
     }
 
-    private fun retryOnNatsConnection(): Retry {
-        return Retry.fixedDelay(Long.MAX_VALUE, Duration.ofSeconds(2))
-            .filter { throwable -> throwable is IllegalStateException }
-    }
+    private fun retryOnNatsError(): Retry = Retry.fixedDelay(Long.MAX_VALUE, Duration.ofSeconds(2))
+        .filter { it is IllegalStateException }
 
     companion object {
-        val log = LoggerFactory.getLogger(CreateOrderKafkaProcessor::class.java)
+        const val GROUP_ID_ORDER = "group-rentcar-order"
     }
 }

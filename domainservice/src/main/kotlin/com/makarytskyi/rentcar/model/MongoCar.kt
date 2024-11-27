@@ -1,5 +1,7 @@
 package com.makarytskyi.rentcar.model
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import java.math.BigDecimal
 import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
@@ -10,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 @Document(collection = MongoCar.COLLECTION_NAME)
 data class MongoCar(
     @Id
+    @JsonSerialize(using = ToStringSerializer::class)
     val id: ObjectId? = null,
     val brand: String? = null,
     val model: String? = null,

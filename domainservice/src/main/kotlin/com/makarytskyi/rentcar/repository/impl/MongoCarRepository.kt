@@ -17,7 +17,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
-internal class CarRepositoryImpl(private val template: ReactiveMongoTemplate) : CarRepository {
+internal class MongoCarRepository(private val template: ReactiveMongoTemplate) : CarRepository {
 
     override fun findById(id: String): Mono<MongoCar> {
         return template.findById<MongoCar>(id)

@@ -18,10 +18,6 @@ import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.util.Utils.dateToTimestamp
 
 object OrderProtoFixtures {
-    val firstPage = 0
-    val emptySize = 0
-    val defaultSize = 20
-
     fun createOrderRequest(mongoCar: MongoCar, mongoUser: MongoUser): CreateOrderRequest =
         CreateOrderRequest.newBuilder()
             .apply {

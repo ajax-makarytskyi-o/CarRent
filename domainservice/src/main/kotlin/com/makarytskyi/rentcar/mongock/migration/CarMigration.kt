@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.index.Index
+import org.springframework.data.mongodb.core.index.PartialIndexFilter
+import org.springframework.data.mongodb.core.query.Criteria
 
 @ChangeUnit(id = "carCollectionAndIndexes", order = "1", author = "makarytskyi.o@ajax.systems")
 class CarMigration {
@@ -28,7 +30,9 @@ class CarMigration {
 
         indexOps.ensureIndex(
             Index()
-                .on(MongoCar::plate.name, Sort.Direction.ASC).unique()
+                .on(MongoCar::plate.name, Sort.Direction.ASC)
+                .unique()
+                .partial(PartialIndexFilter.of(Criteria.where(MongoCar::plate.name).exists(true)))
         )
         log.info("Indexes for {} collection were created", MongoCar.COLLECTION_NAME)
     }

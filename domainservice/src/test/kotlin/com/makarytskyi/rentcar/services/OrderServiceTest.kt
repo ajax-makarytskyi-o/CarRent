@@ -27,7 +27,6 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import io.nats.client.Connection
 import java.math.BigDecimal
 import kotlin.test.Test
 import org.assertj.core.api.Assertions.assertThat

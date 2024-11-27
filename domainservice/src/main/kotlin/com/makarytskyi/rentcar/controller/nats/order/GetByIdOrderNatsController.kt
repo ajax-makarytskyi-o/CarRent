@@ -4,27 +4,35 @@ import com.google.protobuf.Parser
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.GET_BY_ID
-import com.makarytskyi.rentcar.controller.nats.NatsController
 import com.makarytskyi.rentcar.mapper.OrderMapper.toGetByIdResponse
 import com.makarytskyi.rentcar.mapper.toGetByIdFailureResponse
 import com.makarytskyi.rentcar.service.OrderService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import systems.ajax.nats.handler.api.ProtoNatsMessageHandler
 
 @Component
 class GetByIdOrderNatsController(
-    private val orderService: OrderService
-) : NatsController<GetByIdOrderRequest, GetByIdOrderResponse> {
-    override val subject = GET_BY_ID
-    override val queueGroup = QUEUE_GROUP
+    private val orderService: OrderService,
+) : ProtoNatsMessageHandler<GetByIdOrderRequest, GetByIdOrderResponse> {
+    override val subject: String = GET_BY_ID
+    override val queue: String = QUEUE_GROUP
     override val parser: Parser<GetByIdOrderRequest> = GetByIdOrderRequest.parser()
-    override val defaultResponse: GetByIdOrderResponse = GetByIdOrderResponse.getDefaultInstance()
+    override val log: Logger = LoggerFactory.getLogger(GetByIdOrderNatsController::class.java)
 
-    override fun handle(request: GetByIdOrderRequest): Mono<GetByIdOrderResponse> =
-        orderService.getById(request.id)
+    override fun doHandle(inMsg: GetByIdOrderRequest): Mono<GetByIdOrderResponse> =
+        orderService.getById(inMsg.id)
             .map { it.toGetByIdResponse() }
             .onErrorResume { it.toGetByIdFailureResponse().toMono() }
+
+    override fun doOnUnexpectedError(inMsg: GetByIdOrderRequest?, e: Exception): Mono<GetByIdOrderResponse> =
+        GetByIdOrderResponse.newBuilder()
+            .apply {
+                failureBuilder.message = e.message
+            }.build().toMono()
 
     companion object {
         const val QUEUE_GROUP = "get_by_id_order"

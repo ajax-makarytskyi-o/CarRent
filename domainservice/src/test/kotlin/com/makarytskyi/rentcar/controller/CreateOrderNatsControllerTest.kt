@@ -9,13 +9,18 @@ import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.createOrderRe
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failureCreateResponse
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.successfulCreateResponse
 import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.repository.ContainerBase
 import com.makarytskyi.rentcar.repository.UserRepository
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
-class CreateOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
+class CreateOrderNatsControllerTest : ContainerBase {
+
+    @Autowired
+    internal lateinit var natsPublisher: NatsMessagePublisher
 
     @Autowired
     internal lateinit var carRepository: CarRepository
@@ -36,7 +41,7 @@ class CreateOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
         ).toBuilder().successBuilder.orderBuilder.clearId().build()
 
         // WHEN
-        val response = sendRequest(CREATE, protoRequest, CreateOrderResponse.parser())
+        val response = natsPublisher.request(CREATE, protoRequest, CreateOrderResponse.parser()).block()!!
 
         // THEN
         assertNotNull(response.success.order.id)
@@ -53,7 +58,7 @@ class CreateOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
         val protoResponse = failureCreateResponse(exception)
 
         // WHEN
-        val response = sendRequest(CREATE, protoRequest, CreateOrderResponse.parser())
+        val response = natsPublisher.request(CREATE, protoRequest, CreateOrderResponse.parser()).block()
 
         // THEN
         assertEquals(protoResponse, response)

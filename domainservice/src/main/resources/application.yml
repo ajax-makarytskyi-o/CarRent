@@ -29,7 +29,9 @@ management:
         enabled: true
 
 nats:
-  url: ${NATS_URL}
+  spring:
+    io.nats.client:
+      servers: ${NATS_URL}
 
 redis:
   host: ${REDIS_HOST}

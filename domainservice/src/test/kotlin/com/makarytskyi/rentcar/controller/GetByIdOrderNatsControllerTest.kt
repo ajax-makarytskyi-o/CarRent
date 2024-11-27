@@ -12,14 +12,19 @@ import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failureGetByI
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.getByIdOrderRequest
 import com.makarytskyi.rentcar.mapper.OrderMapper.toProto
 import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.repository.ContainerBase
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
-class GetByIdOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
+class GetByIdOrderNatsControllerTest : ContainerBase {
+
+    @Autowired
+    internal lateinit var natsPublisher: NatsMessagePublisher
 
     @Autowired
     internal lateinit var carRepository: CarRepository
@@ -42,7 +47,7 @@ class GetByIdOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
         val expectedOrder = responseAggregatedOrderDto(aggregatedOrder, car).toProto()
 
         // WHEN
-        val response = sendRequest(GET_BY_ID, getByIdRequest, GetByIdOrderResponse.parser())
+        val response = natsPublisher.request(GET_BY_ID, getByIdRequest, GetByIdOrderResponse.parser()).block()!!
 
         // THEN
         assertEquals(response.success.order, expectedOrder)
@@ -57,7 +62,7 @@ class GetByIdOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
         val protoResponse = failureGetByIdResponse(exception)
 
         // WHEN
-        val response = sendRequest(GET_BY_ID, protoRequest, GetByIdOrderResponse.parser())
+        val response = natsPublisher.request(GET_BY_ID, protoRequest, GetByIdOrderResponse.parser()).block()
 
         // THEN
         assertEquals(protoResponse, response)

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import systems.ajax.kafka.publisher.KafkaPublisher
-import systems.ajax.kafka.publisher.options.KafkaPublisherOptions
 
 @Component
 class CreateRepairingKafkaProducer(
@@ -17,7 +16,6 @@ class CreateRepairingKafkaProducer(
         publisher.publish(
             KafkaTopic.Repairing.REPAIRING_CREATE,
             repairing.carId,
-            repairing,
-            KafkaPublisherOptions()
+            repairing
         ).then(Unit.toMono())
 }

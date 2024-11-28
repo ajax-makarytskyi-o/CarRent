@@ -7,7 +7,6 @@ dependencies {
     implementation(project(":internal-api"))
     implementation(project(":commonmodels"))
     implementation(project(":core"))
-    implementation("io.nats:jnats:2.16.14")
     implementation("systems.ajax:nats-spring-boot-starter:4.1.0.186.MASTER-SNAPSHOT")
     implementation("systems.ajax:kafka-spring-boot-starter:3.0.3.170.MASTER-SNAPSHOT")
     implementation("org.springframework.kafka:spring-kafka")

@@ -29,10 +29,7 @@ class GetByIdOrderNatsController(
             .onErrorResume { it.toGetByIdFailureResponse().toMono() }
 
     override fun doOnUnexpectedError(inMsg: GetByIdOrderRequest?, e: Exception): Mono<GetByIdOrderResponse> =
-        GetByIdOrderResponse.newBuilder()
-            .apply {
-                failureBuilder.message = e.message
-            }.build().toMono()
+        e.toGetByIdFailureResponse().toMono()
 
     companion object {
         const val QUEUE_GROUP = "get_by_id_order"

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import systems.ajax.kafka.publisher.KafkaPublisher
-import systems.ajax.kafka.publisher.options.KafkaPublisherOptions
 
 @Component
 class UserNotificationKafkaProducer(
@@ -17,7 +16,6 @@ class UserNotificationKafkaProducer(
         publisher.publish(
             KafkaTopic.User.NOTIFICATION,
             notification.userId,
-            notification,
-            KafkaPublisherOptions()
+            notification
         ).then(Unit.toMono())
 }

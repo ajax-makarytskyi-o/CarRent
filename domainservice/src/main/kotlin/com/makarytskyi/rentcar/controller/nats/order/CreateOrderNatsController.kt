@@ -30,10 +30,7 @@ class CreateOrderNatsController(
             .onErrorResume { it.toCreateFailureResponse().toMono() }
 
     override fun doOnUnexpectedError(inMsg: CreateOrderRequest?, e: Exception): Mono<CreateOrderResponse> =
-        CreateOrderResponse.newBuilder()
-            .apply {
-                failureBuilder.message = e.message
-            }.build().toMono()
+        e.toCreateFailureResponse().toMono()
 
     companion object {
         const val QUEUE_GROUP = "create_order"

@@ -55,7 +55,7 @@ class KafkaIntegrationTest : ContainerBase {
 
         val notification = provider.awaitFirst({ it == expectedNotification })
 
-        assertNotNull(notification)
+        assertNotNull(notification, "Notification in kafka topic should be non-null")
     }
 
     companion object {

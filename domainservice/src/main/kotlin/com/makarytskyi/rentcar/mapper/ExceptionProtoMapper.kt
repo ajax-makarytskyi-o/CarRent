@@ -16,7 +16,9 @@ fun Throwable.toGetByIdFailureResponse(): GetByIdOrderResponse =
         .also {
             it.failureBuilder.also { failure ->
                 failure.message = message.orEmpty()
-                failure.notFoundBuilder
+                when (this) {
+                    is NotFoundException -> failure.notFoundBuilder
+                }
             }
         }
         .build()

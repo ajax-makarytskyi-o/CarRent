@@ -30,10 +30,7 @@ class PatchOrderNatsController(
             .onErrorResume { it.toPatchFailureResponse().toMono() }
 
     override fun doOnUnexpectedError(inMsg: UpdateOrderRequest?, e: Exception): Mono<UpdateOrderResponse> =
-        UpdateOrderResponse.newBuilder()
-            .apply {
-                failureBuilder.message = e.message
-            }.build().toMono()
+        e.toPatchFailureResponse().toMono()
 
     companion object {
         const val QUEUE_GROUP = "patch_order"

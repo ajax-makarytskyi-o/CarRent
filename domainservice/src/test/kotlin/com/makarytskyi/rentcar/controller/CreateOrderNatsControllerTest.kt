@@ -44,7 +44,7 @@ class CreateOrderNatsControllerTest : ContainerBase {
         val response = natsPublisher.request(CREATE, protoRequest, CreateOrderResponse.parser()).block()!!
 
         // THEN
-        assertNotNull(response.success.order.id)
+        assertNotNull(response.success.order.id, "Response should contain order with non-null id")
         assertEquals(orderResponse, response.toBuilder().successBuilder.orderBuilder.clearId().build())
     }
 

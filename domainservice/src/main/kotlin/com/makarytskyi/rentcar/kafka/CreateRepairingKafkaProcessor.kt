@@ -6,14 +6,11 @@ import com.makarytskyi.internalapi.topic.KafkaTopic
 import com.makarytskyi.rentcar.mapper.OrderMapper.toNotification
 import com.makarytskyi.rentcar.service.OrderService
 import com.makarytskyi.rentcar.util.Utils.timestampToDate
-import java.time.Duration
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import systems.ajax.kafka.handler.KafkaEvent
 import systems.ajax.kafka.handler.KafkaHandler
-import systems.ajax.kafka.handler.options.KafkaHandlerOptions
-import systems.ajax.kafka.handler.options.RetryStrategy
 import systems.ajax.kafka.handler.subscription.topic.TopicSingle
 
 @Component

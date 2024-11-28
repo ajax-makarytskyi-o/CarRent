@@ -30,10 +30,7 @@ class FindAllOrdersNatsController(
             .onErrorResume { it.toFindAllFailureResponse().toMono() }
 
     override fun doOnUnexpectedError(inMsg: FindAllOrdersRequest?, e: Exception): Mono<FindAllOrdersResponse> =
-        FindAllOrdersResponse.newBuilder()
-            .apply {
-                failureBuilder.message = e.message
-            }.build().toMono()
+        e.toFindAllFailureResponse().toMono()
 
     companion object {
         const val QUEUE_GROUP = "find_all_orders"

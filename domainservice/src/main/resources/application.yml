@@ -29,7 +29,10 @@ management:
         enabled: true
 
 nats:
-  url: ${NATS_URL}
+  spring:
+    io.nats.client:
+      servers: ${NATS_URL}
+      reconnect.max: 100
 
 redis:
   host: ${REDIS_HOST}

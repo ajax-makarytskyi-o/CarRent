@@ -8,14 +8,19 @@ import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.deleteOrderRequest
 import com.makarytskyi.rentcar.mapper.OrderMapper.toDeleteFailureResponse
 import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.repository.ContainerBase
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.test.test
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
-class DeleteOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
+class DeleteOrderNatsControllerTest : ContainerBase {
+
+    @Autowired
+    internal lateinit var natsPublisher: NatsMessagePublisher
 
     @Autowired
     internal lateinit var carRepository: CarRepository
@@ -35,7 +40,7 @@ class DeleteOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
         val deleteRequest = deleteOrderRequest(order.id.toString())
 
         // WHEN
-        val response = sendRequest(DELETE, deleteRequest, DeleteOrderResponse.parser())
+        val response = natsPublisher.request(DELETE, deleteRequest, DeleteOrderResponse.parser()).block()
 
         // THEN
         assertEquals(toDeleteFailureResponse(), response)

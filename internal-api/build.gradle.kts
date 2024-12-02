@@ -4,12 +4,12 @@ plugins {
 }
 
 dependencies {
-    api("com.google.protobuf:protobuf-java:4.28.2")
+    api("com.google.protobuf:protobuf-kotlin:3.24.3")
     api(project(":commonmodels"))
 }
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:4.28.2"
+        artifact = "com.google.protobuf:protoc:3.24.3"
     }
 }

@@ -4,7 +4,6 @@ import io.lettuce.core.ClientOptions
 import io.lettuce.core.TimeoutOptions
 import java.time.Duration
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary

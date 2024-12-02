@@ -34,7 +34,7 @@ internal class OrderServiceImpl(
     private val orderRepository: OrderRepository,
     private val carRepository: CarRepository,
     private val userRepository: UserRepository,
-    private val orderCreateOrderKafkaProducer: CreateOrderKafkaProducer,
+    private val createOrderKafkaProducer: CreateOrderKafkaProducer,
 ) : OrderService {
 
     override fun getById(id: String): Mono<AggregatedOrderResponseDto> =
@@ -62,7 +62,7 @@ internal class OrderServiceImpl(
             .flatMap { orderRepository.create(createOrderRequest.toEntity()) }
             .flatMap { order -> getCarPrice(createOrderRequest.carId).map { order.toResponse(it) } }
             .doOnNext {
-                orderCreateOrderKafkaProducer.sendCreateRepairing(it.toProto())
+                createOrderKafkaProducer.sendCreateOrder(it.toProto())
                     .doOnError { e ->
                         log.atError()
                             .setMessage("Error happened during sending message to Kafka: {}")

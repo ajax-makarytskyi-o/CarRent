@@ -11,6 +11,7 @@ import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failurePatchR
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.successfulPatchResponse
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.updateOrderRequest
 import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.repository.ContainerBase
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
 import com.makarytskyi.rentcar.util.Utils.timestampToDate
@@ -18,8 +19,12 @@ import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
-class PatchOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
+class PatchOrderNatsControllerTest : ContainerBase {
+
+    @Autowired
+    internal lateinit var natsPublisher: NatsMessagePublisher
 
     @Autowired
     internal lateinit var carRepository: CarRepository
@@ -47,7 +52,7 @@ class PatchOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
         val protoResponse = successfulPatchResponse(responseDto)
 
         // WHEN
-        val response = sendRequest(UPDATE, protoRequest, UpdateOrderResponse.parser())
+        val response = natsPublisher.request(UPDATE, protoRequest, UpdateOrderResponse.parser()).block()
 
         // THEN
         assertEquals(protoResponse, response)
@@ -62,7 +67,7 @@ class PatchOrderNatsControllerTest : AbstractOrderNatsControllerTest() {
         val protoResponse = failurePatchResponse(exception)
 
         // WHEN
-        val response = sendRequest(UPDATE, protoRequest, UpdateOrderResponse.parser())
+        val response = natsPublisher.request(UPDATE, protoRequest, UpdateOrderResponse.parser()).block()
 
         // THEN
         assertEquals(protoResponse, response)

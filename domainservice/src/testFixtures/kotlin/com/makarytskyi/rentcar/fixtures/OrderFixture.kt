@@ -1,5 +1,6 @@
 package com.makarytskyi.rentcar.fixtures
 
+import com.makarytskyi.commonmodels.order.Order
 import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
 import com.makarytskyi.core.dto.order.CreateOrderRequestDto
 import com.makarytskyi.core.dto.order.OrderResponseDto
@@ -11,6 +12,7 @@ import com.makarytskyi.rentcar.model.MongoOrder
 import com.makarytskyi.rentcar.model.MongoUser
 import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
 import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
+import com.makarytskyi.rentcar.util.Utils.dateToTimestamp
 import org.bson.types.ObjectId
 
 object OrderFixture {
@@ -119,4 +121,14 @@ object OrderFixture {
             from = request.from ?: oldMongoOrder.from,
             to = request.to ?: oldMongoOrder.to,
         )
+
+    fun orderProto(order: MongoOrder, price: Double): Order = Order
+        .newBuilder().also {
+            it.id = order.id.toString()
+            it.carId = order.carId.toString()
+            it.userId = order.userId.toString()
+            it.from = dateToTimestamp(order.from!!)
+            it.to = dateToTimestamp(order.to!!)
+            it.price = price
+        }.build()
 }

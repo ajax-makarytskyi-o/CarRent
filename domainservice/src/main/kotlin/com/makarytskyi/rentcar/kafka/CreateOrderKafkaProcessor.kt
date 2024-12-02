@@ -1,68 +1,69 @@
 package com.makarytskyi.rentcar.kafka
 
+import com.google.protobuf.Parser
 import com.makarytskyi.commonmodels.order.Order
 import com.makarytskyi.internalapi.subject.NatsSubject
-import io.nats.client.Connection
+import com.makarytskyi.internalapi.topic.KafkaTopic
+import com.makarytskyi.rentcar.config.NatsListener
 import java.time.Duration
-import org.slf4j.LoggerFactory
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.EventListener
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
-import reactor.kafka.receiver.KafkaReceiver
 import reactor.kotlin.core.publisher.toMono
 import reactor.util.retry.Retry
+import systems.ajax.kafka.handler.KafkaEvent
+import systems.ajax.kafka.handler.KafkaHandler
+import systems.ajax.kafka.handler.options.KafkaHandlerOptions
+import systems.ajax.kafka.handler.options.RetryStrategy
+import systems.ajax.kafka.handler.subscription.topic.TopicSingle
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @Component
-class CreateOrderKafkaProcessor(
-    private val createOrderKafkaReceiver: KafkaReceiver<String, ByteArray>,
-    private val natsConnection: Connection,
-) {
+class CreateOrderKafkaProcessor : KafkaHandler<Order, TopicSingle> {
+    @Autowired
+    private lateinit var natsPublisher: NatsMessagePublisher
 
-    @EventListener(ApplicationReadyEvent::class)
-    fun consume() {
-        createOrderKafkaReceiver.receive()
-            .concatMap { record ->
-                record.value().toMono()
-                    .map { Order.parser().parseFrom(it) }
-                    .onErrorResume {
-                        log.atError()
-                            .setMessage("Error happened during parsing: {}")
-                            .addArgument(it.message)
-                            .setCause(it)
-                            .log()
+    @Autowired
+    private lateinit var connectionListener: NatsListener
 
-                        Mono.empty()
-                    }
-                    .flatMap { sendCreateEvent(it) }
-                    .retryWhen(retryOnNatsConnection())
-                    .doFinally {
-                        record.receiverOffset().acknowledge()
-                    }
-            }
-            .subscribe()
-    }
+    override val subscriptionTopics: TopicSingle = TopicSingle(KafkaTopic.Order.ORDER_CREATE)
+
+    override val groupId: String = GROUP_ID_ORDER
+
+    override val parser: Parser<Order> = Order.parser()
+
+    override val options: KafkaHandlerOptions<Order> = KafkaHandlerOptions<Order>()
+        .retry(
+            RetryStrategy.InPlace(
+                algorithm = RetryStrategy.RetryAlgorithm.Exponential(
+                    RETRY_TIMES,
+                    Duration.ofSeconds(RETRY_DURATION_SECONDS)
+                ),
+            )
+        )
+
+    override fun handle(kafkaEvent: KafkaEvent<Order>): Mono<Unit> =
+        kafkaEvent.toMono()
+            .flatMap { sendCreateEvent(it.data) }
+            .doOnSuccess { kafkaEvent.ack() }
 
     private fun sendCreateEvent(order: Order): Mono<Unit> {
-        return Mono.defer { natsConnection.status.toMono() }
-            .flatMap { status ->
-                if (status == Connection.Status.CONNECTED) {
-                    natsConnection.publish(
+        return order.toMono()
+            .flatMap {
+                if (connectionListener.isConnected())
+                    natsPublisher.publish(
                         NatsSubject.Order.createOrderOnCar(order.userId),
-                        order.toByteArray()
-                    ).toMono()
-                } else {
-                    IllegalStateException("NATS is unavailable").toMono()
-                }
+                        order
+                    )
+                else
+                    IllegalStateException("NATS connection is closed").toMono()
             }
-    }
-
-    private fun retryOnNatsConnection(): Retry {
-        return Retry.fixedDelay(Long.MAX_VALUE, Duration.ofSeconds(2))
-            .filter { throwable -> throwable is IllegalStateException }
     }
 
     companion object {
-        val log = LoggerFactory.getLogger(CreateOrderKafkaProcessor::class.java)
+        const val RETRY_TIMES = 100
+        const val RETRY_DURATION_SECONDS: Long = 1
+
+        const val GROUP_ID_ORDER = "group-rentcar-order"
     }
 }

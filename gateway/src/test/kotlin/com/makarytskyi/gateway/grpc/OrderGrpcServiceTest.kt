@@ -1,7 +1,6 @@
 package com.makarytskyi.gateway.grpc
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.gateway.config.NatsClient
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.createOrderGrpcResponse
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.createRequest
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.failureCreateResponse
@@ -19,6 +18,7 @@ import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.randomCreate
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.tomorrow
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.yesterday
 import com.makarytskyi.gateway.mapper.OrderMapper.toProto
+import com.makarytskyi.grpcapi.input.reqreply.order.StreamCreatedOrdersByCar.StreamCreatedOrdersByUserIdResponse
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
@@ -36,12 +36,17 @@ import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
 import reactor.kotlin.test.test
 import reactor.kotlin.test.verifyError
+import systems.ajax.nats.handler.api.NatsHandlerManager
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
 @ExtendWith(MockKExtension::class)
 class OrderGrpcServiceTest {
 
     @MockK
-    lateinit var natsClient: NatsClient
+    lateinit var manager: NatsHandlerManager
+
+    @MockK
+    lateinit var natsClient: NatsMessagePublisher
 
     @InjectMockKs
     lateinit var controller: OrderGrpcService
@@ -147,7 +152,7 @@ class OrderGrpcServiceTest {
         val orders = listOf(streamCreatedOrderResponse())
 
         every {
-            natsClient.streamCreatedOrdersByCarId(userId)
+            manager.subscribe<StreamCreatedOrdersByUserIdResponse>(userId, any())
         } returns orders.toFlux()
 
         // WHEN // THEN

@@ -15,13 +15,18 @@ import com.makarytskyi.rentcar.fixtures.Utils.firstPage
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.findAllOrderRequest
 import com.makarytskyi.rentcar.mapper.OrderMapper.toProto
 import com.makarytskyi.rentcar.repository.CarRepository
+import com.makarytskyi.rentcar.repository.ContainerBase
 import com.makarytskyi.rentcar.repository.OrderRepository
 import com.makarytskyi.rentcar.repository.UserRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
-class FindAllOrdersNatsControllerTest : AbstractOrderNatsControllerTest() {
+class FindAllOrdersNatsControllerTest : ContainerBase {
+
+    @Autowired
+    internal lateinit var natsPublisher: NatsMessagePublisher
 
     @Autowired
     internal lateinit var carRepository: CarRepository
@@ -47,7 +52,7 @@ class FindAllOrdersNatsControllerTest : AbstractOrderNatsControllerTest() {
         val protoOrders: List<AggregatedOrder> = orders.map { it.toProto() }
 
         // WHEN
-        val response = sendRequest(FIND_ALL, findAllRequest, FindAllOrdersResponse.parser())
+        val response = natsPublisher.request(FIND_ALL, findAllRequest, FindAllOrdersResponse.parser()).block()!!
 
         // THEN
         assertThat(response.success.ordersList).containsAll(protoOrders)
@@ -63,7 +68,7 @@ class FindAllOrdersNatsControllerTest : AbstractOrderNatsControllerTest() {
         val findAllRequest = findAllOrderRequest(page, size)
 
         // WHEN
-        val response = sendRequest(FIND_ALL, findAllRequest, FindAllOrdersResponse.parser())
+        val response = natsPublisher.request(FIND_ALL, findAllRequest, FindAllOrdersResponse.parser()).block()!!
 
         // THEN
         assertThat(response.success.ordersList).hasSize(0)

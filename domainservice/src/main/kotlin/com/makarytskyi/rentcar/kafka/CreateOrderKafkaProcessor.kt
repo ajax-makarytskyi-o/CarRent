@@ -35,7 +35,10 @@ class CreateOrderKafkaProcessor : KafkaHandler<Order, TopicSingle> {
     override val options: KafkaHandlerOptions<Order> = KafkaHandlerOptions<Order>()
         .retry(
             RetryStrategy.InPlace(
-                algorithm = RetryStrategy.RetryAlgorithm.Exponential(20, Duration.ofSeconds(1)),
+                algorithm = RetryStrategy.RetryAlgorithm.Exponential(
+                    RETRY_TIMES,
+                    Duration.ofSeconds(RETRY_DURATION_SECONDS)
+                ),
             )
         )
 
@@ -58,6 +61,9 @@ class CreateOrderKafkaProcessor : KafkaHandler<Order, TopicSingle> {
     }
 
     companion object {
+        const val RETRY_TIMES = 100
+        const val RETRY_DURATION_SECONDS: Long = 1
+
         const val GROUP_ID_ORDER = "group-rentcar-order"
     }
 }

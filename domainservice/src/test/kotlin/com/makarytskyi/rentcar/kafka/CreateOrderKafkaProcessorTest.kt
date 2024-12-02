@@ -60,7 +60,7 @@ class CreateOrderKafkaProcessorTest {
     }
 
     @Test
-    fun `kafka processor should retry publish if nats is disconnected`() {
+    fun `kafka processor should not publish and send acknowledge if nats is disconnected`() {
         // GIVEN
         val carId = ObjectId()
         val userId = ObjectId()
@@ -80,6 +80,7 @@ class CreateOrderKafkaProcessorTest {
             .thenCancel()
             .verify()
 
-        verify(atLeast = 4) { listener.isConnected() }
+        verify(exactly = 0) { event.ack() }
+        verify(exactly = 0) { natsPublisher.publish(any(), any()) }
     }
 }

@@ -17,7 +17,9 @@ import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.grpcCreateRe
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.randomCreateRequest
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.tomorrow
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.yesterday
-import com.makarytskyi.gateway.mapper.OrderMapper.toProto
+import com.makarytskyi.gateway.infrastructure.grpc.OrderGrpcService
+import com.makarytskyi.gateway.infrastructure.mapper.OrderMapper.toProto
+import com.makarytskyi.gateway.infrastructure.nats.OrderNatsAdapter
 import com.makarytskyi.grpcapi.input.reqreply.order.StreamCreatedOrdersByCar.StreamCreatedOrdersByUserIdResponse
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
@@ -47,6 +49,9 @@ class OrderGrpcServiceTest {
 
     @MockK
     lateinit var natsClient: NatsMessagePublisher
+
+    @InjectMockKs
+    lateinit var adapter: OrderNatsAdapter
 
     @InjectMockKs
     lateinit var controller: OrderGrpcService

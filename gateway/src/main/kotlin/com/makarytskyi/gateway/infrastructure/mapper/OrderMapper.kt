@@ -1,4 +1,4 @@
-package com.makarytskyi.gateway.mapper
+package com.makarytskyi.gateway.infrastructure.mapper
 
 import com.google.protobuf.Timestamp
 import com.makarytskyi.commonmodels.order.AggregatedOrder
@@ -10,7 +10,7 @@ import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.core.exception.UnspecifiedServiceException
-import com.makarytskyi.gateway.util.Util.timestampToDate
+import com.makarytskyi.gateway.infrastructure.util.Util.timestampToDate
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse

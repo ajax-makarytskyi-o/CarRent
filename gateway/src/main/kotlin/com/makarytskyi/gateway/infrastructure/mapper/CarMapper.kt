@@ -1,9 +1,8 @@
-package com.makarytskyi.gateway.mapper
+package com.makarytskyi.gateway.infrastructure.mapper
 
 import com.makarytskyi.commonmodels.car.Car
 import com.makarytskyi.commonmodels.car.Car.CarColor
 import com.makarytskyi.core.dto.car.CarResponseDto
-
 
 fun Car.toResponse(): CarResponseDto = CarResponseDto(
     id = id,

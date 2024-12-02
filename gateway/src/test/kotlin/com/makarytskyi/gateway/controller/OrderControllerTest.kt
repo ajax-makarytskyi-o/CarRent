@@ -18,7 +18,8 @@ import com.makarytskyi.gateway.fixtures.OrderProtoFixture.successfulUpdateRespon
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.updateOrderResponse
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.randomCreateRequest
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.randomUpdateRequest
-import com.makarytskyi.gateway.mapper.OrderMapper.toProto
+import com.makarytskyi.gateway.infrastructure.mapper.OrderMapper.toProto
+import com.makarytskyi.gateway.infrastructure.rest.OrderController
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersRequest

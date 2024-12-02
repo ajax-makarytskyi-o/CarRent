@@ -1,4 +1,4 @@
-package com.makarytskyi.gateway.mapper
+package com.makarytskyi.gateway.infrastructure.mapper
 
 import com.makarytskyi.commonmodels.user.User
 import com.makarytskyi.core.dto.user.UserResponseDto

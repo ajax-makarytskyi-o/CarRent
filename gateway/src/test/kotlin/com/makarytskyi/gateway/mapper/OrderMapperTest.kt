@@ -22,9 +22,9 @@ import com.makarytskyi.gateway.fixtures.OrderProtoFixture.updateOrderResponse
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.grpcCreateRequest
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.randomCreateRequest
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.randomUpdateRequest
-import com.makarytskyi.gateway.mapper.OrderMapper.toDto
-import com.makarytskyi.gateway.mapper.OrderMapper.toGrpcProto
-import com.makarytskyi.gateway.mapper.OrderMapper.toInternalProto
+import com.makarytskyi.gateway.infrastructure.mapper.OrderMapper.toDto
+import com.makarytskyi.gateway.infrastructure.mapper.OrderMapper.toGrpcProto
+import com.makarytskyi.gateway.infrastructure.mapper.OrderMapper.toInternalProto
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertThrows

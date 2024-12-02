@@ -1,4 +1,4 @@
-package com.makarytskyi.gateway.util
+package com.makarytskyi.gateway.infrastructure.util
 
 import com.google.protobuf.Timestamp
 import java.util.Date

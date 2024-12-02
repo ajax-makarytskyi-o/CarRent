@@ -1,11 +1,11 @@
-package com.makarytskyi.gateway.controller
+package com.makarytskyi.gateway.infrastructure.rest
 
 import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
 import com.makarytskyi.core.dto.order.CreateOrderRequestDto
 import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
-import com.makarytskyi.gateway.mapper.OrderMapper.toDto
-import com.makarytskyi.gateway.mapper.OrderMapper.toProto
+import com.makarytskyi.gateway.infrastructure.mapper.OrderMapper.toDto
+import com.makarytskyi.gateway.infrastructure.mapper.OrderMapper.toProto
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderResponse

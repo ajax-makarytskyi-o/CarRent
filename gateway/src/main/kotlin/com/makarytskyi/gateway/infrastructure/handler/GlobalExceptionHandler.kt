@@ -1,4 +1,4 @@
-package com.makarytskyi.gateway.handler
+package com.makarytskyi.gateway.infrastructure.handler
 
 import com.makarytskyi.core.exception.NotFoundException
 import org.springframework.http.HttpStatus

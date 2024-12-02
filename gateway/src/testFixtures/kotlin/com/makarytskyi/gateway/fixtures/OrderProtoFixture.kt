@@ -12,9 +12,9 @@ import com.makarytskyi.gateway.fixtures.CarProtoFixture.randomCar
 import com.makarytskyi.gateway.fixtures.UserProtoFixture.randomUser
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.tomorrow
 import com.makarytskyi.gateway.fixtures.request.OrderRequestFixture.twoDaysAfter
-import com.makarytskyi.gateway.mapper.toResponse
-import com.makarytskyi.gateway.util.Util.dateToTimestamp
-import com.makarytskyi.gateway.util.Util.timestampToDate
+import com.makarytskyi.gateway.infrastructure.mapper.toResponse
+import com.makarytskyi.gateway.infrastructure.util.Util.dateToTimestamp
+import com.makarytskyi.gateway.infrastructure.util.Util.timestampToDate
 import com.makarytskyi.grpcapi.input.reqreply.order.StreamCreatedOrdersByCar.StreamCreatedOrdersByUserIdRequest
 import com.makarytskyi.grpcapi.input.reqreply.order.StreamCreatedOrdersByCar.StreamCreatedOrdersByUserIdResponse
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest

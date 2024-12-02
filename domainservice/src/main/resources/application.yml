@@ -28,12 +28,6 @@ management:
       probes:
         enabled: true
 
-nats:
-  spring:
-    io.nats.client:
-      servers: ${NATS_URL}
-      reconnect.max: 100
-
 redis:
   host: ${REDIS_HOST}
   port: ${REDIS_PORT}

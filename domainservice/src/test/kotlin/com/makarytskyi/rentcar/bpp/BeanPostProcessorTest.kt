@@ -4,9 +4,10 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.rentcar.repository.CarRepository
-import com.makarytskyi.rentcar.service.CarService
-import com.makarytskyi.rentcar.service.impl.CarServiceImpl
+import com.makarytskyi.rentcar.car.application.port.input.CarInputPort
+import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
+import com.makarytskyi.rentcar.car.application.service.CarService
+import com.makarytskyi.rentcar.common.bpp.InvocationTrackerBeanPostProcessor
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -27,12 +28,12 @@ import reactor.core.publisher.Mono
 @ExtendWith(MockKExtension::class)
 internal class BeanPostProcessorTest {
     @MockK
-    lateinit var repository: CarRepository
+    lateinit var repository: CarOutputPort
 
     private val mockAppender: Appender<ILoggingEvent> = spyk()
 
     @InjectMockKs
-    lateinit var service: CarServiceImpl
+    lateinit var service: CarService
 
     val beanName = "service"
     val postProcessor: InvocationTrackerBeanPostProcessor = InvocationTrackerBeanPostProcessor()
@@ -66,7 +67,7 @@ internal class BeanPostProcessorTest {
         every { repository.findAll(0, 10) } returns Flux.empty()
 
         // WHEN
-        val proxyService = postProcessor.postProcessAfterInitialization(service, beanName) as CarService
+        val proxyService = postProcessor.postProcessAfterInitialization(service, beanName) as CarInputPort
         proxyService.findAll(0, 10).blockFirst()
 
         // THEN
@@ -76,7 +77,7 @@ internal class BeanPostProcessorTest {
     @Test
     fun `original object should not use logger`() {
         // GIVEN
-        val service = CarServiceImpl(repository)
+        val service = CarService(repository)
         every { repository.findAll(0, 10) } returns Flux.empty()
 
         // WHEN
@@ -94,7 +95,7 @@ internal class BeanPostProcessorTest {
 
         // WHEN
         postProcessor.postProcessBeforeInitialization(service, beanName)
-        val proxyService = postProcessor.postProcessAfterInitialization(service, beanName) as CarService
+        val proxyService = postProcessor.postProcessAfterInitialization(service, beanName) as CarInputPort
 
         // THEN
         assertThrows<NotFoundException> { proxyService.getById(id).block() }

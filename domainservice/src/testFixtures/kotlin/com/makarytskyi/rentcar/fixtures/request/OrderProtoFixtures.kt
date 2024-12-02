@@ -11,14 +11,16 @@ import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
+import com.makarytskyi.rentcar.car.domain.DomainCar
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
-import com.makarytskyi.rentcar.model.MongoCar
-import com.makarytskyi.rentcar.model.MongoUser
-import com.makarytskyi.rentcar.util.Utils.dateToTimestamp
+import com.makarytskyi.rentcar.common.util.Utils.dateToTimestamp
+import com.makarytskyi.rentcar.order.domain.DomainOrder
+import com.makarytskyi.rentcar.user.domain.DomainUser
+import com.makarytskyi.rentcar.user.infrastructure.mongo.entity.MongoUser
 
 object OrderProtoFixtures {
-    fun createOrderRequest(mongoCar: MongoCar, mongoUser: MongoUser): CreateOrderRequest =
+    fun createOrderRequest(mongoCar: DomainCar, mongoUser: DomainUser): CreateOrderRequest =
         CreateOrderRequest.newBuilder()
             .apply {
                 with(orderBuilder) {
@@ -56,16 +58,16 @@ object OrderProtoFixtures {
         }
         .build()
 
-    fun successfulPatchResponse(response: OrderResponseDto): UpdateOrderResponse = UpdateOrderResponse
+    fun successfulPatchResponse(response: DomainOrder): UpdateOrderResponse = UpdateOrderResponse
         .newBuilder()
         .apply {
             with(successBuilder.orderBuilder) {
                 setId(response.id)
                 setCarId(response.carId)
                 setUserId(response.userId)
-                setFrom(dateToTimestamp(response.from))
-                setTo(dateToTimestamp(response.to))
-                setPrice(response.price.toDouble())
+                setFrom(dateToTimestamp(response.from!!))
+                setTo(dateToTimestamp(response.to!!))
+                setPrice(response.price!!.toDouble())
             }
         }
         .build()

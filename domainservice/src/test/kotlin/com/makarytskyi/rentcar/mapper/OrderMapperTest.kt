@@ -1,22 +1,13 @@
 package com.makarytskyi.rentcar.mapper
 
-import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
-import com.makarytskyi.rentcar.fixtures.OrderFixture.createOrderEntity
-import com.makarytskyi.rentcar.fixtures.OrderFixture.createOrderRequestDto
-import com.makarytskyi.rentcar.fixtures.OrderFixture.emptyAggregatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.emptyOrder
-import com.makarytskyi.rentcar.fixtures.OrderFixture.emptyOrderPatch
-import com.makarytskyi.rentcar.fixtures.OrderFixture.orderPatch
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomAggregatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.responseAggregatedOrderDto
 import com.makarytskyi.rentcar.fixtures.OrderFixture.responseOrderDto
-import com.makarytskyi.rentcar.fixtures.OrderFixture.updateOrderRequestDto
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
-import com.makarytskyi.rentcar.mapper.OrderMapper.toEntity
-import com.makarytskyi.rentcar.mapper.OrderMapper.toPatch
-import com.makarytskyi.rentcar.mapper.OrderMapper.toResponse
+import com.makarytskyi.rentcar.order.application.mapper.toResponse
 import java.math.BigDecimal
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -49,47 +40,6 @@ class OrderMapperTest {
     }
 
     @Test
-    fun `create request return entity successfully`() {
-        // GIVEN
-        val car = randomCar()
-        val user = randomUser()
-        val request = createOrderRequestDto(car, user)
-        val response = createOrderEntity(request)
-
-        // WHEN
-        val result = request.toEntity()
-
-        // THEN
-        assertEquals(response, result)
-    }
-
-    @Test
-    fun `update request return entity successfully`() {
-        // GIVEN
-        val request = updateOrderRequestDto()
-        val response = orderPatch(request)
-
-        // WHEN
-        val result = request.toPatch()
-
-        // THEN
-        assertEquals(response, result)
-    }
-
-    @Test
-    fun `update request with null fields return entity with null fields`() {
-        // GIVEN
-        val request = UpdateOrderRequestDto(from = null, to = null)
-        val response = emptyOrderPatch()
-
-        // WHEN
-        val result = request.toPatch()
-
-        // THEN
-        assertEquals(response, result)
-    }
-
-    @Test
     fun `aggregated order mapper should return response successfully`() {
         // GIVEN
         val car = randomCar()
@@ -102,23 +52,5 @@ class OrderMapperTest {
 
         // THEN
         assertEquals(response, result)
-    }
-
-    @Test
-    fun `aggregated order mapper throws IllegalArgumentException if date fields are null`() {
-        // GIVEN
-        val emptyOrder = emptyAggregatedOrder()
-
-        // WHEN // THEN
-        assertThrows<IllegalArgumentException> { emptyOrder.toResponse() }
-    }
-
-    @Test
-    fun `create order proto request mapper throws IllegalArgumentException if dates are nullable`() {
-        // GIVEN
-        val emptyOrder = emptyAggregatedOrder()
-
-        // WHEN // THEN
-        assertThrows<IllegalArgumentException> { emptyOrder.toResponse() }
     }
 }

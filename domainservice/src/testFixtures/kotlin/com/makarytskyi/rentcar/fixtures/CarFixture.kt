@@ -1,12 +1,10 @@
 package com.makarytskyi.rentcar.fixtures
 
 import com.makarytskyi.core.dto.car.CarResponseDto
-import com.makarytskyi.rentcar.dto.car.CarResponse
-import com.makarytskyi.rentcar.dto.car.CreateCarRequest
-import com.makarytskyi.rentcar.dto.car.UpdateCarRequest
+import com.makarytskyi.rentcar.car.domain.DomainCar
+import com.makarytskyi.rentcar.car.domain.patch.DomainCarPatch
+import com.makarytskyi.rentcar.car.infrastructure.rest.dto.CarResponse
 import com.makarytskyi.rentcar.fixtures.Utils.generateString
-import com.makarytskyi.rentcar.model.MongoCar
-import com.makarytskyi.rentcar.model.patch.MongoCarPatch
 import java.math.BigDecimal
 import java.math.RoundingMode
 import kotlin.random.Random
@@ -30,8 +28,8 @@ object CarFixture {
         return generateString(6)
     }
 
-    fun randomColor(): MongoCar.CarColor {
-        return MongoCar.CarColor.entries.toTypedArray().random()
+    fun randomColor(): DomainCar.CarColor {
+        return DomainCar.CarColor.entries.toTypedArray().random()
     }
 
     fun randomPrice(): BigDecimal {
@@ -43,8 +41,8 @@ object CarFixture {
         return randomValue.setScale(2, RoundingMode.HALF_UP)
     }
 
-    fun randomCar() = MongoCar(
-        id = ObjectId(),
+    fun randomCar() = DomainCar(
+        id = ObjectId().toString(),
         brand = randomBrand(),
         model = randomModel(),
         price = randomPrice(),
@@ -53,27 +51,18 @@ object CarFixture {
         color = randomColor()
     )
 
-    fun responseCar(mongoCar: MongoCar) = CarResponse(
+    fun responseCar(mongoCar: DomainCar) = CarResponse(
         mongoCar.id.toString(),
-        mongoCar.brand!!,
-        mongoCar.model!!,
-        mongoCar.price!!,
+        mongoCar.brand,
+        mongoCar.model,
+        mongoCar.price,
         mongoCar.year,
-        mongoCar.plate!!,
+        mongoCar.plate,
         mongoCar.color,
     )
 
-    fun emptyResponseCar() = CarResponse(
-        id = "",
-        brand = "",
-        model = "",
-        price = BigDecimal.ZERO,
-        year = null,
-        plate = "",
-        color = null,
-    )
-
-    fun createCarRequest() = CreateCarRequest(
+    fun createCarRequest() = DomainCar(
+        id = null,
         brand = randomBrand(),
         model = randomModel(),
         price = randomPrice(),
@@ -82,44 +71,39 @@ object CarFixture {
         color = randomColor(),
     )
 
-    fun createCarEntity(request: CreateCarRequest) = MongoCar(
-        id = null,
-        brand = request.brand,
-        model = request.model,
-        price = request.price,
-        year = request.year,
-        plate = request.plate,
-        color = request.color,
-    )
+    fun createdCar(mongoCar: DomainCar) = mongoCar.copy(id = ObjectId().toString())
 
-    fun createdCar(mongoCar: MongoCar) = mongoCar.copy(id = ObjectId())
-
-    fun updateCarRequest() = UpdateCarRequest(
+    fun updateCarRequest() = DomainCarPatch(
         price = randomPrice(),
         color = randomColor(),
     )
 
-    fun carPatch(request: UpdateCarRequest) = MongoCarPatch(
+    fun updateDomainCar(patch: DomainCarPatch, oldCar: DomainCar) = oldCar.copy(
+        price = patch.price ?: oldCar.price,
+        color = patch.color ?: oldCar.color,
+    )
+
+    fun carPatch(request: DomainCarPatch) = DomainCarPatch(
         price = request.price,
         color = request.color,
     )
 
-    fun emptyCarPatch() = MongoCarPatch(
+    fun emptyCarPatch() = DomainCarPatch(
         price = null,
         color = null,
     )
 
-    fun updatedCar(oldMongoCar: MongoCar, request: UpdateCarRequest) =
-        oldMongoCar.copy(price = request.price, color = request.color)
+    fun updatedCar(oldMongoCar: DomainCar, request: DomainCarPatch) =
+        oldMongoCar.copy(price = request.price ?: oldMongoCar.price, color = request.color ?: oldMongoCar.color)
 
-    fun dtoColor(color: MongoCar.CarColor) = when (color) {
-        MongoCar.CarColor.BLUE -> CarResponseDto.CarColor.BLUE
-        MongoCar.CarColor.WHITE -> CarResponseDto.CarColor.WHITE
-        MongoCar.CarColor.RED -> CarResponseDto.CarColor.RED
-        MongoCar.CarColor.GREY -> CarResponseDto.CarColor.GREY
-        MongoCar.CarColor.GREEN -> CarResponseDto.CarColor.GREEN
-        MongoCar.CarColor.YELLOW -> CarResponseDto.CarColor.YELLOW
-        MongoCar.CarColor.BLACK -> CarResponseDto.CarColor.BLACK
-        MongoCar.CarColor.UNSPECIFIED -> CarResponseDto.CarColor.UNSPECIFIED
+    fun dtoColor(color: DomainCar.CarColor) = when (color) {
+        DomainCar.CarColor.BLUE -> CarResponseDto.CarColor.BLUE
+        DomainCar.CarColor.WHITE -> CarResponseDto.CarColor.WHITE
+        DomainCar.CarColor.RED -> CarResponseDto.CarColor.RED
+        DomainCar.CarColor.GREY -> CarResponseDto.CarColor.GREY
+        DomainCar.CarColor.GREEN -> CarResponseDto.CarColor.GREEN
+        DomainCar.CarColor.YELLOW -> CarResponseDto.CarColor.YELLOW
+        DomainCar.CarColor.BLACK -> CarResponseDto.CarColor.BLACK
+        DomainCar.CarColor.UNSPECIFIED -> CarResponseDto.CarColor.UNSPECIFIED
     }
 }

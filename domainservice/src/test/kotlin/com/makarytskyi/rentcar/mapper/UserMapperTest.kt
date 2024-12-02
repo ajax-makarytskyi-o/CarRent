@@ -1,20 +1,16 @@
 package com.makarytskyi.rentcar.mapper
 
-import com.makarytskyi.rentcar.dto.user.CreateUserRequest
-import com.makarytskyi.rentcar.dto.user.UpdateUserRequest
-import com.makarytskyi.rentcar.dto.user.UserResponse
 import com.makarytskyi.rentcar.fixtures.UserFixture.createUserEntity
 import com.makarytskyi.rentcar.fixtures.UserFixture.createUserRequest
-import com.makarytskyi.rentcar.fixtures.UserFixture.emptyResponseUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.responseUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.updateUserRequest
 import com.makarytskyi.rentcar.fixtures.UserFixture.userPatch
-import com.makarytskyi.rentcar.model.MongoUser
+import com.makarytskyi.rentcar.user.infrastructure.rest.mapper.toDomain
+import com.makarytskyi.rentcar.user.infrastructure.rest.mapper.toPatch
+import com.makarytskyi.rentcar.user.infrastructure.rest.mapper.toResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.bson.types.ObjectId
-import org.junit.jupiter.api.assertThrows
 
 class UserMapperTest {
     @Test
@@ -24,29 +20,10 @@ class UserMapperTest {
         val response = responseUser(user)
 
         // WHEN
-        val result = UserResponse.from(user)
+        val result = user.toResponse()
 
         // THEN
         assertEquals(response, result)
-    }
-
-    @Test
-    fun `response mapper throws IllegalArgumentException if user fields are null`() {
-        // GIVEN
-        val user = MongoUser()
-
-        // WHEN // THEN
-        assertThrows<IllegalArgumentException> { UserResponse.from(user) }
-    }
-
-    @Test
-    fun `response mapper return empty response if fields except id are null`() {
-        // GIVEN
-        val emptyUser = MongoUser().copy(id = ObjectId())
-        val response = UserResponse.from(emptyUser)
-
-        // WHEN // THEN
-        assertEquals(response, emptyResponseUser().copy(id = emptyUser.id.toString()))
     }
 
     @Test
@@ -56,7 +33,7 @@ class UserMapperTest {
         val entity = createUserEntity(request)
 
         // WHEN
-        val result = CreateUserRequest.toEntity(request)
+        val result = request.toDomain()
 
         // THEN
         assertEquals(entity, result)
@@ -73,7 +50,7 @@ class UserMapperTest {
         val entity = createUserEntity(request)
 
         // WHEN
-        val result = CreateUserRequest.toEntity(request)
+        val result = request.toDomain()
 
         // THEN
         assertEquals(entity, result)
@@ -86,7 +63,7 @@ class UserMapperTest {
         val entity = userPatch(request)
 
         // WHEN
-        val result = UpdateUserRequest.toPatch(request)
+        val result = request.toPatch()
 
         // THEN
         assertEquals(entity, result)
@@ -103,7 +80,7 @@ class UserMapperTest {
         val entity = userPatch(request)
 
         // WHEN
-        val result = UpdateUserRequest.toPatch(request)
+        val result = request.toPatch()
 
         // THEN
         assertEquals(entity, result)

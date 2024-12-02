@@ -1,0 +1,26 @@
+nats:
+  spring:
+    io.nats.client:
+      servers: "nats://localhost:4222"
+
+spring:
+  data:
+    mongodb:
+      uri: "mongodb://test:test@localhost:27018/test?authSource=admin"
+
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+
+      properties:
+        session.timeout.ms: 10000
+        max.poll.interval.ms: 10000
+    bootstrap-servers: http://localhost:9092
+
+redis:
+  host: localhost
+  port: 6379
+  timeout: 40
+  key-ttl: 60
+  retries: 5
+  retry_timeout: 2

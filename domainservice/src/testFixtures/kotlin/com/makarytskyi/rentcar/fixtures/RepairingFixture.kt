@@ -2,38 +2,29 @@ package com.makarytskyi.rentcar.fixtures
 
 import com.google.protobuf.Timestamp
 import com.makarytskyi.commonmodels.repairing.Repairing
-import com.makarytskyi.rentcar.dto.car.CarResponse
-import com.makarytskyi.rentcar.dto.repairing.AggregatedRepairingResponse
-import com.makarytskyi.rentcar.dto.repairing.CreateRepairingRequest
-import com.makarytskyi.rentcar.dto.repairing.RepairingResponse
-import com.makarytskyi.rentcar.dto.repairing.UpdateRepairingRequest
+import com.makarytskyi.rentcar.car.domain.DomainCar
+import com.makarytskyi.rentcar.car.domain.patch.DomainCarPatch
+import com.makarytskyi.rentcar.car.infrastructure.rest.mapper.toResponse
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
 import com.makarytskyi.rentcar.fixtures.Utils.getDateFromNow
-import com.makarytskyi.rentcar.model.MongoCar
-import com.makarytskyi.rentcar.model.MongoRepairing
-import com.makarytskyi.rentcar.model.MongoRepairing.RepairingStatus
-import com.makarytskyi.rentcar.model.patch.MongoRepairingPatch
-import com.makarytskyi.rentcar.model.projection.AggregatedMongoRepairing
+import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
+import com.makarytskyi.rentcar.repairing.domain.patch.DomainRepairingPatch
+import com.makarytskyi.rentcar.repairing.domain.projection.AggregatedDomainRepairing
+import com.makarytskyi.rentcar.repairing.infrastructure.rest.dto.AggregatedRepairingResponse
+import com.makarytskyi.rentcar.repairing.infrastructure.rest.dto.RepairingResponse
+import com.makarytskyi.rentcar.repairing.infrastructure.rest.dto.UpdateRepairingRequest
 import org.bson.types.ObjectId
 
 object RepairingFixture {
     var tomorrow = getDateFromNow(1)
     var monthAfter = getDateFromNow(30)
 
-    fun randomRepairing(carId: ObjectId?) = MongoRepairing(
-        id = ObjectId(),
-        carId = carId,
+    fun randomRepairing(carId: String?) = DomainRepairing(
+        id = ObjectId().toString(),
+        carId = carId.orEmpty(),
         date = tomorrow,
         price = randomPrice(),
-        status = RepairingStatus.PENDING,
-    )
-
-    fun emptyRepairing() = MongoRepairing(
-        id = null,
-        carId = null,
-        date = null,
-        price = null,
-        status = null,
+        status = DomainRepairing.RepairingStatus.PENDING,
     )
 
     fun emptyProtoRepairing() = Repairing
@@ -46,75 +37,72 @@ object RepairingFixture {
         }
         .build()
 
-    fun emptyRepairingPatch() = MongoRepairingPatch(
+    fun emptyRepairingPatch() = DomainRepairingPatch(
         price = null,
         status = null,
     )
 
-    fun responseRepairing(mongoRepairing: MongoRepairing) = RepairingResponse(
+    fun responseRepairing(mongoRepairing: DomainRepairing) = RepairingResponse(
         id = mongoRepairing.id.toString(),
-        carId = mongoRepairing.carId.toString(),
+        carId = mongoRepairing.carId,
         date = mongoRepairing.date,
         price = mongoRepairing.price,
-        status = mongoRepairing.status,
+        status = mongoRepairing.status!!,
     )
 
-    fun responseAggregatedRepairing(mongoRepairing: AggregatedMongoRepairing) = AggregatedRepairingResponse(
+    fun responseAggregatedRepairing(mongoRepairing: AggregatedDomainRepairing) = AggregatedRepairingResponse(
         id = mongoRepairing.id.toString(),
-        car = CarResponse.from(mongoRepairing.car ?: MongoCar()),
+        car = mongoRepairing.car!!.toResponse(),
         date = mongoRepairing.date,
         price = mongoRepairing.price,
-        status = mongoRepairing.status,
+        status = mongoRepairing.status!!,
     )
 
-    fun createRepairingRequest(mongoCar: MongoCar) = CreateRepairingRequest(
+    fun createRepairingRequest(mongoCar: DomainCar) = DomainRepairing(
         carId = mongoCar.id.toString(),
         date = monthAfter,
         price = randomPrice(),
-        status = RepairingStatus.IN_PROGRESS,
+        status = DomainRepairing.RepairingStatus.IN_PROGRESS,
     )
 
-    fun createRepairingEntity(request: CreateRepairingRequest) = MongoRepairing(
-        id = null,
-        carId = ObjectId(request.carId),
-        date = request.date,
-        price = request.price,
-        status = request.status,
-    )
-
-    fun createdRepairing(mongoRepairing: MongoRepairing) = mongoRepairing.copy(id = ObjectId())
+    fun createdRepairing(mongoRepairing: DomainRepairing) = mongoRepairing.copy(id = ObjectId().toString())
 
     fun updateRepairingRequest() = UpdateRepairingRequest(
         price = randomPrice(),
-        status = RepairingStatus.COMPLETED,
+        status = DomainRepairing.RepairingStatus.COMPLETED,
     )
 
-    fun repairingPatch(request: UpdateRepairingRequest) = MongoRepairingPatch(
+    fun domainRepairingPatch() = DomainRepairingPatch(
+        price = randomPrice(),
+        status = DomainRepairing.RepairingStatus.COMPLETED,
+    )
+
+    fun updateDomainRepairing(patch: DomainRepairingPatch, oldRepairing: DomainRepairing) = oldRepairing.copy(
+        price = patch.price ?: oldRepairing.price,
+        status = patch.status ?: oldRepairing.status,
+    )
+
+    fun repairingPatch(request: UpdateRepairingRequest) = DomainRepairingPatch(
         price = request.price,
         status = request.status,
     )
 
-    fun updatedRepairing(oldMongoRepairing: MongoRepairing, request: UpdateRepairingRequest) =
-        oldMongoRepairing.copy(price = request.price, status = request.status)
+    fun updatedRepairing(oldMongoRepairing: DomainRepairing, request: DomainRepairingPatch) =
+        oldMongoRepairing.copy(
+            price = request.price ?: oldMongoRepairing.price,
+            status = request.status ?: oldMongoRepairing.status
+        )
 
-    fun randomAggregatedRepairing(car: MongoCar) = AggregatedMongoRepairing(
-        id = ObjectId(),
+    fun randomAggregatedRepairing(car: DomainCar) = AggregatedDomainRepairing(
+        id = ObjectId().toString(),
         car = car,
         date = tomorrow,
         price = randomPrice(),
-        status = RepairingStatus.PENDING,
+        status = DomainRepairing.RepairingStatus.PENDING,
     )
 
-    fun emptyAggregatedRepairing() = AggregatedMongoRepairing(
-        id = null,
-        car = null,
-        date = null,
-        price = null,
-        status = null,
-    )
-
-    fun aggregatedRepairing(repairing: MongoRepairing, car: MongoCar) = AggregatedMongoRepairing(
-        id = repairing.id,
+    fun aggregatedRepairing(repairing: DomainRepairing, car: DomainCar) = AggregatedDomainRepairing(
+        id = repairing.id.toString(),
         car = car,
         date = repairing.date,
         price = repairing.price,

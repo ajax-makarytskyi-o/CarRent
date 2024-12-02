@@ -1,18 +1,17 @@
 package com.makarytskyi.rentcar.fixtures
 
 import com.makarytskyi.commonmodels.order.Order
-import com.makarytskyi.core.dto.order.AggregatedOrderResponseDto
-import com.makarytskyi.core.dto.order.CreateOrderRequestDto
-import com.makarytskyi.core.dto.order.OrderResponseDto
-import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
+import com.makarytskyi.rentcar.car.domain.DomainCar
+import com.makarytskyi.rentcar.common.util.Utils.dateToTimestamp
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
 import com.makarytskyi.rentcar.fixtures.Utils.getDateFromNow
-import com.makarytskyi.rentcar.mapper.toResponse
-import com.makarytskyi.rentcar.model.MongoCar
-import com.makarytskyi.rentcar.model.MongoOrder
-import com.makarytskyi.rentcar.model.MongoUser
-import com.makarytskyi.rentcar.model.patch.MongoOrderPatch
-import com.makarytskyi.rentcar.model.projection.AggregatedMongoOrder
-import com.makarytskyi.rentcar.util.Utils.dateToTimestamp
+import com.makarytskyi.rentcar.order.domain.DomainOrder
+import com.makarytskyi.rentcar.order.domain.patch.DomainOrderPatch
+import com.makarytskyi.rentcar.order.domain.projection.AggregatedDomainOrder
+import com.makarytskyi.rentcar.user.domain.DomainUser
+import com.makarytskyi.rentcar.user.domain.patch.DomainUserPatch
+import java.math.BigDecimal
+import java.util.Date
 import org.bson.types.ObjectId
 
 object OrderFixture {
@@ -23,112 +22,122 @@ object OrderFixture {
     var monthAfter = getDateFromNow(30)
     var monthAndDayAfter = getDateFromNow(31)
 
-    fun randomOrder(carId: ObjectId?, userId: ObjectId?) = MongoOrder(
-        id = ObjectId(),
-        carId = carId,
-        userId = userId,
+    fun randomOrder(carId: String?, userId: String?) = DomainOrder(
+        id = ObjectId().toString(),
+        carId = carId!!,
+        userId = userId!!,
         from = tomorrow,
         to = twoDaysAfter,
+        price = randomPrice(),
     )
 
-    fun emptyOrder() = MongoOrder(
+    fun emptyOrder() = DomainOrder(
         id = null,
-        carId = null,
-        userId = null,
+        carId = "",
+        userId = "",
+        from = Date(),
+        to = Date(),
+        price = BigDecimal.ZERO
+    )
+
+    fun emptyOrderPatch() = DomainOrderPatch(
         from = null,
         to = null,
     )
 
-    fun emptyOrderPatch() = MongoOrderPatch(
-        from = null,
-        to = null,
-    )
-
-    fun randomAggregatedOrder(car: MongoCar, user: MongoUser) = AggregatedMongoOrder(
-        id = ObjectId(),
+    fun randomAggregatedOrder(car: DomainCar, user: DomainUser) = AggregatedDomainOrder(
+        id = ObjectId().toString(),
         car = car,
         user = user,
         from = tomorrow,
         to = twoDaysAfter,
+        price = car.price,
     )
 
-    fun emptyAggregatedOrder() = AggregatedMongoOrder(
-        id = null,
-        car = null,
-        user = null,
-        from = null,
-        to = null,
-    )
-
-    fun aggregatedOrder(order: MongoOrder, car: MongoCar, user: MongoUser) = AggregatedMongoOrder(
+    fun aggregatedOrder(order: DomainOrder, car: DomainCar, user: DomainUser) = AggregatedDomainOrder(
         id = order.id,
         car = car,
         user = user,
         from = order.from,
         to = order.to,
+        price = car.price,
     )
 
-    fun responseOrderDto(mongoOrder: MongoOrder, mongoCar: MongoCar) = OrderResponseDto(
+    fun responseOrderDto(mongoOrder: DomainOrder, mongoCar: DomainCar) = DomainOrder(
         id = mongoOrder.id.toString(),
-        carId = mongoOrder.carId.toString(),
-        userId = mongoOrder.userId.toString(),
-        from = mongoOrder.from!!,
-        to = mongoOrder.to!!,
-        price = mongoCar.price!!,
+        carId = mongoOrder.carId,
+        userId = mongoOrder.userId,
+        from = mongoOrder.from,
+        to = mongoOrder.to,
+        price = mongoCar.price,
     )
 
-    fun responseAggregatedOrderDto(mongoOrder: AggregatedMongoOrder, mongoCar: MongoCar) = AggregatedOrderResponseDto(
+    fun responseAggregatedOrderDto(mongoOrder: AggregatedDomainOrder, mongoCar: DomainCar) = AggregatedDomainOrder(
         id = mongoOrder.id.toString(),
-        car = mongoOrder.car!!.toResponse(),
-        user = mongoOrder.user!!.toResponse(),
-        from = mongoOrder.from!!,
-        to = mongoOrder.to!!,
-        price = mongoCar.price!!,
+        car = mongoOrder.car,
+        user = mongoOrder.user,
+        from = mongoOrder.from,
+        to = mongoOrder.to,
+        price = mongoCar.price,
     )
 
-    fun createOrderRequestDto(mongoCar: MongoCar, mongoUser: MongoUser) = CreateOrderRequestDto(
+    fun createOrderRequestDto(mongoCar: DomainCar, mongoUser: DomainUser) = DomainOrder(
+        id = null,
         carId = mongoCar.id.toString(),
         userId = mongoUser.id.toString(),
         from = monthAfter,
         to = monthAndDayAfter,
+        price = null,
     )
 
-    fun createOrderEntity(request: CreateOrderRequestDto) = MongoOrder(
-        id = null,
-        carId = ObjectId(request.carId),
-        userId = ObjectId(request.userId),
-        from = request.from,
-        to = request.to,
-    )
+    fun createdOrder(mongoOrder: DomainOrder) = mongoOrder.copy(id = ObjectId().toString())
 
-    fun createdOrder(mongoOrder: MongoOrder) = mongoOrder.copy(id = ObjectId())
-
-    fun updateOrderRequestDto() = UpdateOrderRequestDto(
+    fun updateOrderRequestDto() = DomainOrderPatch(
         from = tomorrow,
         to = twoDaysAfter,
     )
 
-    fun orderPatch(request: UpdateOrderRequestDto) = MongoOrderPatch(
-        from = request.from,
-        to = request.to,
+    fun domainOrderPatch(patch: DomainOrderPatch, oldOrder: DomainOrder) = oldOrder.copy(
+        from = patch.from ?: oldOrder.from,
+        to = patch.to ?: oldOrder.to,
     )
 
-    fun updatedOrder(oldMongoOrder: AggregatedMongoOrder, request: UpdateOrderRequestDto) =
-        MongoOrder(
+    fun domainOrderPatch(patch: DomainOrderPatch, oldOrder: AggregatedDomainOrder): DomainOrder = DomainOrder(
+        id = oldOrder.id,
+        carId = oldOrder.car.id.toString(),
+        userId = oldOrder.user.id.toString(),
+        from = patch.from ?: oldOrder.from,
+        to = patch.to ?: oldOrder.to,
+        price = oldOrder.price,
+    )
+
+    fun updatedOrder(oldMongoOrder: AggregatedDomainOrder, request: DomainOrderPatch) =
+        DomainOrder(
             id = oldMongoOrder.id,
-            carId = oldMongoOrder.car?.id,
-            userId = oldMongoOrder.user?.id,
+            carId = oldMongoOrder.car.toString(),
+            userId = oldMongoOrder.user.toString(),
             from = request.from ?: oldMongoOrder.from,
             to = request.to ?: oldMongoOrder.to,
+            price = oldMongoOrder.price,
         )
 
-    fun orderProto(order: MongoOrder, price: Double): Order = Order
+    fun updatedOrder(oldMongoOrder: DomainOrder, request: DomainOrderPatch) =
+        DomainOrder(
+            id = oldMongoOrder.id,
+            carId = oldMongoOrder.carId,
+            userId = oldMongoOrder.userId,
+            from = request.from ?: oldMongoOrder.from,
+            to = request.to ?: oldMongoOrder.to,
+            price = oldMongoOrder.price,
+        )
+
+    fun orderProto(order: DomainOrder, price: Double): Order = Order
         .newBuilder().also {
             it.id = order.id.toString()
-            it.carId = order.carId.toString()
-            it.userId = order.userId.toString()
-            it.from = dateToTimestamp(order.from!!)
-            it.to = dateToTimestamp(order.to!!)
+            it.carId = order.carId
+            it.userId = order.userId
+            it.from = dateToTimestamp(order.from)
+            it.to = dateToTimestamp(order.to)
             it.price = price
         }.build()
 }

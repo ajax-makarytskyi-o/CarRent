@@ -4,9 +4,14 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":internal-api"))
+    implementation(project(":domainservice:common"))
     implementation(project(":commonmodels"))
+    implementation(project(":domainservice:car"))
+    implementation(project(":domainservice:user"))
+    implementation(project(":domainservice:order"))
+    implementation(project(":domainservice:repairing"))
     implementation(project(":core"))
+    implementation(project(":internal-api"))
     implementation("systems.ajax:nats-spring-boot-starter:4.1.0.186.MASTER-SNAPSHOT")
     implementation("systems.ajax:kafka-spring-boot-starter:3.0.3.170.MASTER-SNAPSHOT")
     implementation("org.springframework.kafka:spring-kafka")

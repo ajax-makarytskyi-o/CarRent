@@ -13,6 +13,8 @@ import reactor.kotlin.core.publisher.toMono
 import reactor.util.retry.Retry
 import systems.ajax.kafka.handler.KafkaEvent
 import systems.ajax.kafka.handler.KafkaHandler
+import systems.ajax.kafka.handler.options.KafkaHandlerOptions
+import systems.ajax.kafka.handler.options.RetryStrategy
 import systems.ajax.kafka.handler.subscription.topic.TopicSingle
 import systems.ajax.nats.publisher.api.NatsMessagePublisher
 
@@ -30,11 +32,17 @@ class CreateOrderKafkaProcessor : KafkaHandler<Order, TopicSingle> {
 
     override val parser: Parser<Order> = Order.parser()
 
+    override val options: KafkaHandlerOptions<Order> = KafkaHandlerOptions<Order>()
+        .retry(
+            RetryStrategy.InPlace(
+                algorithm = RetryStrategy.RetryAlgorithm.Exponential(20, Duration.ofSeconds(1)),
+            )
+        )
+
     override fun handle(kafkaEvent: KafkaEvent<Order>): Mono<Unit> =
         kafkaEvent.toMono()
-            .flatMap { sendCreateEvent(it.data).retryWhen(retryOnNatsError()) }
-            .doFinally { kafkaEvent.ack() }
-            .then(Unit.toMono())
+            .flatMap { sendCreateEvent(it.data) }
+            .doOnSuccess { kafkaEvent.ack() }
 
     private fun sendCreateEvent(order: Order): Mono<Unit> {
         return order.toMono()
@@ -48,9 +56,6 @@ class CreateOrderKafkaProcessor : KafkaHandler<Order, TopicSingle> {
                     IllegalStateException("NATS connection is closed").toMono()
             }
     }
-
-    private fun retryOnNatsError(): Retry = Retry.fixedDelay(Long.MAX_VALUE, Duration.ofSeconds(2))
-        .filter { it is IllegalStateException && !connectionListener.isConnected() }
 
     companion object {
         const val GROUP_ID_ORDER = "group-rentcar-order"

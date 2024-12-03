@@ -2,7 +2,9 @@ package com.makarytskyi.rentcar.repairing.application.mapper
 
 import com.makarytskyi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomMongoCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
+import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomAggregatedMongoRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomAggregatedRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.repairingPatch
@@ -11,69 +13,20 @@ import com.makarytskyi.rentcar.fixtures.RepairingFixture.responseRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.updateRepairingRequest
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
 import com.makarytskyi.rentcar.repairing.domain.patch.DomainRepairingPatch
+import com.makarytskyi.rentcar.repairing.infrastructure.mongo.entity.MongoRepairing
+import com.makarytskyi.rentcar.repairing.infrastructure.mongo.mapper.toDomain
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.mapper.toPatch
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.mapper.toResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 class RepairingMapperTest {
-    @Test
-    fun `repairing mapper should return response successfully`() {
-        // GIVEN
-        val repairing = randomRepairing(ObjectId().toString())
-        val response = responseRepairing(repairing)
-
-        // WHEN
-        val result = repairing.toResponse()
-
-        // THEN
-        assertEquals(response, result)
-    }
-
-    @Test
-    fun `update request return entity successfully`() {
-        // GIVEN
-        val request = updateRepairingRequest()
-        val entity = repairingPatch(request)
-
-        // WHEN
-        val result = request.toPatch()
-
-        // THEN
-        assertEquals(entity, result)
-    }
-
-    @Test
-    fun `update request with null fields return entity with null fields`() {
-        // GIVEN
-        val request = updateRepairingRequest().copy(price = null, status = null)
-        val entity = repairingPatch(request)
-
-        // WHEN
-        val result = request.toPatch()
-
-        // THEN
-        assertEquals(entity, result)
-    }
-
-    @Test
-    fun `aggregated repairing mapper should return response successfully`() {
-        // GIVEN
-        val car = randomCar()
-        val repairing = randomAggregatedRepairing(car)
-        val response = responseAggregatedRepairing(repairing)
-
-        // WHEN
-        val result = repairing.toResponse()
-
-        // THEN
-        assertEquals(response, result)
-    }
 
     @Test
     fun `patch mapper should return repairing with updated fields`() {

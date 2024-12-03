@@ -2,12 +2,11 @@ package com.makarytskyi.rentcar.car.application.service
 
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
-import com.makarytskyi.rentcar.car.domain.DomainCar
 import com.makarytskyi.rentcar.car.infrastructure.rest.mapper.toResponse
-import com.makarytskyi.rentcar.fixtures.CarFixture.carPatch
 import com.makarytskyi.rentcar.fixtures.CarFixture.createCarRequest
 import com.makarytskyi.rentcar.fixtures.CarFixture.createdCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomCreateCarRequest
 import com.makarytskyi.rentcar.fixtures.CarFixture.responseCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.updateCarRequest
 import com.makarytskyi.rentcar.fixtures.CarFixture.updateDomainCar
@@ -111,7 +110,7 @@ internal class CarServiceTest {
     @Test
     fun `should create car successfully`() {
         // GIVEN
-        val request = createCarRequest()
+        val request = randomCreateCarRequest()
         val createdCar = createdCar(request)
         every { carRepository.create(request) } returns createdCar.toMono()
 

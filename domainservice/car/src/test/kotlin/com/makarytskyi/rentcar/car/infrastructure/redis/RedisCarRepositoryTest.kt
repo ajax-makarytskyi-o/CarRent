@@ -6,7 +6,6 @@ import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
 import com.makarytskyi.rentcar.car.domain.DomainCar
 import com.makarytskyi.rentcar.car.infrastructure.redis.RedisCarRepository.Companion.idRedisKey
 import com.makarytskyi.rentcar.car.infrastructure.redis.RedisCarRepository.Companion.plateRedisKey
-import com.makarytskyi.rentcar.fixtures.CarFixture.carPatch
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.updateCarRequest
 import com.makarytskyi.rentcar.fixtures.CarFixture.updateDomainCar

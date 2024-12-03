@@ -18,8 +18,6 @@ import com.makarytskyi.rentcar.fixtures.OrderFixture.tomorrow
 import com.makarytskyi.rentcar.fixtures.OrderFixture.updateOrderRequestDto
 import com.makarytskyi.rentcar.fixtures.OrderFixture.updatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.yesterday
-import com.makarytskyi.rentcar.fixtures.UserFixture.domainUserPatch
-import com.makarytskyi.rentcar.fixtures.UserFixture.domainUserRequest
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import com.makarytskyi.rentcar.order.application.port.output.CreateOrderProducerOutputPort
 import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort

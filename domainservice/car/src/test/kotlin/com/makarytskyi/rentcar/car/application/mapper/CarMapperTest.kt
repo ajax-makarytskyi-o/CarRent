@@ -1,43 +1,16 @@
 package com.makarytskyi.rentcar.car.application.mapper
 
-import com.makarytskyi.commonmodels.car.Car.CarColor
 import com.makarytskyi.rentcar.car.domain.DomainCar
 import com.makarytskyi.rentcar.car.infrastructure.mongo.entity.MongoCar
 import com.makarytskyi.rentcar.car.infrastructure.mongo.mapper.toDomain
 import com.makarytskyi.rentcar.car.infrastructure.mongo.mapper.toMongo
-import com.makarytskyi.rentcar.car.infrastructure.rest.mapper.toResponse
-import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
-import com.makarytskyi.rentcar.fixtures.CarFixture.responseCar
-import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 
 class CarMapperTest {
-    @Test
-    fun `response mapper should return response successfully`() {
-        // GIVEN
-        val car = randomCar()
-        val response = responseCar(car)
-
-        // WHEN
-        val result = car.toResponse()
-
-        // THEN
-        assertEquals(response, result)
-    }
-
-    @Test
-    fun `response mapper should throw exception if id is null`() {
-        // GIVEN
-        val car = randomCar().copy(id = null)
-
-        // WHEN // THEN
-        assertThrows<IllegalArgumentException> { car.toResponse() }
-    }
 
     @ParameterizedTest
     @MethodSource("colorMapperMongo")

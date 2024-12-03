@@ -20,27 +20,27 @@ import com.makarytskyi.rentcar.user.domain.DomainUser
 import com.makarytskyi.rentcar.user.infrastructure.mongo.entity.MongoUser
 
 object OrderProtoFixtures {
-    fun createOrderRequest(mongoCar: DomainCar, mongoUser: DomainUser): CreateOrderRequest =
+    fun createOrderRequest(car: DomainCar, user: DomainUser): CreateOrderRequest =
         CreateOrderRequest.newBuilder()
             .apply {
                 with(orderBuilder) {
-                    carId = mongoCar.id.toString()
-                    userId = mongoUser.id.toString()
+                    carId = car.id.toString()
+                    userId = user.id.toString()
                     from = dateToTimestamp(monthAfter)
                     to = dateToTimestamp(monthAndDayAfter)
                 }
             }
             .build()
 
-    fun successfulCreateResponse(response: CreateOrderRequest, price: Double): CreateOrderResponse = CreateOrderResponse
+    fun successfulCreateResponse(request: CreateOrderRequest, price: Double): CreateOrderResponse = CreateOrderResponse
         .newBuilder()
         .apply {
             with(successBuilder.orderBuilder) {
-                setId(response.order.id)
-                setCarId(response.order.carId)
-                setUserId(response.order.userId)
-                setFrom(response.order.from)
-                setTo(response.order.to)
+                setId(request.order.id)
+                setCarId(request.order.carId)
+                setUserId(request.order.userId)
+                setFrom(request.order.from)
+                setTo(request.order.to)
                 setPrice(price)
             }
         }
@@ -58,16 +58,16 @@ object OrderProtoFixtures {
         }
         .build()
 
-    fun successfulPatchResponse(response: DomainOrder): UpdateOrderResponse = UpdateOrderResponse
+    fun successfulPatchResponse(order: DomainOrder): UpdateOrderResponse = UpdateOrderResponse
         .newBuilder()
         .apply {
             with(successBuilder.orderBuilder) {
-                setId(response.id)
-                setCarId(response.carId)
-                setUserId(response.userId)
-                setFrom(dateToTimestamp(response.from!!))
-                setTo(dateToTimestamp(response.to!!))
-                setPrice(response.price!!.toDouble())
+                setId(order.id)
+                setCarId(order.carId)
+                setUserId(order.userId)
+                setFrom(dateToTimestamp(order.from))
+                setTo(dateToTimestamp(order.to))
+                setPrice(order.price!!.toDouble())
             }
         }
         .build()

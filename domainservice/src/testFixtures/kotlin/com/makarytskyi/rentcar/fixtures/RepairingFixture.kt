@@ -1,18 +1,19 @@
 package com.makarytskyi.rentcar.fixtures
 
-import com.google.protobuf.Timestamp
-import com.makarytskyi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.car.domain.DomainCar
-import com.makarytskyi.rentcar.car.domain.patch.DomainCarPatch
+import com.makarytskyi.rentcar.car.infrastructure.mongo.entity.MongoCar
 import com.makarytskyi.rentcar.car.infrastructure.rest.mapper.toResponse
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
 import com.makarytskyi.rentcar.fixtures.Utils.getDateFromNow
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
 import com.makarytskyi.rentcar.repairing.domain.patch.DomainRepairingPatch
 import com.makarytskyi.rentcar.repairing.domain.projection.AggregatedDomainRepairing
+import com.makarytskyi.rentcar.repairing.infrastructure.mongo.entity.MongoRepairing
+import com.makarytskyi.rentcar.repairing.infrastructure.mongo.entity.projection.AggregatedMongoRepairing
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.dto.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.dto.RepairingResponse
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.dto.UpdateRepairingRequest
+import com.makarytskyi.rentcar.repairing.infrastructure.rest.mapper.toResponse
 import org.bson.types.ObjectId
 
 object RepairingFixture {
@@ -27,45 +28,35 @@ object RepairingFixture {
         status = DomainRepairing.RepairingStatus.PENDING,
     )
 
-    fun emptyProtoRepairing() = Repairing
-        .newBuilder().also {
-            it.id = ""
-            it.carId = ""
-            it.price = 0.0
-            it.date = Timestamp.getDefaultInstance()
-            it.status = Repairing.RepairingStatus.REPAIRING_STATUS_UNSPECIFIED
-        }
-        .build()
-
     fun emptyRepairingPatch() = DomainRepairingPatch(
         price = null,
         status = null,
     )
 
-    fun responseRepairing(mongoRepairing: DomainRepairing) = RepairingResponse(
-        id = mongoRepairing.id.toString(),
-        carId = mongoRepairing.carId,
-        date = mongoRepairing.date,
-        price = mongoRepairing.price,
-        status = mongoRepairing.status!!,
+    fun responseRepairing(repairing: DomainRepairing) = RepairingResponse(
+        id = repairing.id.toString(),
+        carId = repairing.carId,
+        date = repairing.date,
+        price = repairing.price,
+        status = repairing.status.toResponse(),
     )
 
-    fun responseAggregatedRepairing(mongoRepairing: AggregatedDomainRepairing) = AggregatedRepairingResponse(
-        id = mongoRepairing.id.toString(),
-        car = mongoRepairing.car!!.toResponse(),
-        date = mongoRepairing.date,
-        price = mongoRepairing.price,
-        status = mongoRepairing.status!!,
+    fun responseAggregatedRepairing(repairing: AggregatedDomainRepairing) = AggregatedRepairingResponse(
+        id = repairing.id.toString(),
+        car = repairing.car.toResponse(),
+        date = repairing.date,
+        price = repairing.price,
+        status = repairing.status.toResponse(),
     )
 
-    fun createRepairingRequest(mongoCar: DomainCar) = DomainRepairing(
-        carId = mongoCar.id.toString(),
+    fun createRepairingRequest(car: DomainCar) = DomainRepairing(
+        carId = car.id.toString(),
         date = monthAfter,
         price = randomPrice(),
         status = DomainRepairing.RepairingStatus.IN_PROGRESS,
     )
 
-    fun createdRepairing(mongoRepairing: DomainRepairing) = mongoRepairing.copy(id = ObjectId().toString())
+    fun createdRepairing(repairing: DomainRepairing) = repairing.copy(id = ObjectId().toString())
 
     fun updateRepairingRequest() = UpdateRepairingRequest(
         price = randomPrice(),
@@ -87,10 +78,10 @@ object RepairingFixture {
         status = request.status,
     )
 
-    fun updatedRepairing(oldMongoRepairing: DomainRepairing, request: DomainRepairingPatch) =
-        oldMongoRepairing.copy(
-            price = request.price ?: oldMongoRepairing.price,
-            status = request.status ?: oldMongoRepairing.status
+    fun updatedRepairing(oldRepairing: DomainRepairing, request: DomainRepairingPatch) =
+        oldRepairing.copy(
+            price = request.price ?: oldRepairing.price,
+            status = request.status ?: oldRepairing.status,
         )
 
     fun randomAggregatedRepairing(car: DomainCar) = AggregatedDomainRepairing(
@@ -107,5 +98,13 @@ object RepairingFixture {
         date = repairing.date,
         price = repairing.price,
         status = repairing.status,
+    )
+
+    fun randomAggregatedMongoRepairing(car: MongoCar?) = AggregatedMongoRepairing(
+        id = ObjectId(),
+        car = car,
+        date = tomorrow,
+        price = randomPrice(),
+        status = MongoRepairing.RepairingStatus.PENDING,
     )
 }

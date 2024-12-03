@@ -25,12 +25,12 @@ object UserFixture {
         return generateString(8)
     }
 
-    fun responseUser(mongoUser: DomainUser) = UserResponse(
-        id = mongoUser.id.toString(),
-        name = mongoUser.name,
-        email = mongoUser.email,
-        phoneNumber = mongoUser.phoneNumber!!,
-        city = mongoUser.city!!,
+    fun responseUser(user: DomainUser) = UserResponse(
+        id = user.id.toString(),
+        name = user.name,
+        email = user.email,
+        phoneNumber = user.phoneNumber!!,
+        city = user.city!!,
     )
 
     fun createUserRequest() = CreateUserRequest(
@@ -56,12 +56,12 @@ object UserFixture {
         city = request.city,
     )
 
-    fun createdUser(mongoUser: DomainUser) = mongoUser.copy(id = ObjectId().toString())
+    fun createdUser(user: DomainUser) = user.copy(id = ObjectId().toString())
 
     fun updateUserRequest() = UpdateUserRequest(
         name = randomName(),
         phoneNumber = randomPhoneNumber(),
-        city = randomCity()
+        city = randomCity(),
     )
 
     fun userPatch(request: UpdateUserRequest) = DomainUserPatch(
@@ -90,6 +90,10 @@ object UserFixture {
         city = patch.city ?: oldUser.city,
     )
 
-    fun updatedUser(mongoUser: DomainUser, request: DomainUserPatch) =
-        mongoUser.copy(name = request.name ?: mongoUser.name, phoneNumber = request.phoneNumber, city = request.city)
+    fun updatedUser(user: DomainUser, patch: DomainUserPatch) =
+        user.copy(
+            name = patch.name ?: user.name,
+            phoneNumber = patch.phoneNumber ?: user.phoneNumber,
+            city = patch.city ?: user.city,
+        )
 }

@@ -1,22 +1,21 @@
-package com.makarytskyi.rentcar.mapper
+package com.makarytskyi.rentcar.repairing.application.mapper
 
 import com.makarytskyi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
-import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyProtoRepairing
+import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomAggregatedRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.repairingPatch
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.responseAggregatedRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.responseRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.updateRepairingRequest
-import com.makarytskyi.rentcar.repairing.application.mapper.toProto
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
+import com.makarytskyi.rentcar.repairing.domain.patch.DomainRepairingPatch
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.mapper.toPatch
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.mapper.toResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
@@ -74,6 +73,42 @@ class RepairingMapperTest {
 
         // THEN
         assertEquals(response, result)
+    }
+
+    @Test
+    fun `patch mapper should return repairing with updated fields`() {
+        // GIVEN
+        val repairing = randomRepairing(ObjectId().toString())
+
+        val patch = DomainRepairingPatch(
+            price = randomPrice(),
+            status = DomainRepairing.RepairingStatus.entries.random(),
+        )
+
+        val expected = repairing.copy(price = patch.price!!, status = patch.status!!)
+
+        // WHEN
+        val result = repairing.fromPatch(patch)
+
+        // THEN
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun `patch mapper should return old repairing if patch is empty`() {
+        // GIVEN
+        val repairing = randomRepairing(ObjectId().toString())
+
+        val patch = DomainRepairingPatch(
+            price = null,
+            status = null,
+        )
+
+        // WHEN
+        val result = repairing.fromPatch(patch)
+
+        // THEN
+        assertEquals(repairing, result)
     }
 
     @ParameterizedTest

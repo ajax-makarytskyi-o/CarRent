@@ -8,4 +8,8 @@ data class UpdateRepairingRequest(
     @field:Min(0)
     val price: BigDecimal?,
     val status: DomainRepairing.RepairingStatus?,
-)
+) {
+    enum class RepairingStatus {
+        PENDING, IN_PROGRESS, COMPLETED
+    }
+}

@@ -1,6 +1,5 @@
 package com.makarytskyi.rentcar.car.infrastructure.rest.dto
 
-import com.makarytskyi.rentcar.car.domain.DomainCar
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -20,5 +19,9 @@ data class CreateCarRequest(
     @field:NotNull
     @field:Size(max = 12)
     val plate: String,
-    val color: DomainCar.CarColor?,
-)
+    val color: CarColor = CarColor.UNSPECIFIED,
+) {
+    enum class CarColor {
+        RED, GREEN, BLUE, BLACK, WHITE, GREY, YELLOW, UNSPECIFIED
+    }
+}

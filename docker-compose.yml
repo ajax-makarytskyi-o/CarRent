@@ -51,6 +51,19 @@ services:
     profiles:
       - dev
 
+  mongo-test:
+    image: mongo:7.0.12
+    restart: always
+    container_name: test_mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: test
+      MONGO_INITDB_ROOT_PASSWORD: test
+      MONGO_INITDB_DATABASE: test
+    ports:
+      - "27018:27017"
+    profiles:
+      - test
+
   mongo-express:
     image: mongo-express:1.0.2
     container_name: express

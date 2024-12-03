@@ -10,13 +10,13 @@ fun DomainCar.toProto(): Car = Car.newBuilder()
         it.brand = brand
         it.model = model
         it.year = year ?: 0
-        it.color = color?.toProto()
+        it.color = color.toProto()
         it.plate = plate
-        it.price = price?.toDouble() ?: 0.0
+        it.price = price.toDouble()
     }
     .build()
 
-private fun DomainCar.CarColor.toProto(): CarColor =
+fun DomainCar.CarColor.toProto(): CarColor =
     when (this) {
         DomainCar.CarColor.RED -> CarColor.CAR_COLOR_RED
         DomainCar.CarColor.GREEN -> CarColor.CAR_COLOR_GREEN

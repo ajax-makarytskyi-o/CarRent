@@ -1,6 +1,5 @@
 package com.makarytskyi.rentcar.repairing.infrastructure.rest.dto
 
-import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
 import java.math.BigDecimal
 import java.util.Date
 
@@ -9,5 +8,9 @@ data class RepairingResponse(
     val carId: String,
     val date: Date?,
     val price: BigDecimal?,
-    val status: DomainRepairing.RepairingStatus?,
-)
+    val status: RepairingStatus?,
+) {
+    enum class RepairingStatus {
+        PENDING, IN_PROGRESS, COMPLETED
+    }
+}

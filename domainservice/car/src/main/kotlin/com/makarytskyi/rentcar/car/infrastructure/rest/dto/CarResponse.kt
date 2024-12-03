@@ -1,6 +1,5 @@
 package com.makarytskyi.rentcar.car.infrastructure.rest.dto
 
-import com.makarytskyi.rentcar.car.domain.DomainCar
 import java.math.BigDecimal
 
 data class CarResponse(
@@ -10,5 +9,9 @@ data class CarResponse(
     val price: BigDecimal,
     val year: Int?,
     val plate: String,
-    val color: DomainCar.CarColor?,
-)
+    val color: CarColor,
+) {
+    enum class CarColor {
+        RED, GREEN, BLUE, BLACK, WHITE, GREY, YELLOW, UNSPECIFIED
+    }
+}

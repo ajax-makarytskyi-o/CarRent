@@ -14,14 +14,14 @@ fun AggregatedDomainRepairing.toResponse(): AggregatedRepairingResponse = Aggreg
     this.car.toResponse(),
     this.date,
     this.price,
-    this.status,
+    this.status.toResponse(),
 )
 
 fun CreateRepairingRequest.toDomain(): DomainRepairing = DomainRepairing(
     carId = this.carId,
     date = this.date ?: throw IllegalArgumentException("Date of repairing is null"),
     price = this.price ?: throw IllegalArgumentException("Price of repairing is null"),
-    status = this.status ?: DomainRepairing.RepairingStatus.PENDING,
+    status = this.status?.toDomain() ?: DomainRepairing.RepairingStatus.PENDING,
 )
 
 fun DomainRepairing.toResponse(): RepairingResponse = RepairingResponse(
@@ -29,10 +29,24 @@ fun DomainRepairing.toResponse(): RepairingResponse = RepairingResponse(
     requireNotNull(this.carId) { "Car id is null" },
     this.date,
     this.price,
-    this.status,
+    this.status.toResponse(),
 )
 
 fun UpdateRepairingRequest.toPatch() = DomainRepairingPatch(
     price = this.price,
     status = this.status,
 )
+
+fun CreateRepairingRequest.RepairingStatus.toDomain(): DomainRepairing.RepairingStatus =
+    when (this) {
+        CreateRepairingRequest.RepairingStatus.PENDING -> DomainRepairing.RepairingStatus.PENDING
+        CreateRepairingRequest.RepairingStatus.IN_PROGRESS -> DomainRepairing.RepairingStatus.IN_PROGRESS
+        CreateRepairingRequest.RepairingStatus.COMPLETED -> DomainRepairing.RepairingStatus.COMPLETED
+    }
+
+fun DomainRepairing.RepairingStatus.toResponse(): RepairingResponse.RepairingStatus =
+    when (this) {
+        DomainRepairing.RepairingStatus.PENDING -> RepairingResponse.RepairingStatus.PENDING
+        DomainRepairing.RepairingStatus.IN_PROGRESS -> RepairingResponse.RepairingStatus.IN_PROGRESS
+        DomainRepairing.RepairingStatus.COMPLETED -> RepairingResponse.RepairingStatus.COMPLETED
+    }

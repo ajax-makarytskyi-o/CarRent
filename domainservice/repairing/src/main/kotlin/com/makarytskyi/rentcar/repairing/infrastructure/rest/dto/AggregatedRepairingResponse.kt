@@ -10,5 +10,5 @@ data class AggregatedRepairingResponse(
     val car: CarResponse,
     val date: Date?,
     val price: BigDecimal?,
-    val status: DomainRepairing.RepairingStatus?,
+    val status: RepairingResponse.RepairingStatus?,
 )

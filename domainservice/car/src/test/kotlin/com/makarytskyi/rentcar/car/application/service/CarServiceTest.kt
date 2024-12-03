@@ -3,7 +3,6 @@ package com.makarytskyi.rentcar.car.application.service
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
 import com.makarytskyi.rentcar.car.infrastructure.rest.mapper.toResponse
-import com.makarytskyi.rentcar.fixtures.CarFixture.createCarRequest
 import com.makarytskyi.rentcar.fixtures.CarFixture.createdCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCreateCarRequest

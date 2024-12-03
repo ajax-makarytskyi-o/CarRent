@@ -3,12 +3,11 @@ package com.makarytskyi.rentcar.car.infrastructure.redis
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
 import com.makarytskyi.rentcar.car.domain.DomainCar
-import com.makarytskyi.rentcar.car.domain.patch.DomainCarPatch
-import com.makarytskyi.rentcar.car.infrastructure.mongo.MongoCarRepository
 import com.makarytskyi.rentcar.common.config.RedisProperties
 import io.lettuce.core.RedisException
 import java.net.SocketException
 import java.time.Duration
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Primary
 import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.redis.RedisConnectionFailureException
@@ -22,7 +21,8 @@ import reactor.util.retry.Retry
 @Repository
 @Primary
 class RedisCarRepository(
-    private val mongoCarRepository: MongoCarRepository,
+    @Qualifier("mongoCarRepository")
+    private val mongoCarRepository: CarOutputPort,
     private val reactiveRedisTemplate: ReactiveRedisTemplate<String, ByteArray>,
     private val mapper: ObjectMapper,
     private val redisProperties: RedisProperties,
@@ -61,9 +61,9 @@ class RedisCarRepository(
                     .subscribe()
             }
 
-    override fun patch(id: String, carPatch: DomainCar): Mono<DomainCar> =
+    override fun patch(id: String, patch: DomainCar): Mono<DomainCar> =
         findById(id)
-            .flatMap { mongoCarRepository.patch(id, carPatch) }
+            .flatMap { mongoCarRepository.patch(id, patch) }
             .doOnNext { car ->
                 setRedisKey(idRedisKey(car.id.toString()), mapper.writeValueAsBytes(car), redisProperties.ttlSeconds)
                 setRedisKey(

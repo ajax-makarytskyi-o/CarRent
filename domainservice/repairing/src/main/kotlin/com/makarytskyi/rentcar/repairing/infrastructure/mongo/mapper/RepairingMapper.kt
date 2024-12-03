@@ -1,7 +1,6 @@
 package com.makarytskyi.rentcar.repairing.infrastructure.mongo.mapper
 
 import com.makarytskyi.rentcar.car.infrastructure.mongo.mapper.toDomain
-import com.makarytskyi.rentcar.order.infrastructure.mongo.mapper.toMongo
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
 import com.makarytskyi.rentcar.repairing.domain.projection.AggregatedDomainRepairing
 import com.makarytskyi.rentcar.repairing.infrastructure.mongo.entity.MongoRepairing

@@ -2,7 +2,6 @@ package com.makarytskyi.rentcar.user.infrastructure.mongo
 
 import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
 import com.makarytskyi.rentcar.user.domain.DomainUser
-import com.makarytskyi.rentcar.user.domain.patch.DomainUserPatch
 import com.makarytskyi.rentcar.user.infrastructure.mongo.entity.MongoUser
 import com.makarytskyi.rentcar.user.infrastructure.mongo.mapper.toDomain
 import com.makarytskyi.rentcar.user.infrastructure.mongo.mapper.toMongo
@@ -15,7 +14,6 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.isEqualTo
-import org.springframework.data.mongodb.core.update
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono

@@ -1,7 +1,6 @@
 package com.makarytskyi.rentcar.fixtures.request
 
 import com.makarytskyi.commonmodels.error.Error
-import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
@@ -12,12 +11,11 @@ import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 import com.makarytskyi.rentcar.car.domain.DomainCar
+import com.makarytskyi.rentcar.common.util.Utils.dateToTimestamp
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
-import com.makarytskyi.rentcar.common.util.Utils.dateToTimestamp
 import com.makarytskyi.rentcar.order.domain.DomainOrder
 import com.makarytskyi.rentcar.user.domain.DomainUser
-import com.makarytskyi.rentcar.user.infrastructure.mongo.entity.MongoUser
 
 object OrderProtoFixtures {
     fun createOrderRequest(car: DomainCar, user: DomainUser): CreateOrderRequest =

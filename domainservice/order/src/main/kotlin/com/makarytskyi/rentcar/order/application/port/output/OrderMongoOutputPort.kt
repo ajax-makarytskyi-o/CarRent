@@ -1,7 +1,6 @@
 package com.makarytskyi.rentcar.order.application.port.output
 
 import com.makarytskyi.rentcar.order.domain.DomainOrder
-import com.makarytskyi.rentcar.order.domain.patch.DomainOrderPatch
 import com.makarytskyi.rentcar.order.domain.projection.AggregatedDomainOrder
 import java.util.Date
 import reactor.core.publisher.Flux

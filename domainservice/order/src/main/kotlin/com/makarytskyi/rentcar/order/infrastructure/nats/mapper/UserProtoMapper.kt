@@ -5,10 +5,10 @@ import com.makarytskyi.rentcar.user.domain.DomainUser
 
 fun DomainUser.toProto(): User = User.newBuilder()
     .also {
-        it.setId(id)
-        it.setName(name)
-        it.setEmail(email)
-        it.setPhoneNumber(phoneNumber)
-        it.setCity(city)
+        it.id = id
+        it.name = name
+        it.email = email
+        it.phoneNumber = phoneNumber ?: ""
+        it.city = city ?: ""
     }
     .build()

@@ -1,7 +1,6 @@
 package com.makarytskyi.rentcar.car.application.port.output
 
 import com.makarytskyi.rentcar.car.domain.DomainCar
-import com.makarytskyi.rentcar.car.domain.patch.DomainCarPatch
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 

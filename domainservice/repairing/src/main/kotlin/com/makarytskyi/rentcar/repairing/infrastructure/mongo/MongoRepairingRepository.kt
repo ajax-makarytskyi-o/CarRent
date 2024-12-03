@@ -1,10 +1,8 @@
 package com.makarytskyi.rentcar.repairing.infrastructure.mongo
 
 import com.makarytskyi.rentcar.car.infrastructure.mongo.entity.MongoCar
-import com.makarytskyi.rentcar.car.infrastructure.mongo.mapper.toDomain
 import com.makarytskyi.rentcar.repairing.application.port.output.RepairingMongoOutputPort
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
-import com.makarytskyi.rentcar.repairing.domain.patch.DomainRepairingPatch
 import com.makarytskyi.rentcar.repairing.domain.projection.AggregatedDomainRepairing
 import com.makarytskyi.rentcar.repairing.infrastructure.mongo.entity.MongoRepairing
 import com.makarytskyi.rentcar.repairing.infrastructure.mongo.entity.projection.AggregatedMongoRepairing

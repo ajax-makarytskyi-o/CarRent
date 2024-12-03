@@ -1,7 +1,6 @@
 package com.makarytskyi.rentcar.repairing.application.port.output
 
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
-import com.makarytskyi.rentcar.repairing.domain.patch.DomainRepairingPatch
 import com.makarytskyi.rentcar.repairing.domain.projection.AggregatedDomainRepairing
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono

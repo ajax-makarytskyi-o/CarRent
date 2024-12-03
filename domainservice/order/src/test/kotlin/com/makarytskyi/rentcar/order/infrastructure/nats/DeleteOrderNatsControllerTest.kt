@@ -3,12 +3,12 @@ package com.makarytskyi.rentcar.order.infrastructure.nats
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.DELETE
 import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
-import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.deleteOrderRequest
 import com.makarytskyi.rentcar.order.ContainerBase
+import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toDeleteFailureResponse
 import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
 import kotlin.test.assertEquals

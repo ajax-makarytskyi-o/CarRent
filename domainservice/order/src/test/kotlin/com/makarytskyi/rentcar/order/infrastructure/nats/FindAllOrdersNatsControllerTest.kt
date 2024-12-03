@@ -4,7 +4,6 @@ import com.makarytskyi.commonmodels.order.AggregatedOrder
 import com.makarytskyi.internalapi.input.reqreply.order.FindAllOrdersResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.FIND_ALL
 import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
-import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
@@ -15,9 +14,9 @@ import com.makarytskyi.rentcar.fixtures.Utils.emptySize
 import com.makarytskyi.rentcar.fixtures.Utils.firstPage
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.findAllOrderRequest
 import com.makarytskyi.rentcar.order.ContainerBase
+import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
 import com.makarytskyi.rentcar.order.domain.projection.AggregatedDomainOrder
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toProto
-import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.toProto
 import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

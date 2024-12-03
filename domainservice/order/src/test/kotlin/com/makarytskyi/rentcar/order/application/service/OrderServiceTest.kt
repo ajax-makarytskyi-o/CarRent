@@ -2,7 +2,6 @@ package com.makarytskyi.rentcar.order.application.service
 
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
-import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.createOrderRequestDto
@@ -20,6 +19,7 @@ import com.makarytskyi.rentcar.fixtures.OrderFixture.updatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.yesterday
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import com.makarytskyi.rentcar.order.application.port.output.CreateOrderProducerOutputPort
+import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
 import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs

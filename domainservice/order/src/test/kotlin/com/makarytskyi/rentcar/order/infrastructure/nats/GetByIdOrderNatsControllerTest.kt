@@ -4,7 +4,6 @@ import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.GET_BY_ID
 import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
-import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
@@ -13,8 +12,8 @@ import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failureGetByIdResponse
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.getByIdOrderRequest
 import com.makarytskyi.rentcar.order.ContainerBase
+import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toProto
-import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.toProto
 import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId

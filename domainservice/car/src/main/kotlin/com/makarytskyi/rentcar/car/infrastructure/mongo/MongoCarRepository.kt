@@ -2,7 +2,6 @@ package com.makarytskyi.rentcar.car.infrastructure.mongo
 
 import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
 import com.makarytskyi.rentcar.car.domain.DomainCar
-import com.makarytskyi.rentcar.car.domain.patch.DomainCarPatch
 import com.makarytskyi.rentcar.car.infrastructure.mongo.entity.MongoCar
 import com.makarytskyi.rentcar.car.infrastructure.mongo.mapper.toDomain
 import com.makarytskyi.rentcar.car.infrastructure.mongo.mapper.toMongo

@@ -1,8 +1,3 @@
-nats:
-  spring:
-    io.nats.client:
-      servers: "nats://localhost:4222"
-
 spring:
   data:
     mongodb:

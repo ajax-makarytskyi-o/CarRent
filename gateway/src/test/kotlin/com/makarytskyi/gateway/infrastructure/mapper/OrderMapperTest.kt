@@ -1,4 +1,4 @@
-package com.makarytskyi.gateway.mapper
+package com.makarytskyi.gateway.infrastructure.mapper
 
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.gateway.fixtures.OrderProtoFixture.aggregatedOrderResponse

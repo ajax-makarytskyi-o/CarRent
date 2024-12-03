@@ -34,6 +34,7 @@ dependencies {
     testImplementation("org.testcontainers:mongodb:1.19.0")
     testImplementation("io.projectreactor:reactor-test:3.6.10")
     testImplementation("io.mockk:mockk:1.13.12")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.1.0")
 }
 
 tasks.bootJar {

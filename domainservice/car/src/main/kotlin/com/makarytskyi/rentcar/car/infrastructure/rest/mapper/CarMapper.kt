@@ -5,7 +5,6 @@ import com.makarytskyi.rentcar.car.domain.patch.DomainCarPatch
 import com.makarytskyi.rentcar.car.infrastructure.rest.dto.CarResponse
 import com.makarytskyi.rentcar.car.infrastructure.rest.dto.CreateCarRequest
 import com.makarytskyi.rentcar.car.infrastructure.rest.dto.UpdateCarRequest
-import java.math.BigDecimal
 
 fun CreateCarRequest.toDomain(): DomainCar = DomainCar(
     id = null,

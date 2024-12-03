@@ -1,7 +1,6 @@
 package com.makarytskyi.rentcar.order.infrastructure.mongo
 
 import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
-import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.domainOrderPatch
@@ -11,6 +10,7 @@ import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import com.makarytskyi.rentcar.order.ContainerBase
+import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
 import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -11,12 +11,12 @@ fun DomainOrder.toResponse(price: BigDecimal?): DomainOrder {
         from.toInstant()?.until(to.toInstant(), java.time.temporal.ChronoUnit.DAYS)?.toBigDecimal() ?: BigDecimal.ZERO
 
     return DomainOrder(
-        id = requireNotNull(id) { "Order id is null" },
+        id = id,
         carId = carId,
         userId = userId,
         from = from,
         to = to,
-        price = price?.times(bookedDays) ?: throw IllegalArgumentException("Price of car is null")
+        price = requireNotNull(price?.times(bookedDays)) { "Price of car is null" }
     )
 }
 
@@ -25,7 +25,7 @@ fun AggregatedDomainOrder.toResponse(): AggregatedDomainOrder {
         from.toInstant()?.until(to.toInstant(), java.time.temporal.ChronoUnit.DAYS)?.toBigDecimal() ?: BigDecimal.ZERO
 
     return AggregatedDomainOrder(
-        id = requireNotNull(id) { "Order id is null" },
+        id = id,
         car = car,
         user = user,
         from = from,

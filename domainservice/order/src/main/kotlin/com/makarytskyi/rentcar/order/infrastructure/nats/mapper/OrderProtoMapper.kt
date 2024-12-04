@@ -13,13 +13,13 @@ import com.makarytskyi.rentcar.common.util.Utils.dateToTimestamp
 import com.makarytskyi.rentcar.common.util.Utils.timestampToDate
 import com.makarytskyi.rentcar.order.application.mapper.toProto
 import com.makarytskyi.rentcar.order.domain.DomainOrder
-import com.makarytskyi.rentcar.order.domain.patch.DomainOrderPatch
+import com.makarytskyi.rentcar.order.domain.create.CreateOrder
+import com.makarytskyi.rentcar.order.domain.patch.PatchOrder
 import com.makarytskyi.rentcar.order.domain.projection.AggregatedDomainOrder
 
 @Suppress("TooManyFunctions")
 object OrderProtoMapper {
-    fun CreateOrderRequest.toDomain() = DomainOrder(
-        id = null,
+    fun CreateOrderRequest.toDomain() = CreateOrder(
         carId = order.carId,
         userId = order.userId,
         from = timestampToDate(order.from),
@@ -43,7 +43,7 @@ object OrderProtoMapper {
     fun toDeleteFailureResponse(): DeleteOrderResponse = DeleteOrderResponse.newBuilder()
         .apply { successBuilder }.build()
 
-    fun OrderUpdate.toPatch(): DomainOrderPatch = DomainOrderPatch(
+    fun OrderUpdate.toPatch(): PatchOrder = PatchOrder(
         from = timestampToDate(startDate),
         to = timestampToDate(endDate),
     )
@@ -55,7 +55,7 @@ object OrderProtoMapper {
             it.user = user.toProto()
             it.from = dateToTimestamp(from)
             it.to = dateToTimestamp(to)
-            it.price = price?.toDouble() ?: throw IllegalArgumentException("Car price is null")
+            it.price = requireNotNull(price?.toDouble()) { "Car price is null" }
         }
         .build()
 

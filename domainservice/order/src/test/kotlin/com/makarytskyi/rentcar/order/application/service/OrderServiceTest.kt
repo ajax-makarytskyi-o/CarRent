@@ -1,10 +1,10 @@
 package com.makarytskyi.rentcar.order.application.service
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
+import com.makarytskyi.rentcar.car.application.port.output.CarRepositoryOutputPort
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
-import com.makarytskyi.rentcar.fixtures.OrderFixture.createOrderRequestDto
+import com.makarytskyi.rentcar.fixtures.OrderFixture.createOrderRequest
 import com.makarytskyi.rentcar.fixtures.OrderFixture.createdOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.domainOrderPatch
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
@@ -19,8 +19,8 @@ import com.makarytskyi.rentcar.fixtures.OrderFixture.updatedOrder
 import com.makarytskyi.rentcar.fixtures.OrderFixture.yesterday
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import com.makarytskyi.rentcar.order.application.port.output.CreateOrderProducerOutputPort
-import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
-import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
+import com.makarytskyi.rentcar.order.application.port.output.OrderRepositoryOutputPort
+import com.makarytskyi.rentcar.user.application.port.output.UserRepositoryOutputPort
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -45,13 +45,13 @@ internal class OrderServiceTest {
     lateinit var orderCreateOrderKafkaProducer: CreateOrderProducerOutputPort
 
     @MockK
-    lateinit var orderRepository: OrderMongoOutputPort
+    lateinit var orderRepository: OrderRepositoryOutputPort
 
     @MockK
-    lateinit var carRepository: CarOutputPort
+    lateinit var carRepository: CarRepositoryOutputPort
 
     @MockK
-    lateinit var userRepository: UserOutputPort
+    lateinit var userRepository: UserRepositoryOutputPort
 
     @InjectMockKs
     lateinit var orderService: OrderService
@@ -63,10 +63,10 @@ internal class OrderServiceTest {
         val user = randomUser()
         val order = randomAggregatedOrder(car, user)
         val response = responseAggregatedOrderDto(order, car)
-        every { orderRepository.findFullById(order.id.toString()) } returns order.toMono()
+        every { orderRepository.findFullById(order.id) } returns order.toMono()
 
         // WHEN
-        val result = orderService.getById(order.id.toString())
+        val result = orderService.getById(order.id)
 
         // THEN
         result
@@ -74,7 +74,7 @@ internal class OrderServiceTest {
             .expectNext(response)
             .verifyComplete()
 
-        verify { orderRepository.findFullById(order.id.toString()) }
+        verify { orderRepository.findFullById(order.id) }
     }
 
     @Test
@@ -136,13 +136,13 @@ internal class OrderServiceTest {
         // GIVEN
         val car = randomCar()
         val user = randomUser()
-        val request = createOrderRequestDto(car, user)
+        val request = createOrderRequest(car.id, user.id)
         val createdOrder = createdOrder(request)
         val response = responseOrderDto(createdOrder, car)
         every { orderRepository.create(request) } returns createdOrder.toMono()
-        every { carRepository.findById(car.id.toString()) } returns car.toMono()
-        every { userRepository.findById(user.id.toString()) } returns user.toMono()
-        every { orderRepository.findByCarId(car.id.toString()) } returns Flux.empty()
+        every { carRepository.findById(car.id) } returns car.toMono()
+        every { userRepository.findById(user.id) } returns user.toMono()
+        every { orderRepository.findByCarId(car.id) } returns Flux.empty()
         every { orderCreateOrderKafkaProducer.sendCreateOrder(any()) } returns Mono.empty()
 
         // WHEN
@@ -162,17 +162,17 @@ internal class OrderServiceTest {
         // GIVEN
         val user = randomUser()
         val car = randomCar()
-        every { userRepository.findById(user.id.toString()) } returns user.toMono()
-        every { carRepository.findById(car.id.toString()) } returns Mono.empty()
+        every { userRepository.findById(user.id) } returns user.toMono()
+        every { carRepository.findById(car.id) } returns Mono.empty()
 
         // WHEN // THEN
-        orderService.create(createOrderRequestDto(car, user))
+        orderService.create(createOrderRequest(car.id, user.id))
             .test()
             .verifyError<NotFoundException>()
 
         verify {
-            userRepository.findById(user.id.toString())
-            carRepository.findById(car.id.toString())
+            userRepository.findById(user.id)
+            carRepository.findById(car.id)
         }
     }
 
@@ -181,16 +181,16 @@ internal class OrderServiceTest {
         // GIVEN
         val car = randomCar()
         val user = randomUser()
-        val request = createOrderRequestDto(car, user)
-        every { userRepository.findById(user.id.toString()) } returns Mono.empty()
-        every { carRepository.findById(car.id.toString()) } returns car.toMono()
+        val request = createOrderRequest(car.id, user.id)
+        every { userRepository.findById(user.id) } returns Mono.empty()
+        every { carRepository.findById(car.id) } returns car.toMono()
 
         // WHEN // THEN
         orderService.create(request)
             .test()
             .verifyError<NotFoundException>()
 
-        verify { userRepository.findById(user.id.toString()) }
+        verify { userRepository.findById(user.id) }
     }
 
     @Test
@@ -204,16 +204,16 @@ internal class OrderServiceTest {
                 to = monthAndDayAfter
             )
         )
-        every { userRepository.findById(user.id.toString()) } returns user.toMono()
-        every { carRepository.findById(car.id.toString()) } returns car.toMono()
-        every { orderRepository.findByCarId(car.id.toString()) } returns orders.toFlux()
+        every { userRepository.findById(user.id) } returns user.toMono()
+        every { carRepository.findById(car.id) } returns car.toMono()
+        every { orderRepository.findByCarId(car.id) } returns orders.toFlux()
 
         // WHEN // THEN
-        orderService.create(createOrderRequestDto(car, user))
+        orderService.create(createOrderRequest(car.id, user.id))
             .test()
             .verifyError<IllegalArgumentException>()
 
-        verify { orderRepository.findByCarId(car.id.toString()) }
+        verify { orderRepository.findByCarId(car.id) }
     }
 
     @Test
@@ -221,7 +221,7 @@ internal class OrderServiceTest {
         // GIVEN
         val user = randomUser()
         val car = randomCar()
-        val request = createOrderRequestDto(car, user).copy(
+        val request = createOrderRequest(car.id, user.id).copy(
             from = monthAfter,
             to = tomorrow
         )
@@ -237,7 +237,7 @@ internal class OrderServiceTest {
         // GIVEN
         val user = randomUser()
         val car = randomCar()
-        val request = createOrderRequestDto(car, user).copy(
+        val request = createOrderRequest(car.id, user.id).copy(
             from = yesterday,
             to = tomorrow
         )
@@ -260,14 +260,14 @@ internal class OrderServiceTest {
         val domainRequest = domainOrderPatch(request, order)
         val updatedOrder = updatedOrder(order, request)
         val response = responseOrderDto(updatedOrder, car).copy(price = price)
-        every { orderRepository.findFullById(order.id.toString()) } returns aggregatedOrder.toMono()
-        every { orderRepository.findById(order.id.toString()) } returns order.toMono()
-        every { carRepository.findById(car.id.toString()) } returns car.toMono()
-        every { orderRepository.findByCarId(car.id.toString()) } returns Flux.empty()
-        every { orderRepository.patch(order.id.toString(), domainRequest) } returns updatedOrder.toMono()
+        every { orderRepository.findFullById(order.id) } returns aggregatedOrder.toMono()
+        every { orderRepository.findById(order.id) } returns order.toMono()
+        every { carRepository.findById(car.id) } returns car.toMono()
+        every { orderRepository.findByCarId(car.id) } returns Flux.empty()
+        every { orderRepository.patch(order.id, domainRequest) } returns updatedOrder.toMono()
 
         // WHEN
-        val result = orderService.patch(order.id.toString(), request)
+        val result = orderService.patch(order.id, request)
 
         // THEN
         result
@@ -275,7 +275,7 @@ internal class OrderServiceTest {
             .expectNext(response)
             .verifyComplete()
 
-        verify { orderRepository.patch(order.id.toString(), domainRequest) }
+        verify { orderRepository.patch(order.id, domainRequest) }
     }
 
     @Test
@@ -290,14 +290,14 @@ internal class OrderServiceTest {
         val domainRequest = domainOrderPatch(request, order)
         val updatedOrder = updatedOrder(order, request)
         val response = responseOrderDto(updatedOrder, car).copy(price = price)
-        every { orderRepository.findFullById(order.id.toString()) } returns aggregatedOrder.toMono()
-        every { carRepository.findById(car.id.toString()) } returns car.toMono()
-        every { orderRepository.findByCarId(car.id.toString()) } returns Flux.empty()
-        every { orderRepository.findById(order.id.toString()) } returns order.toMono()
-        every { orderRepository.patch(order.id.toString(), domainRequest) } returns updatedOrder.toMono()
+        every { orderRepository.findFullById(order.id) } returns aggregatedOrder.toMono()
+        every { carRepository.findById(car.id) } returns car.toMono()
+        every { orderRepository.findByCarId(car.id) } returns Flux.empty()
+        every { orderRepository.findById(order.id) } returns order.toMono()
+        every { orderRepository.patch(order.id, domainRequest) } returns updatedOrder.toMono()
 
         // WHEN
-        val result = orderService.patch(order.id.toString(), request)
+        val result = orderService.patch(order.id, request)
 
         // THEN
         result
@@ -305,7 +305,7 @@ internal class OrderServiceTest {
             .expectNext(response)
             .verifyComplete()
 
-        verify { orderRepository.patch(order.id.toString(), domainRequest) }
+        verify { orderRepository.patch(order.id, domainRequest) }
     }
 
     @Test
@@ -344,11 +344,11 @@ internal class OrderServiceTest {
         val order = randomOrder(car.id, user.id).copy(price = car.price)
         val orders = listOf(order)
         val orderResponse = responseOrderDto(order, car)
-        every { orderRepository.findByUserId(user.id.toString()) } returns orders.toFlux()
-        every { carRepository.findById(car.id.toString()) } returns car.toMono()
+        every { orderRepository.findByUserId(user.id) } returns orders.toFlux()
+        every { carRepository.findById(car.id) } returns car.toMono()
 
         // WHEN
-        val foundOrders = orderService.findByUser(user.id.toString())
+        val foundOrders = orderService.findByUser(user.id)
 
         // THEN
         foundOrders.collectList()
@@ -358,7 +358,7 @@ internal class OrderServiceTest {
             }
             .verifyComplete()
 
-        verify { orderRepository.findByUserId(user.id.toString()) }
+        verify { orderRepository.findByUserId(user.id) }
     }
 
     @Test
@@ -386,11 +386,11 @@ internal class OrderServiceTest {
         val order = randomOrder(car.id, user.id).copy(price = car.price)
         val orders = listOf(order)
         val orderResponse = responseOrderDto(order, car)
-        every { orderRepository.findByCarId(car.id.toString()) } returns orders.toFlux()
-        every { carRepository.findById(car.id.toString()) } returns car.toMono()
+        every { orderRepository.findByCarId(car.id) } returns orders.toFlux()
+        every { carRepository.findById(car.id) } returns car.toMono()
 
         // WHEN
-        val foundOrders = orderService.findByCar(car.id.toString())
+        val foundOrders = orderService.findByCar(car.id)
 
         // THEN
         foundOrders.collectList()
@@ -400,7 +400,7 @@ internal class OrderServiceTest {
             }
             .verifyComplete()
 
-        verify { orderRepository.findByCarId(car.id.toString()) }
+        verify { orderRepository.findByCarId(car.id) }
     }
 
     @Test
@@ -428,11 +428,11 @@ internal class OrderServiceTest {
         val order = randomOrder(car.id, user.id).copy(price = car.price)
         val orders = listOf(order)
         val orderResponse = responseOrderDto(order, car)
-        every { orderRepository.findByCarIdAndUserId(car.id.toString(), user.id.toString()) } returns orders.toFlux()
-        every { carRepository.findById(car.id.toString()) } returns car.toMono()
+        every { orderRepository.findByCarIdAndUserId(car.id, user.id) } returns orders.toFlux()
+        every { carRepository.findById(car.id) } returns car.toMono()
 
         // WHEN
-        val foundOrders = orderService.findByCarAndUser(car.id.toString(), user.id.toString())
+        val foundOrders = orderService.findByCarAndUser(car.id, user.id)
 
         // THEN
         foundOrders.collectList()
@@ -442,7 +442,7 @@ internal class OrderServiceTest {
             }
             .verifyComplete()
 
-        verify { orderRepository.findByCarIdAndUserId(car.id.toString(), user.id.toString()) }
+        verify { orderRepository.findByCarIdAndUserId(car.id, user.id) }
     }
 
     @Test

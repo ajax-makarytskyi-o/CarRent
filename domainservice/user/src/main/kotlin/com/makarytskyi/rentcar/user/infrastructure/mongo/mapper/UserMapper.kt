@@ -1,19 +1,18 @@
 package com.makarytskyi.rentcar.user.infrastructure.mongo.mapper
 
 import com.makarytskyi.rentcar.user.domain.DomainUser
+import com.makarytskyi.rentcar.user.domain.create.CreateUser
 import com.makarytskyi.rentcar.user.infrastructure.mongo.entity.MongoUser
-import org.bson.types.ObjectId
 
 fun MongoUser.toDomain(): DomainUser = DomainUser(
     id = this.id.toString(),
-    name = this.name ?: throw IllegalArgumentException("Name of user is null"),
-    email = this.email ?: throw IllegalArgumentException("Email of user is null"),
+    name = requireNotNull(this.name) { "Name of user is null" },
+    email = requireNotNull(this.email) { "Email of user is null" },
     phoneNumber = this.phoneNumber,
     city = this.city,
 )
 
-fun DomainUser.toMongo(): MongoUser = MongoUser(
-    id = this.id?.let { ObjectId(it) },
+fun CreateUser.toMongo(): MongoUser = MongoUser(
     name = this.name,
     email = this.email,
     phoneNumber = this.phoneNumber,

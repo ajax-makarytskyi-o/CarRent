@@ -1,20 +1,20 @@
 package com.makarytskyi.rentcar.user.infrastructure.rest.mapper
 
 import com.makarytskyi.rentcar.user.domain.DomainUser
-import com.makarytskyi.rentcar.user.domain.patch.DomainUserPatch
+import com.makarytskyi.rentcar.user.domain.create.CreateUser
+import com.makarytskyi.rentcar.user.domain.patch.PatchUser
 import com.makarytskyi.rentcar.user.infrastructure.rest.dto.CreateUserRequest
 import com.makarytskyi.rentcar.user.infrastructure.rest.dto.UpdateUserRequest
 import com.makarytskyi.rentcar.user.infrastructure.rest.dto.UserResponse
 
-fun CreateUserRequest.toDomain(): DomainUser = DomainUser(
-    id = null,
+fun CreateUserRequest.toDomain(): CreateUser = CreateUser(
     name = this.name,
     email = this.email,
     phoneNumber = this.phoneNumber,
     city = this.city,
 )
 
-fun UpdateUserRequest.toPatch() = DomainUserPatch(
+fun UpdateUserRequest.toPatch() = PatchUser(
     name = this.name,
     phoneNumber = this.phoneNumber,
     city = this.city,

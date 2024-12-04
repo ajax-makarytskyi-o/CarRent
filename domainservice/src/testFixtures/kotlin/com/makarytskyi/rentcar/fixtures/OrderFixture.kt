@@ -6,7 +6,8 @@ import com.makarytskyi.rentcar.common.util.Utils.dateToTimestamp
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
 import com.makarytskyi.rentcar.fixtures.Utils.getDateFromNow
 import com.makarytskyi.rentcar.order.domain.DomainOrder
-import com.makarytskyi.rentcar.order.domain.patch.DomainOrderPatch
+import com.makarytskyi.rentcar.order.domain.create.CreateOrder
+import com.makarytskyi.rentcar.order.domain.patch.PatchOrder
 import com.makarytskyi.rentcar.order.domain.projection.AggregatedDomainOrder
 import com.makarytskyi.rentcar.user.domain.DomainUser
 import java.math.BigDecimal
@@ -14,12 +15,14 @@ import java.util.Date
 import org.bson.types.ObjectId
 
 object OrderFixture {
-    var yesterday = getDateFromNow(-1)
-    var tomorrow = getDateFromNow(1)
-    var twoDaysAfter = getDateFromNow(2)
-    var threeDaysAfter = getDateFromNow(3)
-    var monthAfter = getDateFromNow(30)
-    var monthAndDayAfter = getDateFromNow(31)
+    val yesterday = getDateFromNow(-1)
+    val tomorrow = getDateFromNow(1)
+    val twoDaysAfter = getDateFromNow(2)
+    val threeDaysAfter = getDateFromNow(3)
+    val weekAfter = getDateFromNow(7)
+    val weekAndDayAfter = getDateFromNow(8)
+    val monthAfter = getDateFromNow(30)
+    val monthAndDayAfter = getDateFromNow(31)
 
     fun randomOrder(carId: String?, userId: String?) = DomainOrder(
         id = ObjectId().toString(),
@@ -31,7 +34,7 @@ object OrderFixture {
     )
 
     fun emptyOrder() = DomainOrder(
-        id = null,
+        id = "",
         carId = "",
         userId = "",
         from = Date(),
@@ -39,7 +42,7 @@ object OrderFixture {
         price = BigDecimal.ZERO
     )
 
-    fun emptyOrderPatch() = DomainOrderPatch(
+    fun emptyOrderPatch() = PatchOrder(
         from = null,
         to = null,
     )
@@ -63,7 +66,7 @@ object OrderFixture {
     )
 
     fun responseOrderDto(order: DomainOrder, car: DomainCar) = DomainOrder(
-        id = order.id.toString(),
+        id = order.id,
         carId = order.carId,
         userId = order.userId,
         from = order.from,
@@ -72,7 +75,7 @@ object OrderFixture {
     )
 
     fun responseAggregatedOrderDto(order: AggregatedDomainOrder, car: DomainCar) = AggregatedDomainOrder(
-        id = order.id.toString(),
+        id = order.id,
         car = order.car,
         user = order.user,
         from = order.from,
@@ -80,28 +83,34 @@ object OrderFixture {
         price = car.price,
     )
 
-    fun createOrderRequestDto(car: DomainCar, user: DomainUser) = DomainOrder(
-        id = null,
-        carId = car.id.toString(),
-        userId = user.id.toString(),
+    fun createOrderRequest(carId: String, userId: String) = CreateOrder(
+        carId = carId,
+        userId = userId,
         from = monthAfter,
         to = monthAndDayAfter,
         price = null,
     )
 
-    fun createdOrder(order: DomainOrder) = order.copy(id = ObjectId().toString())
+    fun createdOrder(order: CreateOrder) = DomainOrder(
+        id = ObjectId().toString(),
+        carId = order.carId,
+        userId = order.userId,
+        from = order.from,
+        to = order.to,
+        price = order.price,
+    )
 
-    fun updateOrderRequestDto() = DomainOrderPatch(
+    fun updateOrderRequestDto() = PatchOrder(
         from = tomorrow,
         to = twoDaysAfter,
     )
 
-    fun domainOrderPatch(patch: DomainOrderPatch, oldOrder: DomainOrder) = oldOrder.copy(
+    fun domainOrderPatch(patch: PatchOrder, oldOrder: DomainOrder) = oldOrder.copy(
         from = patch.from ?: oldOrder.from,
         to = patch.to ?: oldOrder.to,
     )
 
-    fun updatedOrder(oldOrder: DomainOrder, request: DomainOrderPatch) =
+    fun updatedOrder(oldOrder: DomainOrder, request: PatchOrder) =
         DomainOrder(
             id = oldOrder.id,
             carId = oldOrder.carId,
@@ -113,7 +122,7 @@ object OrderFixture {
 
     fun orderProto(order: DomainOrder, price: Double): Order = Order
         .newBuilder().also {
-            it.id = order.id.toString()
+            it.id = order.id
             it.carId = order.carId
             it.userId = order.userId
             it.from = dateToTimestamp(order.from)

@@ -17,7 +17,7 @@ import reactor.kotlin.core.publisher.toMono
 
 @GrpcService
 class OrderGrpcService(
-    private val natsHandler: OrderInputPort
+    private val natsHandler: OrderInputPort,
 ) : ReactorOrderServiceGrpc.OrderServiceImplBase() {
 
     override fun getFullById(request: GetByIdOrderRequest): Mono<GetByIdOrderResponse> =

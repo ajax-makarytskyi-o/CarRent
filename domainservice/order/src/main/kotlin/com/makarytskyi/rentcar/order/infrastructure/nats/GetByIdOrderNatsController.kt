@@ -4,7 +4,7 @@ import com.google.protobuf.Parser
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.GET_BY_ID
-import com.makarytskyi.rentcar.order.application.port.input.OrderInputPort
+import com.makarytskyi.rentcar.order.application.port.input.OrderServiceInputPort
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toGetByIdFailureResponse
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toGetByIdResponse
 import org.slf4j.Logger
@@ -16,7 +16,7 @@ import systems.ajax.nats.handler.api.ProtoNatsMessageHandler
 
 @Component
 class GetByIdOrderNatsController(
-    private val orderInputPort: OrderInputPort,
+    private val orderInputPort: OrderServiceInputPort,
 ) : ProtoNatsMessageHandler<GetByIdOrderRequest, GetByIdOrderResponse> {
     override val subject: String = GET_BY_ID
     override val queue: String = QUEUE_GROUP

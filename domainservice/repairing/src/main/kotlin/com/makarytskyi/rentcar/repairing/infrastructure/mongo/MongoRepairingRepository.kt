@@ -1,8 +1,9 @@
 package com.makarytskyi.rentcar.repairing.infrastructure.mongo
 
 import com.makarytskyi.rentcar.car.infrastructure.mongo.entity.MongoCar
-import com.makarytskyi.rentcar.repairing.application.port.output.RepairingMongoOutputPort
+import com.makarytskyi.rentcar.repairing.application.port.output.RepairingRepositoryOutputPort
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
+import com.makarytskyi.rentcar.repairing.domain.create.CreateRepairing
 import com.makarytskyi.rentcar.repairing.domain.projection.AggregatedDomainRepairing
 import com.makarytskyi.rentcar.repairing.infrastructure.mongo.entity.MongoRepairing
 import com.makarytskyi.rentcar.repairing.infrastructure.mongo.entity.projection.AggregatedMongoRepairing
@@ -24,10 +25,10 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
-internal class MongoRepairingRepository(private val template: ReactiveMongoTemplate) : RepairingMongoOutputPort {
+internal class MongoRepairingRepository(private val template: ReactiveMongoTemplate) : RepairingRepositoryOutputPort {
 
-    override fun create(mongoRepairing: DomainRepairing): Mono<DomainRepairing> {
-        return template.insert(mongoRepairing.toMongo()).map { it.toDomain() }
+    override fun create(repairing: CreateRepairing): Mono<DomainRepairing> {
+        return template.insert(repairing.toMongo()).map { it.toDomain() }
     }
 
     override fun findFullById(id: String): Mono<AggregatedDomainRepairing> {

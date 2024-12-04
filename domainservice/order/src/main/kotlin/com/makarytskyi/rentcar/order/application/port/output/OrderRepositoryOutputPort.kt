@@ -1,19 +1,20 @@
 package com.makarytskyi.rentcar.order.application.port.output
 
 import com.makarytskyi.rentcar.order.domain.DomainOrder
+import com.makarytskyi.rentcar.order.domain.create.CreateOrder
 import com.makarytskyi.rentcar.order.domain.projection.AggregatedDomainOrder
 import java.util.Date
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-interface OrderMongoOutputPort {
+interface OrderRepositoryOutputPort {
     fun findFullById(id: String): Mono<AggregatedDomainOrder>
 
     fun findById(id: String): Mono<DomainOrder>
 
     fun findFullAll(page: Int, size: Int): Flux<AggregatedDomainOrder>
 
-    fun create(mongoOrder: DomainOrder): Mono<DomainOrder>
+    fun create(order: CreateOrder): Mono<DomainOrder>
 
     fun deleteById(id: String): Mono<Unit>
 

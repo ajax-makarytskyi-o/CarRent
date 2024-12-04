@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.car.application.service
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
+import com.makarytskyi.rentcar.car.application.port.output.CarRepositoryOutputPort
 import com.makarytskyi.rentcar.car.infrastructure.rest.mapper.toResponse
 import com.makarytskyi.rentcar.fixtures.CarFixture.createdCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
@@ -30,7 +30,7 @@ import reactor.kotlin.test.verifyError
 @ExtendWith(MockKExtension::class)
 internal class CarServiceTest {
     @MockK
-    lateinit var carRepository: CarOutputPort
+    lateinit var carRepository: CarRepositoryOutputPort
 
     @InjectMockKs
     lateinit var carService: CarService
@@ -40,10 +40,10 @@ internal class CarServiceTest {
         // GIVEN
         val car = randomCar()
         val responseCar = responseCar(car)
-        every { carRepository.findById(car.id.toString()) } returns car.toMono()
+        every { carRepository.findById(car.id) } returns car.toMono()
 
         // WHEN
-        val result = carService.getById(car.id.toString()).map { it.toResponse() }
+        val result = carService.getById(car.id).map { it.toResponse() }
 
         // THEN
         result
@@ -51,7 +51,7 @@ internal class CarServiceTest {
             .expectNext(responseCar)
             .verifyComplete()
 
-        verify { carRepository.findById(car.id.toString()) }
+        verify { carRepository.findById(car.id) }
     }
 
     @Test
@@ -134,11 +134,11 @@ internal class CarServiceTest {
         val updateCarRequest = updateCarRequest()
         val patch = updateDomainCar(updateCarRequest, oldCar)
         val updatedCar = updatedCar(oldCar, updateCarRequest)
-        every { carRepository.findById(oldCar.id.toString()) } returns oldCar.toMono()
-        every { carRepository.patch(oldCar.id.toString(), patch) } returns updatedCar.toMono()
+        every { carRepository.findById(oldCar.id) } returns oldCar.toMono()
+        every { carRepository.patch(oldCar.id, patch) } returns updatedCar.toMono()
 
         // WHEN
-        val result = carService.patch(oldCar.id.toString(), updateCarRequest)
+        val result = carService.patch(oldCar.id, updateCarRequest)
 
         // THEN
         result
@@ -148,7 +148,7 @@ internal class CarServiceTest {
             }
             .verifyComplete()
 
-        verify { carRepository.patch(oldCar.id.toString(), patch) }
+        verify { carRepository.patch(oldCar.id, patch) }
     }
 
     @Test

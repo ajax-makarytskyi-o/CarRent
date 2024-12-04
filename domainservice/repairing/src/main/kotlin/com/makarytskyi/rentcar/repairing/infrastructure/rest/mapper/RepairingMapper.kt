@@ -2,7 +2,8 @@ package com.makarytskyi.rentcar.repairing.infrastructure.rest.mapper
 
 import com.makarytskyi.rentcar.car.infrastructure.rest.mapper.toResponse
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
-import com.makarytskyi.rentcar.repairing.domain.patch.DomainRepairingPatch
+import com.makarytskyi.rentcar.repairing.domain.create.CreateRepairing
+import com.makarytskyi.rentcar.repairing.domain.patch.PatchRepairing
 import com.makarytskyi.rentcar.repairing.domain.projection.AggregatedDomainRepairing
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.dto.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.dto.CreateRepairingRequest
@@ -17,10 +18,10 @@ fun AggregatedDomainRepairing.toResponse(): AggregatedRepairingResponse = Aggreg
     this.status.toResponse(),
 )
 
-fun CreateRepairingRequest.toDomain(): DomainRepairing = DomainRepairing(
+fun CreateRepairingRequest.toDomain(): CreateRepairing = CreateRepairing(
     carId = this.carId,
-    date = this.date ?: throw IllegalArgumentException("Date of repairing is null"),
-    price = this.price ?: throw IllegalArgumentException("Price of repairing is null"),
+    date = requireNotNull(this.date) { "Date of repairing is null" },
+    price = requireNotNull(this.price) { "Price of repairing is null" },
     status = this.status?.toDomain() ?: DomainRepairing.RepairingStatus.PENDING,
 )
 
@@ -32,7 +33,7 @@ fun DomainRepairing.toResponse(): RepairingResponse = RepairingResponse(
     this.status.toResponse(),
 )
 
-fun UpdateRepairingRequest.toPatch() = DomainRepairingPatch(
+fun UpdateRepairingRequest.toPatch() = PatchRepairing(
     price = this.price,
     status = this.status,
 )

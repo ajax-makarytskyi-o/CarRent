@@ -1,11 +1,10 @@
 package com.makarytskyi.rentcar.car.infrastructure.mongo.mapper
 
 import com.makarytskyi.rentcar.car.domain.DomainCar
+import com.makarytskyi.rentcar.car.domain.create.CreateCar
 import com.makarytskyi.rentcar.car.infrastructure.mongo.entity.MongoCar
-import org.bson.types.ObjectId
 
-fun DomainCar.toMongo(): MongoCar = MongoCar(
-    id = this.id?.let { ObjectId(it) },
+fun CreateCar.toMongo(): MongoCar = MongoCar(
     brand = this.brand,
     model = this.model,
     price = this.price,
@@ -28,11 +27,11 @@ fun DomainCar.CarColor.toMongo(): MongoCar.CarColor =
 
 fun MongoCar.toDomain(): DomainCar = DomainCar(
     id = this.id.toString(),
-    brand = this.brand ?: throw IllegalArgumentException("Brand of car is null"),
-    model = this.model ?: throw IllegalArgumentException("Model of car is null"),
-    price = this.price ?: throw IllegalArgumentException("Price of car is null"),
+    brand = requireNotNull(this.brand) { "Brand of car is null" },
+    model = requireNotNull(this.model) { "Model of car is null" },
+    price = requireNotNull(this.price) { "Price of car is null" },
     year = this.year,
-    plate = this.plate ?: throw IllegalArgumentException("Plate of car is null"),
+    plate = requireNotNull(this.plate) { "Plate of car is null" },
     color = this.color?.toDomain() ?: DomainCar.CarColor.UNSPECIFIED,
 )
 

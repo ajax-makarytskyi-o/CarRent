@@ -4,7 +4,7 @@ import com.makarytskyi.rentcar.fixtures.UserFixture.randomCity
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomName
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomPhoneNumber
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
-import com.makarytskyi.rentcar.user.domain.patch.DomainUserPatch
+import com.makarytskyi.rentcar.user.domain.patch.PatchUser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -15,7 +15,7 @@ class UserMapperTest {
         // GIVEN
         val user = randomUser()
 
-        val patch = DomainUserPatch(
+        val patch = PatchUser(
             name = randomName(),
             phoneNumber = randomPhoneNumber(),
             city = randomCity(),
@@ -35,7 +35,7 @@ class UserMapperTest {
         // GIVEN
         val user = randomUser()
 
-        val patch = DomainUserPatch(
+        val patch = PatchUser(
             name = null,
             phoneNumber = null,
             city = null,

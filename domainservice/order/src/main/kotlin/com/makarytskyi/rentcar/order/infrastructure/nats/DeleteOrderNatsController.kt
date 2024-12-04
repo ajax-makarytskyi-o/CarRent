@@ -4,7 +4,7 @@ import com.google.protobuf.Parser
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.DeleteOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.DELETE
-import com.makarytskyi.rentcar.order.application.port.input.OrderInputPort
+import com.makarytskyi.rentcar.order.application.port.input.OrderServiceInputPort
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toDeleteFailureResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -15,7 +15,7 @@ import systems.ajax.nats.handler.api.ProtoNatsMessageHandler
 
 @Component
 class DeleteOrderNatsController(
-    private val orderInputPort: OrderInputPort,
+    private val orderInputPort: OrderServiceInputPort,
 ) : ProtoNatsMessageHandler<DeleteOrderRequest, DeleteOrderResponse> {
     override val subject: String = DELETE
     override val queue: String = QUEUE_GROUP

@@ -29,10 +29,10 @@ class OrderMapperTest {
     }
 
     @Test
-    fun `order mapper throws IllegalArgumentException if car date fields are null`() {
+    fun `order mapper throws IllegalArgumentException if car price is null`() {
         // GIVEN
         val order = emptyOrder()
-        val price = BigDecimal.ZERO
+        val price = null
 
         // WHEN // THEN
         assertThrows<IllegalArgumentException> { order.toResponse(price) }

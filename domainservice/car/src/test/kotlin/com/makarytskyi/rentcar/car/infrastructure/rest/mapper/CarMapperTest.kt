@@ -12,7 +12,6 @@ import com.makarytskyi.rentcar.fixtures.CarFixture.updateCarDtoRequest
 import com.makarytskyi.rentcar.fixtures.CarFixture.updateCarRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
@@ -30,15 +29,6 @@ class CarMapperTest {
 
         // THEN
         assertEquals(response, result)
-    }
-
-    @Test
-    fun `response mapper should throw exception if id is null`() {
-        // GIVEN
-        val car = randomCar().copy(id = null)
-
-        // WHEN // THEN
-        assertThrows<IllegalArgumentException> { car.toResponse() }
     }
 
     @Test

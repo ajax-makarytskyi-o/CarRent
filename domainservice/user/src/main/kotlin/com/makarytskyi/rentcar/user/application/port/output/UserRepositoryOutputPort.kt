@@ -1,11 +1,12 @@
 package com.makarytskyi.rentcar.user.application.port.output
 
 import com.makarytskyi.rentcar.user.domain.DomainUser
+import com.makarytskyi.rentcar.user.domain.create.CreateUser
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-interface UserOutputPort {
-    fun create(user: DomainUser): Mono<DomainUser>
+interface UserRepositoryOutputPort {
+    fun create(user: CreateUser): Mono<DomainUser>
 
     fun findById(id: String): Mono<DomainUser>
 

@@ -1,7 +1,8 @@
 package com.makarytskyi.rentcar.car.infrastructure.mongo
 
-import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
+import com.makarytskyi.rentcar.car.application.port.output.CarRepositoryOutputPort
 import com.makarytskyi.rentcar.car.domain.DomainCar
+import com.makarytskyi.rentcar.car.domain.create.CreateCar
 import com.makarytskyi.rentcar.car.infrastructure.mongo.entity.MongoCar
 import com.makarytskyi.rentcar.car.infrastructure.mongo.mapper.toDomain
 import com.makarytskyi.rentcar.car.infrastructure.mongo.mapper.toMongo
@@ -19,13 +20,13 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
-class MongoCarRepository(private val template: ReactiveMongoTemplate) : CarOutputPort {
+class MongoCarRepository(private val template: ReactiveMongoTemplate) : CarRepositoryOutputPort {
 
     override fun findById(id: String): Mono<DomainCar> {
         return template.findById<MongoCar>(id).map { it.toDomain() }
     }
 
-    override fun create(car: DomainCar): Mono<DomainCar> {
+    override fun create(car: CreateCar): Mono<DomainCar> {
         return template.insert(car.toMongo()).map { it.toDomain() }
     }
 
@@ -51,12 +52,12 @@ class MongoCarRepository(private val template: ReactiveMongoTemplate) : CarOutpu
         return template.find(query, MongoCar::class.java).map { it.toDomain() }
     }
 
-    override fun patch(id: String, carPatch: DomainCar): Mono<DomainCar> {
+    override fun patch(id: String, patch: DomainCar): Mono<DomainCar> {
         val query = Query(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
         val update = Update()
 
-        update.set(MongoCar::color.name, carPatch.color)
-        update.set(MongoCar::price.name, carPatch.price)
+        update.set(MongoCar::color.name, patch.color)
+        update.set(MongoCar::price.name, patch.price)
 
         val options = FindAndModifyOptions()
         options.returnNew(true)

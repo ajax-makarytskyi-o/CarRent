@@ -4,7 +4,7 @@ import com.google.protobuf.Parser
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.CREATE
-import com.makarytskyi.rentcar.order.application.port.input.OrderInputPort
+import com.makarytskyi.rentcar.order.application.port.input.OrderServiceInputPort
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toCreateFailureResponse
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toCreateResponse
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toDomain
@@ -17,7 +17,7 @@ import systems.ajax.nats.handler.api.ProtoNatsMessageHandler
 
 @Component
 class CreateOrderNatsController(
-    val orderInputPort: OrderInputPort,
+    val orderInputPort: OrderServiceInputPort,
 ) : ProtoNatsMessageHandler<CreateOrderRequest, CreateOrderResponse> {
     override val subject: String = CREATE
     override val queue: String = QUEUE_GROUP

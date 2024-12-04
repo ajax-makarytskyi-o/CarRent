@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.user.infrastructure.rest
 
-import com.makarytskyi.rentcar.user.application.port.input.UserInputPort
+import com.makarytskyi.rentcar.user.application.port.input.UserServiceInputPort
 import com.makarytskyi.rentcar.user.infrastructure.rest.dto.CreateUserRequest
 import com.makarytskyi.rentcar.user.infrastructure.rest.dto.UpdateUserRequest
 import com.makarytskyi.rentcar.user.infrastructure.rest.dto.UserResponse
@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/users")
-internal class UserController(private val userInputPort: UserInputPort) {
+internal class UserController(private val userInputPort: UserServiceInputPort) {
 
     @GetMapping("/{id}")
     fun getById(@PathVariable id: String): Mono<UserResponse> = userInputPort.getById(id).map { it.toResponse() }

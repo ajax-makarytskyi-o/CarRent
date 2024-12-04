@@ -2,6 +2,7 @@ package com.makarytskyi.rentcar.user.infrastructure.rest.mapper
 
 import com.makarytskyi.rentcar.fixtures.UserFixture.createUserEntity
 import com.makarytskyi.rentcar.fixtures.UserFixture.createUserRequest
+import com.makarytskyi.rentcar.fixtures.UserFixture.createUserRequestDto
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.responseUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.updateUserRequest
@@ -26,7 +27,7 @@ class UserMapperTest {
     @Test
     fun `create request mapper should return entity successfully`() {
         // GIVEN
-        val request = createUserRequest()
+        val request = createUserRequestDto()
         val entity = createUserEntity(request)
 
         // WHEN
@@ -39,7 +40,7 @@ class UserMapperTest {
     @Test
     fun `create request return entity with null fields if request fields are null`() {
         // GIVEN
-        val request = createUserRequest().copy(
+        val request = createUserRequestDto().copy(
             phoneNumber = null,
             city = null,
         )

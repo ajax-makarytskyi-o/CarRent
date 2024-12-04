@@ -1,8 +1,9 @@
 package com.makarytskyi.rentcar.order.infrastructure.mongo
 
 import com.makarytskyi.rentcar.car.infrastructure.mongo.entity.MongoCar
-import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
+import com.makarytskyi.rentcar.order.application.port.output.OrderRepositoryOutputPort
 import com.makarytskyi.rentcar.order.domain.DomainOrder
+import com.makarytskyi.rentcar.order.domain.create.CreateOrder
 import com.makarytskyi.rentcar.order.domain.projection.AggregatedDomainOrder
 import com.makarytskyi.rentcar.order.infrastructure.mongo.entity.MongoOrder
 import com.makarytskyi.rentcar.order.infrastructure.mongo.entity.projection.AggregatedMongoOrder
@@ -27,7 +28,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
-internal class MongoOrderRepository(private val template: ReactiveMongoTemplate) : OrderMongoOutputPort {
+internal class MongoOrderRepository(private val template: ReactiveMongoTemplate) : OrderRepositoryOutputPort {
 
     override fun findFullById(id: String): Mono<AggregatedDomainOrder> {
         val match = Aggregation.match(Criteria.where(Fields.UNDERSCORE_ID).isEqualTo(id))
@@ -73,8 +74,8 @@ internal class MongoOrderRepository(private val template: ReactiveMongoTemplate)
             .map { it.toDomain() }
     }
 
-    override fun create(mongoOrder: DomainOrder): Mono<DomainOrder> {
-        return template.insert(mongoOrder.toMongo()).map { it.toDomain() }
+    override fun create(order: CreateOrder): Mono<DomainOrder> {
+        return template.insert(order.toMongo()).map { it.toDomain() }
     }
 
     override fun deleteById(id: String): Mono<Unit> {

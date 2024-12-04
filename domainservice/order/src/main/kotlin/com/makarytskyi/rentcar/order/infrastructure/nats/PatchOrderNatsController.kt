@@ -4,7 +4,7 @@ import com.google.protobuf.Parser
 import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.UPDATE
-import com.makarytskyi.rentcar.order.application.port.input.OrderInputPort
+import com.makarytskyi.rentcar.order.application.port.input.OrderServiceInputPort
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toPatch
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toPatchFailureResponse
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toPatchResponse
@@ -17,7 +17,7 @@ import systems.ajax.nats.handler.api.ProtoNatsMessageHandler
 
 @Component
 class PatchOrderNatsController(
-    private val orderInputPort: OrderInputPort,
+    private val orderInputPort: OrderServiceInputPort,
 ) : ProtoNatsMessageHandler<UpdateOrderRequest, UpdateOrderResponse> {
     override val subject: String = UPDATE
     override val queue: String = QUEUE_GROUP

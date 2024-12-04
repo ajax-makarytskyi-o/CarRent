@@ -2,7 +2,8 @@ package com.makarytskyi.rentcar.fixtures
 
 import com.makarytskyi.rentcar.fixtures.Utils.generateString
 import com.makarytskyi.rentcar.user.domain.DomainUser
-import com.makarytskyi.rentcar.user.domain.patch.DomainUserPatch
+import com.makarytskyi.rentcar.user.domain.create.CreateUser
+import com.makarytskyi.rentcar.user.domain.patch.PatchUser
 import com.makarytskyi.rentcar.user.infrastructure.rest.dto.CreateUserRequest
 import com.makarytskyi.rentcar.user.infrastructure.rest.dto.UpdateUserRequest
 import com.makarytskyi.rentcar.user.infrastructure.rest.dto.UserResponse
@@ -26,37 +27,48 @@ object UserFixture {
     }
 
     fun responseUser(user: DomainUser) = UserResponse(
-        id = user.id.toString(),
+        id = user.id,
         name = user.name,
         email = user.email,
         phoneNumber = user.phoneNumber!!,
         city = user.city!!,
     )
 
-    fun createUserRequest() = CreateUserRequest(
+    fun createUserRequest() = CreateUser(
         name = randomName(),
         email = randomEmail(),
         phoneNumber = randomPhoneNumber(),
         city = randomCity(),
     )
 
-    fun domainUserRequest() = DomainUser(
-        id = null,
+    fun createUserRequestDto() = CreateUserRequest(
         name = randomName(),
         email = randomEmail(),
         phoneNumber = randomPhoneNumber(),
         city = randomCity(),
     )
 
-    fun createUserEntity(request: CreateUserRequest) = DomainUser(
-        id = null,
+    fun domainUserRequest() = CreateUser(
+        name = randomName(),
+        email = randomEmail(),
+        phoneNumber = randomPhoneNumber(),
+        city = randomCity(),
+    )
+
+    fun createUserEntity(request: CreateUserRequest) = CreateUser(
         name = request.name,
         email = request.email,
         phoneNumber = request.phoneNumber,
         city = request.city,
     )
 
-    fun createdUser(user: DomainUser) = user.copy(id = ObjectId().toString())
+    fun createdUser(user: CreateUser): DomainUser = DomainUser(
+        id = ObjectId().toString(),
+        name = user.name,
+        email = user.email,
+        phoneNumber = user.phoneNumber,
+        city = user.city,
+    )
 
     fun updateUserRequest() = UpdateUserRequest(
         name = randomName(),
@@ -64,13 +76,13 @@ object UserFixture {
         city = randomCity(),
     )
 
-    fun userPatch(request: UpdateUserRequest) = DomainUserPatch(
+    fun userPatch(request: UpdateUserRequest) = PatchUser(
         name = request.name,
         phoneNumber = request.phoneNumber,
         city = request.city,
     )
 
-    fun emptyUserPatch() = DomainUserPatch(
+    fun emptyUserPatch() = PatchUser(
         name = null,
         phoneNumber = null,
         city = null,
@@ -84,13 +96,13 @@ object UserFixture {
         city = randomCity(),
     )
 
-    fun domainUserPatch(patch: DomainUserPatch, oldUser: DomainUser) = oldUser.copy(
+    fun domainUserPatch(patch: PatchUser, oldUser: DomainUser) = oldUser.copy(
         name = patch.name ?: oldUser.name,
         phoneNumber = patch.phoneNumber ?: oldUser.phoneNumber,
         city = patch.city ?: oldUser.city,
     )
 
-    fun updatedUser(user: DomainUser, patch: DomainUserPatch) =
+    fun updatedUser(user: DomainUser, patch: PatchUser) =
         user.copy(
             name = patch.name ?: user.name,
             phoneNumber = patch.phoneNumber ?: user.phoneNumber,

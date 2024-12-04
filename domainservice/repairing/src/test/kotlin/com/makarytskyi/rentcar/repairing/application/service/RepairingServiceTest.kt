@@ -1,7 +1,7 @@
 package com.makarytskyi.rentcar.repairing.application.service
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
+import com.makarytskyi.rentcar.car.application.port.output.CarRepositoryOutputPort
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.createRepairingRequest
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.createdRepairing
@@ -13,7 +13,7 @@ import com.makarytskyi.rentcar.fixtures.RepairingFixture.responseRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.updateDomainRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.updatedRepairing
 import com.makarytskyi.rentcar.repairing.application.port.output.CreateRepairingProducerOutputPort
-import com.makarytskyi.rentcar.repairing.application.port.output.RepairingMongoOutputPort
+import com.makarytskyi.rentcar.repairing.application.port.output.RepairingRepositoryOutputPort
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.mapper.toResponse
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -36,10 +36,10 @@ import reactor.kotlin.test.verifyError
 internal class RepairingServiceTest {
 
     @MockK
-    lateinit var repairingRepository: RepairingMongoOutputPort
+    lateinit var repairingRepository: RepairingRepositoryOutputPort
 
     @MockK
-    lateinit var carRepository: CarOutputPort
+    lateinit var carRepository: CarRepositoryOutputPort
 
     @MockK
     lateinit var kafkaProducer: CreateRepairingProducerOutputPort
@@ -53,10 +53,10 @@ internal class RepairingServiceTest {
         val car = randomCar()
         val repairing = randomAggregatedRepairing(car)
         val response = responseAggregatedRepairing(repairing)
-        every { repairingRepository.findFullById(repairing.id.toString()) } returns repairing.toMono()
+        every { repairingRepository.findFullById(repairing.id) } returns repairing.toMono()
 
         // WHEN
-        val result = repairingService.getFullById(repairing.id.toString()).map { it.toResponse() }
+        val result = repairingService.getFullById(repairing.id).map { it.toResponse() }
 
         // THEN
         result
@@ -64,7 +64,7 @@ internal class RepairingServiceTest {
             .expectNext(response)
             .verifyComplete()
 
-        verify { repairingRepository.findFullById(repairing.id.toString()) }
+        verify { repairingRepository.findFullById(repairing.id) }
     }
 
     @Test
@@ -124,11 +124,11 @@ internal class RepairingServiceTest {
     fun `should create repairing successfully`() {
         // GIVEN
         val car = randomCar()
-        val request = createRepairingRequest(car)
+        val request = createRepairingRequest(car.id)
         val createdRepairing = createdRepairing(request)
         val response = responseRepairing(createdRepairing)
         every { repairingRepository.create(request) } returns createdRepairing.toMono()
-        every { carRepository.findById(car.id.toString()) } returns car.toMono()
+        every { carRepository.findById(car.id) } returns car.toMono()
         every { kafkaProducer.sendCreateRepairing(any()) } returns Mono.empty()
 
         // WHEN
@@ -147,8 +147,8 @@ internal class RepairingServiceTest {
     fun `should return NotFoundException if car doesn't exist`() {
         // GIVEN
         val car = randomCar()
-        val request = createRepairingRequest(car)
-        every { carRepository.findById(car.id.toString()) } returns Mono.empty()
+        val request = createRepairingRequest(car.id)
+        every { carRepository.findById(car.id) } returns Mono.empty()
 
         // WHEN // THEN
         repairingService.create(request)
@@ -167,11 +167,11 @@ internal class RepairingServiceTest {
         val domainRequest = updateDomainRepairing(request, repairing)
 
         val updatedRepairing = updatedRepairing(repairing, request)
-        every { repairingRepository.findById(repairing.id.toString()) } returns repairing.toMono()
-        every { repairingRepository.patch(repairing.id.toString(), domainRequest) } returns updatedRepairing.toMono()
+        every { repairingRepository.findById(repairing.id) } returns repairing.toMono()
+        every { repairingRepository.patch(repairing.id, domainRequest) } returns updatedRepairing.toMono()
 
         // WHEN
-        val result = repairingService.patch(repairing.id.toString(), request)
+        val result = repairingService.patch(repairing.id, request)
 
         // THEN
         result
@@ -179,7 +179,7 @@ internal class RepairingServiceTest {
             .expectNext(updatedRepairing)
             .verifyComplete()
 
-        verify { repairingRepository.patch(repairing.id.toString(), domainRequest) }
+        verify { repairingRepository.patch(repairing.id, domainRequest) }
     }
 
     @Test

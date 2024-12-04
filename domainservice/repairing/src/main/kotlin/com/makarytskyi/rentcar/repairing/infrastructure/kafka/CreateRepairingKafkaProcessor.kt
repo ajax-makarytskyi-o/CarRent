@@ -4,7 +4,7 @@ import com.google.protobuf.Parser
 import com.makarytskyi.commonmodels.repairing.Repairing
 import com.makarytskyi.internalapi.topic.KafkaTopic
 import com.makarytskyi.rentcar.common.util.Utils.timestampToDate
-import com.makarytskyi.rentcar.order.application.port.input.OrderInputPort
+import com.makarytskyi.rentcar.order.application.port.input.OrderServiceInputPort
 import com.makarytskyi.rentcar.order.infrastructure.kafka.toNotification
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -16,7 +16,7 @@ import systems.ajax.kafka.handler.subscription.topic.TopicSingle
 @Component
 class CreateRepairingKafkaProcessor(
     private val userNotificationKafkaProducer: UserNotificationKafkaProducer,
-    private val orderService: OrderInputPort,
+    private val orderService: OrderServiceInputPort,
 ) : KafkaHandler<Repairing, TopicSingle> {
 
     override val subscriptionTopics: TopicSingle = TopicSingle(KafkaTopic.Repairing.REPAIRING_CREATE)

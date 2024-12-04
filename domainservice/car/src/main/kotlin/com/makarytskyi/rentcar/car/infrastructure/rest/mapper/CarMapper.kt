@@ -1,13 +1,13 @@
 package com.makarytskyi.rentcar.car.infrastructure.rest.mapper
 
 import com.makarytskyi.rentcar.car.domain.DomainCar
-import com.makarytskyi.rentcar.car.domain.patch.DomainCarPatch
+import com.makarytskyi.rentcar.car.domain.create.CreateCar
+import com.makarytskyi.rentcar.car.domain.patch.PatchCar
 import com.makarytskyi.rentcar.car.infrastructure.rest.dto.CarResponse
 import com.makarytskyi.rentcar.car.infrastructure.rest.dto.CreateCarRequest
 import com.makarytskyi.rentcar.car.infrastructure.rest.dto.UpdateCarRequest
 
-fun CreateCarRequest.toDomain(): DomainCar = DomainCar(
-    id = null,
+fun CreateCarRequest.toDomain(): CreateCar = CreateCar(
     brand = this.brand,
     model = this.model,
     price = this.price,
@@ -16,7 +16,7 @@ fun CreateCarRequest.toDomain(): DomainCar = DomainCar(
     color = this.color.toDomain(),
 )
 
-fun UpdateCarRequest.toPatch(): DomainCarPatch = DomainCarPatch(
+fun UpdateCarRequest.toPatch(): PatchCar = PatchCar(
     price = this.price,
     color = this.color?.toDomain(),
 )

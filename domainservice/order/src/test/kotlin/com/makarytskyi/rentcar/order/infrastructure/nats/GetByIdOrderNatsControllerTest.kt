@@ -3,18 +3,18 @@ package com.makarytskyi.rentcar.order.infrastructure.nats
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
 import com.makarytskyi.internalapi.subject.NatsSubject.Order.GET_BY_ID
-import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
-import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
+import com.makarytskyi.rentcar.car.application.port.output.CarRepositoryOutputPort
+import com.makarytskyi.rentcar.fixtures.CarFixture.createCarRequest
 import com.makarytskyi.rentcar.fixtures.OrderFixture.aggregatedOrder
-import com.makarytskyi.rentcar.fixtures.OrderFixture.randomOrder
+import com.makarytskyi.rentcar.fixtures.OrderFixture.createOrderRequest
 import com.makarytskyi.rentcar.fixtures.OrderFixture.responseAggregatedOrderDto
-import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
+import com.makarytskyi.rentcar.fixtures.UserFixture.createUserRequest
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.failureGetByIdResponse
 import com.makarytskyi.rentcar.fixtures.request.OrderProtoFixtures.getByIdOrderRequest
 import com.makarytskyi.rentcar.order.ContainerBase
-import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
+import com.makarytskyi.rentcar.order.application.port.output.OrderRepositoryOutputPort
 import com.makarytskyi.rentcar.order.infrastructure.nats.mapper.OrderProtoMapper.toProto
-import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
+import com.makarytskyi.rentcar.user.application.port.output.UserRepositoryOutputPort
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
@@ -27,23 +27,23 @@ class GetByIdOrderNatsControllerTest : ContainerBase {
     internal lateinit var natsPublisher: NatsMessagePublisher
 
     @Autowired
-    internal lateinit var carRepository: CarOutputPort
+    internal lateinit var carRepository: CarRepositoryOutputPort
 
     @Autowired
-    internal lateinit var userRepository: UserOutputPort
+    internal lateinit var userRepository: UserRepositoryOutputPort
 
     @Autowired
-    internal lateinit var orderRepository: OrderMongoOutputPort
+    internal lateinit var orderRepository: OrderRepositoryOutputPort
 
     @Test
     fun `getById should return success message with found order`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()!!
-        val user = userRepository.create(randomUser()).block()!!
-        val order = orderRepository.create(randomOrder(car.id, user.id)).block()!!
+        val car = carRepository.create(createCarRequest()).block()!!
+        val user = userRepository.create(createUserRequest()).block()!!
+        val order = orderRepository.create(createOrderRequest(car.id, user.id)).block()!!
         val aggregatedOrder = aggregatedOrder(order, car, user)
 
-        val getByIdRequest = getByIdOrderRequest(order.id.toString())
+        val getByIdRequest = getByIdOrderRequest(order.id)
         val expectedOrder = responseAggregatedOrderDto(aggregatedOrder, car).toProto()
 
         // WHEN

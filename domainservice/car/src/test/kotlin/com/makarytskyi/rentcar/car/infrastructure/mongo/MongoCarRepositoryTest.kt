@@ -1,11 +1,12 @@
 package com.makarytskyi.rentcar.car.infrastructure.mongo
 
 import com.makarytskyi.rentcar.car.ContainerBase
-import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
+import com.makarytskyi.rentcar.car.application.port.output.CarRepositoryOutputPort
 import com.makarytskyi.rentcar.car.domain.DomainCar
+import com.makarytskyi.rentcar.fixtures.CarFixture.createCarRequest
+import com.makarytskyi.rentcar.fixtures.CarFixture.createdCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.emptyCarPatch
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomBrand
-import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomModel
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomPlate
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
@@ -25,12 +26,13 @@ internal class MongoCarRepositoryTest : ContainerBase {
 
     @Autowired
     @Qualifier("mongoCarRepository")
-    private lateinit var carRepository: CarOutputPort
+    private lateinit var carRepository: CarRepositoryOutputPort
 
     @Test
     fun `create should insert car and return it with id`() {
         // GIVEN
-        val car = randomCar().copy(id = null)
+        val car = createCarRequest()
+        val expected = createdCar(car)
 
         // WHEN
         val result = carRepository.create(car)
@@ -40,7 +42,7 @@ internal class MongoCarRepositoryTest : ContainerBase {
             .test()
             .assertNext {
                 assertNotNull(it.id, "Car should have non-null id after saving")
-                assertEquals(car.copy(id = it.id), it)
+                assertEquals(expected.copy(id = it.id), it)
             }
             .verifyComplete()
     }
@@ -48,7 +50,8 @@ internal class MongoCarRepositoryTest : ContainerBase {
     @Test
     fun `findAll should find all cars`() {
         // GIVEN
-        val insertedCar1 = carRepository.create(randomCar()).block()
+        val request = createCarRequest()
+        val insertedCar = carRepository.create(request).block()
 
         // WHEN
         val cars = carRepository.findAll(firstPage, defaultSize)
@@ -57,7 +60,7 @@ internal class MongoCarRepositoryTest : ContainerBase {
         cars.collectList()
             .test()
             .assertNext {
-                assertThat(it).contains(insertedCar1)
+                assertThat(it).contains(insertedCar)
             }
             .verifyComplete()
     }
@@ -66,12 +69,13 @@ internal class MongoCarRepositoryTest : ContainerBase {
     fun `patch should partially update color of car`() {
         // GIVEN
         val color = DomainCar.CarColor.BLUE
-        val car = carRepository.create(randomCar()).block()!!
+        val createRequest = createCarRequest()
+        val car = carRepository.create(createRequest).block()!!
         val updateCar = emptyCarPatch().copy(color = color)
         val request = updateDomainCar(updateCar, car)
 
         // WHEN
-        val updated = carRepository.patch(car.id.toString(), request)
+        val updated = carRepository.patch(car.id, request)
 
         // THEN
         updated
@@ -87,12 +91,13 @@ internal class MongoCarRepositoryTest : ContainerBase {
     fun `patch should partially update price of car`() {
         // GIVEN
         val price = randomPrice()
-        val car = carRepository.create(randomCar()).block()!!
+        val createRequest = createCarRequest()
+        val car = carRepository.create(createRequest).block()!!
         val updateCar = emptyCarPatch().copy(price = price)
         val request = updateDomainCar(updateCar, car)
 
         // WHEN
-        val updated = carRepository.patch(car.id.toString(), request)
+        val updated = carRepository.patch(car.id, request)
 
         // THEN
         updated
@@ -108,8 +113,8 @@ internal class MongoCarRepositoryTest : ContainerBase {
     fun `findByPlate should find existing car by plate`() {
         // GIVEN
         val plate = randomPlate()
-        val car = randomCar().copy(plate = plate)
-        carRepository.create(car).block()
+        val createRequest = createCarRequest().copy(plate = plate)
+        carRepository.create(createRequest).block()
 
         // WHEN
         val foundCar = carRepository.findByPlate(plate)
@@ -141,8 +146,10 @@ internal class MongoCarRepositoryTest : ContainerBase {
     fun `findAllByBrand should find all cars by brand`() {
         // GIVEN
         val brand = randomBrand()
-        val car1 = carRepository.create(randomCar().copy(brand = brand)).block()
-        val car2 = carRepository.create(randomCar().copy(brand = brand)).block()
+        val createRequest1 = createCarRequest().copy(brand = brand)
+        val createRequest2 = createCarRequest().copy(brand = brand)
+        val car1 = carRepository.create(createRequest1).block()
+        val car2 = carRepository.create(createRequest2).block()
 
         // WHEN
         val foundCars = carRepository.findAllByBrand(brand)
@@ -161,8 +168,10 @@ internal class MongoCarRepositoryTest : ContainerBase {
         // GIVEN
         val brand = randomBrand()
         val model = randomModel()
-        val car1 = carRepository.create(randomCar().copy(brand = brand, model = model)).block()
-        val car2 = carRepository.create(randomCar().copy(brand = brand, model = model)).block()
+        val createRequest1 = createCarRequest().copy(brand = brand, model = model)
+        val createRequest2 = createCarRequest().copy(brand = brand, model = model)
+        val car1 = carRepository.create(createRequest1).block()
+        val car2 = carRepository.create(createRequest2).block()
 
         // WHEN
         val foundCars = carRepository.findAllByBrandAndModel(brand, model)
@@ -179,10 +188,10 @@ internal class MongoCarRepositoryTest : ContainerBase {
     @Test
     fun `findById should return existing car by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()!!
+        val car = carRepository.create(createCarRequest()).block()!!
 
         // WHEN
-        val foundCar = carRepository.findById(car.id.toString())
+        val foundCar = carRepository.findById(car.id)
 
         // THEN
         foundCar
@@ -208,13 +217,13 @@ internal class MongoCarRepositoryTest : ContainerBase {
     @Test
     fun `deleteById should delete car by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()!!
+        val car = carRepository.create(createCarRequest()).block()!!
 
         // WHEN
-        carRepository.deleteById(car.id.toString()).block()!!
+        carRepository.deleteById(car.id).block()!!
 
         // THEN
-        carRepository.findById(car.id.toString())
+        carRepository.findById(car.id)
             .test()
             .verifyComplete()
     }

@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.car.infrastructure.rest
 
-import com.makarytskyi.rentcar.car.application.port.input.CarInputPort
+import com.makarytskyi.rentcar.car.application.port.input.CarServiceInputPort
 import com.makarytskyi.rentcar.car.infrastructure.rest.dto.CarResponse
 import com.makarytskyi.rentcar.car.infrastructure.rest.dto.CreateCarRequest
 import com.makarytskyi.rentcar.car.infrastructure.rest.dto.UpdateCarRequest
@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/cars")
-internal class CarController(private val carInputPort: CarInputPort) {
+internal class CarController(private val carInputPort: CarServiceInputPort) {
 
     @GetMapping("/{id}")
     fun getById(@PathVariable id: String): Mono<CarResponse> = carInputPort.getById(id).map { it.toResponse() }

@@ -1,17 +1,18 @@
 package com.makarytskyi.rentcar.order.application.service
 
 import com.makarytskyi.core.exception.NotFoundException
-import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
+import com.makarytskyi.rentcar.car.application.port.output.CarRepositoryOutputPort
 import com.makarytskyi.rentcar.common.annotation.InvocationTracker
 import com.makarytskyi.rentcar.order.application.mapper.toProto
 import com.makarytskyi.rentcar.order.application.mapper.toResponse
-import com.makarytskyi.rentcar.order.application.port.input.OrderInputPort
+import com.makarytskyi.rentcar.order.application.port.input.OrderServiceInputPort
 import com.makarytskyi.rentcar.order.application.port.output.CreateOrderProducerOutputPort
-import com.makarytskyi.rentcar.order.application.port.output.OrderMongoOutputPort
+import com.makarytskyi.rentcar.order.application.port.output.OrderRepositoryOutputPort
 import com.makarytskyi.rentcar.order.domain.DomainOrder
-import com.makarytskyi.rentcar.order.domain.patch.DomainOrderPatch
+import com.makarytskyi.rentcar.order.domain.create.CreateOrder
+import com.makarytskyi.rentcar.order.domain.patch.PatchOrder
 import com.makarytskyi.rentcar.order.domain.projection.AggregatedDomainOrder
-import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
+import com.makarytskyi.rentcar.user.application.port.output.UserRepositoryOutputPort
 import java.math.BigDecimal
 import java.util.Date
 import org.slf4j.LoggerFactory
@@ -27,36 +28,36 @@ import reactor.kotlin.core.util.function.component2
 @InvocationTracker
 @Service
 class OrderService(
-    private val orderMongoOutputPort: OrderMongoOutputPort,
-    private val carOutputPort: CarOutputPort,
-    private val userOutputPort: UserOutputPort,
+    private val orderOutputPort: OrderRepositoryOutputPort,
+    private val carOutputPort: CarRepositoryOutputPort,
+    private val userOutputPort: UserRepositoryOutputPort,
     private val createOrderKafkaProducer: CreateOrderProducerOutputPort,
-) : OrderInputPort {
+) : OrderServiceInputPort {
     override fun getById(id: String): Mono<AggregatedDomainOrder> =
-        orderMongoOutputPort.findFullById(id)
+        orderOutputPort.findFullById(id)
             .switchIfEmpty { Mono.error(NotFoundException("Order with id $id is not found")) }
             .map { it.toResponse() }
 
     override fun findAll(page: Int, size: Int): Flux<AggregatedDomainOrder> =
-        orderMongoOutputPort.findFullAll(page, size)
+        orderOutputPort.findFullAll(page, size)
 
-    override fun create(createOrderRequest: DomainOrder): Mono<DomainOrder> {
-        return createOrderRequest.toMono()
+    override fun create(order: CreateOrder): Mono<DomainOrder> {
+        return order.toMono()
             .doOnNext { validateDates(it.from, it.to) }
             .flatMap {
                 Mono.zip(
-                    validateUserExists(createOrderRequest.userId)
+                    validateUserExists(order.userId)
                         .subscribeOn(Schedulers.boundedElastic()),
                     validateCarAvailability(
-                        createOrderRequest.carId,
-                        createOrderRequest.from,
-                        createOrderRequest.to
+                        order.carId,
+                        order.from,
+                        order.to
                     ).subscribeOn(Schedulers.boundedElastic())
-                ).thenReturn(createOrderRequest)
+                ).thenReturn(order)
             }
             .flatMap {
                 Mono.zip(
-                    orderMongoOutputPort.create(createOrderRequest),
+                    orderOutputPort.create(order),
                     getCarPrice(it.carId)
                 ).map { (order, carPrice) -> order.copy(price = order.totalPrice(carPrice)) }
             }
@@ -72,29 +73,29 @@ class OrderService(
             }
     }
 
-    override fun deleteById(id: String): Mono<Unit> = orderMongoOutputPort.deleteById(id)
+    override fun deleteById(id: String): Mono<Unit> = orderOutputPort.deleteById(id)
 
-    override fun findByUser(userId: String): Flux<DomainOrder> = orderMongoOutputPort.findByUserId(userId)
+    override fun findByUser(userId: String): Flux<DomainOrder> = orderOutputPort.findByUserId(userId)
 
-    override fun findByCar(carId: String): Flux<DomainOrder> = orderMongoOutputPort.findByCarId(carId)
+    override fun findByCar(carId: String): Flux<DomainOrder> = orderOutputPort.findByCarId(carId)
 
     override fun findByCarAndUser(carId: String, userId: String): Flux<DomainOrder> =
-        orderMongoOutputPort.findByCarIdAndUserId(carId, userId)
+        orderOutputPort.findByCarIdAndUserId(carId, userId)
 
-    override fun patch(id: String, orderRequest: DomainOrderPatch): Mono<DomainOrder> =
-        orderMongoOutputPort.findFullById(id)
+    override fun patch(id: String, patch: PatchOrder): Mono<DomainOrder> =
+        orderOutputPort.findFullById(id)
             .switchIfEmpty { Mono.error(NotFoundException("Order with id $id is not found")) }
             .flatMap { order ->
-                val from = orderRequest.from ?: order.from
-                val to = orderRequest.to ?: order.to
+                val from = patch.from ?: order.from
+                val to = patch.to ?: order.to
                 validateDates(from, to)
-                validateCarAvailability(order.car.id.toString(), from, to).then(orderRequest.toMono())
+                validateCarAvailability(order.car.id, from, to).then(patch.toMono())
             }
-            .flatMap { patch ->
-                orderMongoOutputPort.findById(id)
+            .flatMap { patchOrder ->
+                orderOutputPort.findById(id)
                     .flatMap {
                         Mono.zip(
-                            orderMongoOutputPort.patch(id, it.fromPatch(patch)),
+                            orderOutputPort.patch(id, it.fromPatch(patchOrder)),
                             getCarPrice(it.carId)
                         ).map { (order, carPrice) -> order.copy(price = order.totalPrice(carPrice)) }
                     }
@@ -102,7 +103,7 @@ class OrderService(
 
     override fun findOrderByCarAndDate(carId: String, date: Date): Mono<DomainOrder> =
         Mono.zip(
-            orderMongoOutputPort.findOrderByDateAndCarId(date, carId),
+            orderOutputPort.findOrderByDateAndCarId(date, carId),
             getCarPrice(carId),
         )
             .map { (order, price) -> order.toResponse(price) }
@@ -118,7 +119,7 @@ class OrderService(
     private fun validateCarAvailability(carId: String, from: Date?, to: Date?): Mono<DomainOrder> {
         return carOutputPort.findById(carId)
             .switchIfEmpty { Mono.error(NotFoundException("Car with id $carId is not found")) }
-            .flatMapMany { orderMongoOutputPort.findByCarId(it.id.toString()) }
+            .flatMapMany { orderOutputPort.findByCarId(it.id.toString()) }
             .filter { it.from.before(to) && it.to.after(from) }
             .flatMap<DomainOrder> { Mono.error(IllegalArgumentException("Car is already booked on this time")) }
             .toMono()

@@ -1,7 +1,8 @@
 package com.makarytskyi.rentcar.fixtures
 
 import com.makarytskyi.rentcar.car.domain.DomainCar
-import com.makarytskyi.rentcar.car.domain.patch.DomainCarPatch
+import com.makarytskyi.rentcar.car.domain.create.CreateCar
+import com.makarytskyi.rentcar.car.domain.patch.PatchCar
 import com.makarytskyi.rentcar.car.infrastructure.mongo.entity.MongoCar
 import com.makarytskyi.rentcar.car.infrastructure.mongo.mapper.toMongo
 import com.makarytskyi.rentcar.car.infrastructure.rest.dto.CarResponse
@@ -67,7 +68,7 @@ object CarFixture {
     )
 
     fun responseCar(car: DomainCar) = CarResponse(
-        car.id.toString(),
+        car.id,
         car.brand,
         car.model,
         car.price,
@@ -85,8 +86,16 @@ object CarFixture {
         color = CreateCarRequest.CarColor.entries.random(),
     )
 
-    fun createCarRequest(request: CreateCarRequest) = DomainCar(
-        id = null,
+    fun createCarRequest() = CreateCar(
+        brand = randomBrand(),
+        model = randomModel(),
+        price = randomPrice(),
+        year = randomYear(),
+        plate = randomPlate(),
+        color = DomainCar.CarColor.entries.random(),
+    )
+
+    fun createCarRequest(request: CreateCarRequest) = CreateCar(
         brand = request.brand,
         model = request.model,
         price = request.price,
@@ -100,13 +109,12 @@ object CarFixture {
         color = UpdateCarRequest.CarColor.entries.random(),
     )
 
-    fun updateCarRequest(request: UpdateCarRequest) = DomainCarPatch(
+    fun updateCarRequest(request: UpdateCarRequest) = PatchCar(
         price = request.price,
         color = request.color?.toDomain(),
     )
 
-    fun randomCreateCarRequest() = DomainCar(
-        id = null,
+    fun randomCreateCarRequest() = CreateCar(
         brand = randomBrand(),
         model = randomModel(),
         price = randomPrice(),
@@ -115,24 +123,32 @@ object CarFixture {
         color = randomColor(),
     )
 
-    fun createdCar(car: DomainCar) = car.copy(id = ObjectId().toString())
+    fun createdCar(car: CreateCar): DomainCar = DomainCar(
+        id = ObjectId().toString(),
+        brand = car.brand,
+        model = car.model,
+        price = car.price,
+        year = car.year,
+        plate = car.plate,
+        color = car.color,
+    )
 
-    fun updateCarRequest() = DomainCarPatch(
+    fun updateCarRequest() = PatchCar(
         price = randomPrice(),
         color = randomColor(),
     )
 
-    fun updateDomainCar(patch: DomainCarPatch, oldCar: DomainCar) = oldCar.copy(
+    fun updateDomainCar(patch: PatchCar, oldCar: DomainCar) = oldCar.copy(
         price = patch.price ?: oldCar.price,
         color = patch.color ?: oldCar.color,
     )
 
-    fun emptyCarPatch() = DomainCarPatch(
+    fun emptyCarPatch() = PatchCar(
         price = null,
         color = null,
     )
 
-    fun updatedCar(oldCar: DomainCar, request: DomainCarPatch) =
+    fun updatedCar(oldCar: DomainCar, request: PatchCar) =
         oldCar.copy(
             price = request.price ?: oldCar.price,
             color = request.color ?: oldCar.color,

@@ -1,11 +1,11 @@
 package com.makarytskyi.rentcar.repairing.domain
 
-import com.makarytskyi.rentcar.repairing.domain.patch.DomainRepairingPatch
+import com.makarytskyi.rentcar.repairing.domain.patch.PatchRepairing
 import java.math.BigDecimal
 import java.util.Date
 
 data class DomainRepairing(
-    val id: String? = null,
+    val id: String,
     val carId: String,
     val date: Date,
     val price: BigDecimal,
@@ -15,7 +15,7 @@ data class DomainRepairing(
         PENDING, IN_PROGRESS, COMPLETED
     }
 
-    fun fromPatch(patch: DomainRepairingPatch): DomainRepairing = this.copy(
+    fun fromPatch(patch: PatchRepairing): DomainRepairing = this.copy(
         price = patch.price ?: this.price,
         status = patch.status ?: this.status,
     )

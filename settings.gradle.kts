@@ -10,9 +10,9 @@ include(
     "grpc-api",
     "internal-api"
 )
-include("domainservice:user")
 include("domainservice:car")
-include("domainservice:repairing")
-include("domainservice:order")
 include("domainservice:common")
 include("domainservice:migration")
+include("domainservice:order")
+include("domainservice:repairing")
+include("domainservice:user")

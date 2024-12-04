@@ -4,7 +4,7 @@ import com.makarytskyi.commonmodels.repairing.Repairing
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomRepairing
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
-import com.makarytskyi.rentcar.repairing.domain.patch.DomainRepairingPatch
+import com.makarytskyi.rentcar.repairing.domain.patch.PatchRepairing
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.bson.types.ObjectId
@@ -20,7 +20,7 @@ class RepairingMapperTest {
         // GIVEN
         val repairing = randomRepairing(ObjectId().toString())
 
-        val patch = DomainRepairingPatch(
+        val patch = PatchRepairing(
             price = randomPrice(),
             status = DomainRepairing.RepairingStatus.entries.random(),
         )
@@ -39,7 +39,7 @@ class RepairingMapperTest {
         // GIVEN
         val repairing = randomRepairing(ObjectId().toString())
 
-        val patch = DomainRepairingPatch(
+        val patch = PatchRepairing(
             price = null,
             status = null,
         )

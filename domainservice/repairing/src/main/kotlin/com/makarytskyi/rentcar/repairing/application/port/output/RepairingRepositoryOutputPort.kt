@@ -1,12 +1,13 @@
 package com.makarytskyi.rentcar.repairing.application.port.output
 
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
+import com.makarytskyi.rentcar.repairing.domain.create.CreateRepairing
 import com.makarytskyi.rentcar.repairing.domain.projection.AggregatedDomainRepairing
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-interface RepairingMongoOutputPort {
-    fun create(mongoRepairing: DomainRepairing): Mono<DomainRepairing>
+interface RepairingRepositoryOutputPort {
+    fun create(repairing: CreateRepairing): Mono<DomainRepairing>
 
     fun findFullById(id: String): Mono<AggregatedDomainRepairing>
 

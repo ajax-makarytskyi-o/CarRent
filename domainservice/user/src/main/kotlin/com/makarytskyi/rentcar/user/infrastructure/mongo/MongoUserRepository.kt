@@ -1,7 +1,8 @@
 package com.makarytskyi.rentcar.user.infrastructure.mongo
 
-import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
+import com.makarytskyi.rentcar.user.application.port.output.UserRepositoryOutputPort
 import com.makarytskyi.rentcar.user.domain.DomainUser
+import com.makarytskyi.rentcar.user.domain.create.CreateUser
 import com.makarytskyi.rentcar.user.infrastructure.mongo.entity.MongoUser
 import com.makarytskyi.rentcar.user.infrastructure.mongo.mapper.toDomain
 import com.makarytskyi.rentcar.user.infrastructure.mongo.mapper.toMongo
@@ -19,9 +20,9 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Repository
-internal class MongoUserRepository(private val template: ReactiveMongoTemplate) : UserOutputPort {
+internal class MongoUserRepository(private val template: ReactiveMongoTemplate) : UserRepositoryOutputPort {
 
-    override fun create(user: DomainUser): Mono<DomainUser> {
+    override fun create(user: CreateUser): Mono<DomainUser> {
         return template.insert(user.toMongo()).map { it.toDomain() }
     }
 

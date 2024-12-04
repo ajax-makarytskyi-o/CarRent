@@ -2,10 +2,12 @@ package com.makarytskyi.rentcar.car.infrastructure.redis
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.makarytskyi.rentcar.car.ContainerBase
-import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
+import com.makarytskyi.rentcar.car.application.port.output.CarRepositoryOutputPort
 import com.makarytskyi.rentcar.car.domain.DomainCar
 import com.makarytskyi.rentcar.car.infrastructure.redis.RedisCarRepository.Companion.idRedisKey
 import com.makarytskyi.rentcar.car.infrastructure.redis.RedisCarRepository.Companion.plateRedisKey
+import com.makarytskyi.rentcar.fixtures.CarFixture.createCarRequest
+import com.makarytskyi.rentcar.fixtures.CarFixture.createdCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
 import com.makarytskyi.rentcar.fixtures.CarFixture.updateCarRequest
 import com.makarytskyi.rentcar.fixtures.CarFixture.updateDomainCar
@@ -21,14 +23,14 @@ import reactor.kotlin.test.test
 
 internal class RedisCarRepositoryTest : ContainerBase {
     @Autowired
-    lateinit var redisCarRepository: CarOutputPort
+    lateinit var redisCarRepository: CarRepositoryOutputPort
 
     @Autowired
     lateinit var redisTemplate: ReactiveRedisTemplate<String, ByteArray>
 
     @Autowired
     @Qualifier("mongoCarRepository")
-    lateinit var mongoCarRepository: CarOutputPort
+    lateinit var mongoCarRepository: CarRepositoryOutputPort
 
     @Autowired
     lateinit var mapper: ObjectMapper
@@ -36,8 +38,8 @@ internal class RedisCarRepositoryTest : ContainerBase {
     @Test
     fun `redis repository should cache the car after calling getById`() {
         // GIVEN
-        val car = mongoCarRepository.create(randomCar()).block()!!
-        val carId = car.id.toString()
+        val car = mongoCarRepository.create(createCarRequest()).block()!!
+        val carId = car.id
         val redisKey = idRedisKey(carId)
 
         // WHEN
@@ -66,7 +68,7 @@ internal class RedisCarRepositoryTest : ContainerBase {
     fun `redis repository should return car by id from cache if car is in redis`() {
         // GIVEN
         val car = randomCar()
-        val carId = car.id.toString()
+        val carId = car.id
         val redisKey = idRedisKey(carId)
         redisTemplate.opsForValue()
             .set(redisKey, mapper.writeValueAsBytes(car), Duration.ofSeconds(TTL_SECONDS)).block()
@@ -94,7 +96,7 @@ internal class RedisCarRepositoryTest : ContainerBase {
     fun `redis repository should cache empty byte array by id if it doesn't exist`() {
         // GIVEN
         val car = randomCar()
-        val carId = car.id.toString()
+        val carId = car.id
         val redisKey = idRedisKey(carId)
 
         // WHEN
@@ -121,17 +123,18 @@ internal class RedisCarRepositoryTest : ContainerBase {
     @Test
     fun `create should cache car by its id and plate`() {
         // GIVEN
-        val car = randomCar()
+        val request = createCarRequest()
+        val car = createdCar(request)
         val plateKey = plateRedisKey(car.plate)
 
         // WHEN
-        val createdCar = redisCarRepository.create(car).block()!!
+        val createdCar = redisCarRepository.create(request).block()!!
 
         // THEN
         await()
             .atMost(Duration.ofSeconds(AWAIT_SECONDS))
             .untilAsserted {
-                redisTemplate.hasKey(idRedisKey(createdCar.id.toString()))
+                redisTemplate.hasKey(idRedisKey(createdCar.id))
                     .test()
                     .expectNext(true)
                     .verifyComplete()
@@ -142,10 +145,12 @@ internal class RedisCarRepositoryTest : ContainerBase {
             .expectNext(true)
             .verifyComplete()
 
-        redisTemplate.opsForValue().get(idRedisKey(createdCar.id.toString()))
+        redisTemplate.opsForValue().get(idRedisKey(createdCar.id))
             .map { mapper.readValue(it, DomainCar::class.java) }
             .test()
-            .expectNext(car)
+            .assertNext {
+                assertEquals(car.copy(id = it.id), it)
+            }
             .verifyComplete()
 
     }
@@ -153,11 +158,11 @@ internal class RedisCarRepositoryTest : ContainerBase {
     @Test
     fun `delete should remove car from redis`() {
         // GIVEN
-        val car = redisCarRepository.create(randomCar()).block()!!
-        val redisKey = idRedisKey(car.id.toString())
+        val car = redisCarRepository.create(createCarRequest()).block()!!
+        val redisKey = idRedisKey(car.id)
 
         // WHEN
-        redisCarRepository.deleteById(car.id.toString()).block()
+        redisCarRepository.deleteById(car.id).block()
 
         // THEN
         await()
@@ -173,13 +178,13 @@ internal class RedisCarRepositoryTest : ContainerBase {
     @Test
     fun `patch should replace cached car`() {
         // GIVEN
-        val car = redisCarRepository.create(randomCar()).block()!!
+        val car = redisCarRepository.create(createCarRequest()).block()!!
         val patch = updateDomainCar(updateCarRequest(), car)
-        val idKey = idRedisKey(car.id.toString())
+        val idKey = idRedisKey(car.id)
         val plateKey = plateRedisKey(car.plate)
 
         // WHEN
-        val updatedCar = redisCarRepository.patch(car.id.toString(), patch).block()!!
+        val updatedCar = redisCarRepository.patch(car.id, patch).block()!!
 
         // THEN
         await()
@@ -202,7 +207,7 @@ internal class RedisCarRepositoryTest : ContainerBase {
     @Test
     fun `redis repository should cache the car after calling findByPlate`() {
         // GIVEN
-        val car = mongoCarRepository.create(randomCar()).block()!!
+        val car = mongoCarRepository.create(createCarRequest()).block()!!
         val plate = car.plate
         val plateKey = plateRedisKey(plate)
 

@@ -1,16 +1,17 @@
 package com.makarytskyi.rentcar.user.infrastructure.mongo
 
+import com.makarytskyi.rentcar.fixtures.UserFixture.createdUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.domainUserPatch
+import com.makarytskyi.rentcar.fixtures.UserFixture.domainUserRequest
 import com.makarytskyi.rentcar.fixtures.UserFixture.emptyUserPatch
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomCity
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomEmail
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomName
 import com.makarytskyi.rentcar.fixtures.UserFixture.randomPhoneNumber
-import com.makarytskyi.rentcar.fixtures.UserFixture.randomUser
 import com.makarytskyi.rentcar.fixtures.Utils.defaultSize
 import com.makarytskyi.rentcar.fixtures.Utils.firstPage
 import com.makarytskyi.rentcar.user.ContainerBase
-import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
+import com.makarytskyi.rentcar.user.application.port.output.UserRepositoryOutputPort
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,12 +23,13 @@ import reactor.kotlin.test.test
 internal class UserRepositoryTest : ContainerBase {
 
     @Autowired
-    lateinit var userRepository: UserOutputPort
+    lateinit var userRepository: UserRepositoryOutputPort
 
     @Test
     fun `create should insert user and return it with id`() {
         // GIVEN
-        val unexistingUser = randomUser()
+        val unexistingUser = domainUserRequest()
+        val expected = createdUser(unexistingUser)
 
         // WHEN
         val user = userRepository.create(unexistingUser)
@@ -37,7 +39,7 @@ internal class UserRepositoryTest : ContainerBase {
             .test()
             .assertNext {
                 assertNotNull(it.id, "User should have non-null id after saving")
-                assertEquals(unexistingUser.copy(id = it.id), it)
+                assertEquals(expected.copy(id = it.id), it)
             }
             .verifyComplete()
     }
@@ -45,8 +47,8 @@ internal class UserRepositoryTest : ContainerBase {
     @Test
     fun `findAll should find all users`() {
         // GIVEN
-        val insertedUser1 = userRepository.create(randomUser()).block()
-        val insertedUser2 = userRepository.create(randomUser()).block()
+        val insertedUser1 = userRepository.create(domainUserRequest()).block()
+        val insertedUser2 = userRepository.create(domainUserRequest()).block()
 
         // WHEN
         val allUsers = userRepository.findAll(firstPage, defaultSize)
@@ -67,7 +69,7 @@ internal class UserRepositoryTest : ContainerBase {
         val phoneNumber = randomPhoneNumber()
         val city = randomCity()
 
-        val user = userRepository.create(randomUser()).block()!!
+        val user = userRepository.create(domainUserRequest()).block()!!
 
         val updateUser = emptyUserPatch().copy(
             name = name,
@@ -78,7 +80,7 @@ internal class UserRepositoryTest : ContainerBase {
         val domainUpdate = domainUserPatch(updateUser, user)
 
         // WHEN
-        val updated = userRepository.patch(user.id.toString(), domainUpdate)
+        val updated = userRepository.patch(user.id, domainUpdate)
 
         // THEN
         updated
@@ -95,7 +97,7 @@ internal class UserRepositoryTest : ContainerBase {
     fun `findByPhoneNumber should return user found by phone number`() {
         // GIVEN
         val phoneNumber = randomPhoneNumber()
-        val user = userRepository.create(randomUser().copy(phoneNumber = phoneNumber)).block()!!
+        val user = userRepository.create(domainUserRequest().copy(phoneNumber = phoneNumber)).block()!!
 
         // WHEN
         val foundUser = userRepository.findByPhoneNumber(phoneNumber)
@@ -125,7 +127,7 @@ internal class UserRepositoryTest : ContainerBase {
     fun `findByEmail should return user found by email`() {
         // GIVEN
         val email = randomEmail()
-        val user = userRepository.create(randomUser().copy(email = email)).block()!!
+        val user = userRepository.create(domainUserRequest().copy(email = email)).block()!!
 
         // WHEN
         val foundUser = userRepository.findByEmail(email)
@@ -154,10 +156,10 @@ internal class UserRepositoryTest : ContainerBase {
     @Test
     fun `findById should return user if found by id`() {
         // GIVEN
-        val user = userRepository.create(randomUser()).block()!!
+        val user = userRepository.create(domainUserRequest()).block()!!
 
         // WHEN
-        val foundUser = userRepository.findById(user.id.toString())
+        val foundUser = userRepository.findById(user.id)
 
         // THEN
         foundUser
@@ -183,13 +185,13 @@ internal class UserRepositoryTest : ContainerBase {
     @Test
     fun `deleteById should delete user by id`() {
         // GIVEN
-        val user = userRepository.create(randomUser()).block()!!
+        val user = userRepository.create(domainUserRequest()).block()!!
 
         // WHEN
-        userRepository.deleteById(user.id.toString()).block()
+        userRepository.deleteById(user.id).block()
 
         // THEN
-        userRepository.findById(user.id.toString())
+        userRepository.findById(user.id)
             .test()
             .verifyComplete()
     }

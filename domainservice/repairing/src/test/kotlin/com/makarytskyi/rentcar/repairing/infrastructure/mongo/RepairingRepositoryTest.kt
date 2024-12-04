@@ -1,14 +1,15 @@
 package com.makarytskyi.rentcar.repairing.infrastructure.mongo
 
-import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
-import com.makarytskyi.rentcar.fixtures.CarFixture.randomCar
+import com.makarytskyi.rentcar.car.application.port.output.CarRepositoryOutputPort
+import com.makarytskyi.rentcar.fixtures.CarFixture.createCarRequest
 import com.makarytskyi.rentcar.fixtures.CarFixture.randomPrice
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.aggregatedRepairing
+import com.makarytskyi.rentcar.fixtures.RepairingFixture.createRepairingRequest
+import com.makarytskyi.rentcar.fixtures.RepairingFixture.createdRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.emptyRepairingPatch
-import com.makarytskyi.rentcar.fixtures.RepairingFixture.randomRepairing
 import com.makarytskyi.rentcar.fixtures.RepairingFixture.updateDomainRepairing
 import com.makarytskyi.rentcar.repairing.ContainerBase
-import com.makarytskyi.rentcar.repairing.application.port.output.RepairingMongoOutputPort
+import com.makarytskyi.rentcar.repairing.application.port.output.RepairingRepositoryOutputPort
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
 import com.makarytskyi.rentcar.repairing.infrastructure.mongo.entity.MongoRepairing
 import com.makarytskyi.rentcar.repairing.infrastructure.mongo.mapper.toDomain
@@ -23,16 +24,17 @@ import reactor.kotlin.test.test
 internal class RepairingRepositoryTest : ContainerBase {
 
     @Autowired
-    lateinit var repairingRepository: RepairingMongoOutputPort
+    lateinit var repairingRepository: RepairingRepositoryOutputPort
 
     @Autowired
-    lateinit var carRepository: CarOutputPort
+    lateinit var carRepository: CarRepositoryOutputPort
 
     @Test
     fun `create should insert repairing and return it with id`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()!!
-        val repairing = randomRepairing(car.id).copy(id = null)
+        val car = carRepository.create(createCarRequest()).block()!!
+        val repairing = createRepairingRequest(car.id)
+        val expected = createdRepairing(repairing)
 
         // WHEN
         val createdRepairing = repairingRepository.create(repairing)
@@ -42,7 +44,7 @@ internal class RepairingRepositoryTest : ContainerBase {
             .test()
             .assertNext {
                 assertNotNull(it.id, "Repairing should have non-null id after saving")
-                assertEquals(repairing.copy(id = it.id), it)
+                assertEquals(expected.copy(id = it.id), it)
             }
             .verifyComplete()
     }
@@ -50,12 +52,12 @@ internal class RepairingRepositoryTest : ContainerBase {
     @Test
     fun `findAll should find all repairings`() {
         // GIVEN
-        val car1 = carRepository.create(randomCar()).block()!!
-        val repairing1 = repairingRepository.create(randomRepairing(car1.id)).block()!!
+        val car1 = carRepository.create(createCarRequest()).block()!!
+        val repairing1 = repairingRepository.create(createRepairingRequest(car1.id)).block()!!
         val fullRepairing1 = aggregatedRepairing(repairing1, car1)
 
-        val car2 = carRepository.create(randomCar()).block()!!
-        val repairing2 = repairingRepository.create(randomRepairing(car2.id)).block()!!
+        val car2 = carRepository.create(createCarRequest()).block()!!
+        val repairing2 = repairingRepository.create(createRepairingRequest(car2.id)).block()!!
         val fullRepairing2 = aggregatedRepairing(repairing2, car2)
 
         // WHEN
@@ -75,8 +77,8 @@ internal class RepairingRepositoryTest : ContainerBase {
         // GIVEN
         val price = randomPrice()
         val status = DomainRepairing.RepairingStatus.COMPLETED
-        val car = carRepository.create(randomCar()).block()!!
-        val repairing = repairingRepository.create(randomRepairing(car.id)).block()!!
+        val car = carRepository.create(createCarRequest()).block()!!
+        val repairing = repairingRepository.create(createRepairingRequest(car.id)).block()!!
 
         val updateRepairing = emptyRepairingPatch().copy(
             price = price,
@@ -86,7 +88,7 @@ internal class RepairingRepositoryTest : ContainerBase {
         val domainUpdate = updateDomainRepairing(updateRepairing, repairing)
 
         // WHEN
-        val updated = repairingRepository.patch(repairing.id.toString(), domainUpdate)
+        val updated = repairingRepository.patch(repairing.id, domainUpdate)
 
         // THEN
         updated
@@ -102,11 +104,12 @@ internal class RepairingRepositoryTest : ContainerBase {
     fun `findByStatusAndCarId should return repairings found by status and carId`() {
         // GIVEN
         val status = MongoRepairing.RepairingStatus.COMPLETED
-        val car = carRepository.create(randomCar()).block()!!
-        val repairing = repairingRepository.create(randomRepairing(car.id).copy(status = status.toDomain())).block()
+        val car = carRepository.create(createCarRequest()).block()!!
+        val repairing =
+            repairingRepository.create(createRepairingRequest(car.id).copy(status = status.toDomain())).block()
 
         // WHEN
-        val foundRepairings = repairingRepository.findByStatusAndCarId(status.toDomain(), car.id.toString())
+        val foundRepairings = repairingRepository.findByStatusAndCarId(status.toDomain(), car.id)
 
         // THEN
         foundRepairings.collectList()
@@ -120,14 +123,14 @@ internal class RepairingRepositoryTest : ContainerBase {
     @Test
     fun `deleteById should delete repairing by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()!!
-        val repairing = repairingRepository.create(randomRepairing(car.id)).block()!!
+        val car = carRepository.create(createCarRequest()).block()!!
+        val repairing = repairingRepository.create(createRepairingRequest(car.id)).block()!!
 
         // WHEN
-        repairingRepository.deleteById(repairing.id.toString()).block()
+        repairingRepository.deleteById(repairing.id).block()
 
         // THEN
-        repairingRepository.findFullById(repairing.id.toString())
+        repairingRepository.findFullById(repairing.id)
             .test()
             .verifyComplete()
     }
@@ -135,12 +138,12 @@ internal class RepairingRepositoryTest : ContainerBase {
     @Test
     fun `findById should return existing repairing by id`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()!!
-        val repairing = repairingRepository.create(randomRepairing(car.id)).block()!!
+        val car = carRepository.create(createCarRequest()).block()!!
+        val repairing = repairingRepository.create(createRepairingRequest(car.id)).block()!!
         val fullRepairing = aggregatedRepairing(repairing, car)
 
         // WHEN
-        val foundRepairing = repairingRepository.findFullById(repairing.id.toString())
+        val foundRepairing = repairingRepository.findFullById(repairing.id)
 
         // THEN
         foundRepairing
@@ -167,8 +170,9 @@ internal class RepairingRepositoryTest : ContainerBase {
     fun `findByStatus should return repairings found by status`() {
         // GIVEN
         val status = MongoRepairing.RepairingStatus.IN_PROGRESS
-        val car = carRepository.create(randomCar()).block()!!
-        val repairing = repairingRepository.create(randomRepairing(car.id).copy(status = status.toDomain())).block()
+        val car = carRepository.create(createCarRequest()).block()!!
+        val repairing =
+            repairingRepository.create(createRepairingRequest(car.id).copy(status = status.toDomain())).block()
 
         // WHEN
         val repairings = repairingRepository.findByStatus(status.toDomain())
@@ -185,11 +189,11 @@ internal class RepairingRepositoryTest : ContainerBase {
     @Test
     fun `findByCarId should return repairings found by carId`() {
         // GIVEN
-        val car = carRepository.create(randomCar()).block()!!
-        val repairing = repairingRepository.create(randomRepairing(car.id)).block()
+        val car = carRepository.create(createCarRequest()).block()!!
+        val repairing = repairingRepository.create(createRepairingRequest(car.id)).block()
 
         // WHEN
-        val repairings = repairingRepository.findByCarId(car.id.toString())
+        val repairings = repairingRepository.findByCarId(car.id)
 
         // THEN
         repairings.collectList()

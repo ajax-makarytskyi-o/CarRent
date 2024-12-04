@@ -1,6 +1,6 @@
 package com.makarytskyi.rentcar.repairing.infrastructure.rest
 
-import com.makarytskyi.rentcar.repairing.application.port.input.RepairingInputPort
+import com.makarytskyi.rentcar.repairing.application.port.input.RepairingServiceInputPort
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.dto.AggregatedRepairingResponse
 import com.makarytskyi.rentcar.repairing.infrastructure.rest.dto.CreateRepairingRequest
@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/repairings")
-internal class RepairingController(private val repairingInputPort: RepairingInputPort) {
+internal class RepairingController(private val repairingInputPort: RepairingServiceInputPort) {
 
     @GetMapping()
     fun findFullAll(

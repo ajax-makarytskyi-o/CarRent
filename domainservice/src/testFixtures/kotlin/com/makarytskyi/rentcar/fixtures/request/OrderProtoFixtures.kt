@@ -14,16 +14,18 @@ import com.makarytskyi.rentcar.car.domain.DomainCar
 import com.makarytskyi.rentcar.common.util.Utils.dateToTimestamp
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
+import com.makarytskyi.rentcar.fixtures.OrderFixture.weekAfter
+import com.makarytskyi.rentcar.fixtures.OrderFixture.weekAndDayAfter
 import com.makarytskyi.rentcar.order.domain.DomainOrder
 import com.makarytskyi.rentcar.user.domain.DomainUser
 
 object OrderProtoFixtures {
-    fun createOrderRequest(car: DomainCar, user: DomainUser): CreateOrderRequest =
+    fun createOrderRequestProto(car: DomainCar, user: DomainUser): CreateOrderRequest =
         CreateOrderRequest.newBuilder()
             .apply {
                 with(orderBuilder) {
-                    carId = car.id.toString()
-                    userId = user.id.toString()
+                    carId = car.id
+                    userId = user.id
                     from = dateToTimestamp(monthAfter)
                     to = dateToTimestamp(monthAndDayAfter)
                 }
@@ -86,8 +88,8 @@ object OrderProtoFixtures {
         UpdateOrderRequest.newBuilder()
             .apply {
                 setId(id)
-                updateBuilder.setStartDate(dateToTimestamp(monthAfter))
-                updateBuilder.setEndDate(dateToTimestamp(monthAndDayAfter))
+                updateBuilder.setStartDate(dateToTimestamp(weekAfter))
+                updateBuilder.setEndDate(dateToTimestamp(weekAndDayAfter))
             }
             .build()
 

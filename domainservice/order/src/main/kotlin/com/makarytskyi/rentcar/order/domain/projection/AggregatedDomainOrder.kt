@@ -6,7 +6,7 @@ import java.math.BigDecimal
 import java.util.Date
 
 data class AggregatedDomainOrder(
-    val id: String?,
+    val id: String,
     val car: DomainCar,
     val user: DomainUser,
     val from: Date,

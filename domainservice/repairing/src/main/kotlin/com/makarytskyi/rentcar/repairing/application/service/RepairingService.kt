@@ -2,15 +2,16 @@ package com.makarytskyi.rentcar.repairing.application.service
 
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.internalapi.topic.KafkaTopic
-import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
+import com.makarytskyi.rentcar.car.application.port.output.CarRepositoryOutputPort
 import com.makarytskyi.rentcar.car.domain.DomainCar
 import com.makarytskyi.rentcar.common.annotation.InvocationTracker
 import com.makarytskyi.rentcar.repairing.application.mapper.toProto
-import com.makarytskyi.rentcar.repairing.application.port.input.RepairingInputPort
+import com.makarytskyi.rentcar.repairing.application.port.input.RepairingServiceInputPort
 import com.makarytskyi.rentcar.repairing.application.port.output.CreateRepairingProducerOutputPort
-import com.makarytskyi.rentcar.repairing.application.port.output.RepairingMongoOutputPort
+import com.makarytskyi.rentcar.repairing.application.port.output.RepairingRepositoryOutputPort
 import com.makarytskyi.rentcar.repairing.domain.DomainRepairing
-import com.makarytskyi.rentcar.repairing.domain.patch.DomainRepairingPatch
+import com.makarytskyi.rentcar.repairing.domain.create.CreateRepairing
+import com.makarytskyi.rentcar.repairing.domain.patch.PatchRepairing
 import com.makarytskyi.rentcar.repairing.domain.projection.AggregatedDomainRepairing
 import java.util.Date
 import org.slf4j.LoggerFactory
@@ -23,19 +24,19 @@ import reactor.kotlin.core.publisher.toMono
 @InvocationTracker
 @Service
 class RepairingService(
-    private val repairingMongoOutputPort: RepairingMongoOutputPort,
-    private val carOutputPort: CarOutputPort,
+    private val repairingOutputPort: RepairingRepositoryOutputPort,
+    private val carOutputPort: CarRepositoryOutputPort,
     private val createRepairingProducerOutputPort: CreateRepairingProducerOutputPort,
-) : RepairingInputPort {
+) : RepairingServiceInputPort {
 
     override fun findFullAll(page: Int, size: Int): Flux<AggregatedDomainRepairing> =
-        repairingMongoOutputPort.findFullAll(page, size)
+        repairingOutputPort.findFullAll(page, size)
 
-    override fun create(repairingRequest: DomainRepairing): Mono<DomainRepairing> =
-        repairingRequest.toMono()
+    override fun create(repairing: CreateRepairing): Mono<DomainRepairing> =
+        repairing.toMono()
             .doOnNext { validateDate(it.date) }
-            .flatMap { validateCarExists(repairingRequest.carId) }
-            .flatMap { repairingMongoOutputPort.create(repairingRequest) }
+            .flatMap { validateCarExists(repairing.carId) }
+            .flatMap { repairingOutputPort.create(repairing) }
             .doOnNext {
                 createRepairingProducerOutputPort.sendCreateRepairing(it.toProto())
                     .doOnError { error ->
@@ -48,24 +49,24 @@ class RepairingService(
                     .subscribe()
             }
 
-    override fun getFullById(id: String): Mono<AggregatedDomainRepairing> = repairingMongoOutputPort.findFullById(id)
+    override fun getFullById(id: String): Mono<AggregatedDomainRepairing> = repairingOutputPort.findFullById(id)
         .switchIfEmpty { Mono.error(NotFoundException("Repairing with id $id is not found")) }
 
-    override fun deleteById(id: String): Mono<Unit> = repairingMongoOutputPort.deleteById(id)
+    override fun deleteById(id: String): Mono<Unit> = repairingOutputPort.deleteById(id)
 
-    override fun patch(id: String, repairingRequest: DomainRepairingPatch): Mono<DomainRepairing> =
-        repairingMongoOutputPort.findById(id)
-            .flatMap { repairingMongoOutputPort.patch(id, it.fromPatch(repairingRequest)) }
+    override fun patch(id: String, patch: PatchRepairing): Mono<DomainRepairing> =
+        repairingOutputPort.findById(id)
+            .flatMap { repairingOutputPort.patch(id, it.fromPatch(patch)) }
             .switchIfEmpty { Mono.error(NotFoundException("Repairing with id $id is not found")) }
 
     override fun findByStatus(status: DomainRepairing.RepairingStatus): Flux<DomainRepairing> =
-        repairingMongoOutputPort.findByStatus(status)
+        repairingOutputPort.findByStatus(status)
 
     override fun findByCarId(carId: String): Flux<DomainRepairing> =
-        repairingMongoOutputPort.findByCarId(carId)
+        repairingOutputPort.findByCarId(carId)
 
     override fun findByStatusAndCar(status: DomainRepairing.RepairingStatus, carId: String): Flux<DomainRepairing> =
-        repairingMongoOutputPort.findByStatusAndCarId(status, carId)
+        repairingOutputPort.findByStatusAndCarId(status, carId)
 
     private fun validateCarExists(carId: String): Mono<DomainCar> = carOutputPort.findById(carId)
         .switchIfEmpty { Mono.error(NotFoundException("Car in repairing with id $carId is not found")) }

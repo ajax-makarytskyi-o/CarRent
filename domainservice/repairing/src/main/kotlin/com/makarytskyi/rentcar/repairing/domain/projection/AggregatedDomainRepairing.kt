@@ -6,7 +6,7 @@ import java.math.BigDecimal
 import java.util.Date
 
 data class AggregatedDomainRepairing(
-    val id: String?,
+    val id: String,
     val car: DomainCar,
     val date: Date,
     val price: BigDecimal,

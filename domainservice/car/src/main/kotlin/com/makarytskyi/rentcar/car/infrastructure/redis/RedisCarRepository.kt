@@ -1,8 +1,9 @@
 package com.makarytskyi.rentcar.car.infrastructure.redis
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.makarytskyi.rentcar.car.application.port.output.CarOutputPort
+import com.makarytskyi.rentcar.car.application.port.output.CarRepositoryOutputPort
 import com.makarytskyi.rentcar.car.domain.DomainCar
+import com.makarytskyi.rentcar.car.domain.create.CreateCar
 import com.makarytskyi.rentcar.common.config.RedisProperties
 import io.lettuce.core.RedisException
 import java.net.SocketException
@@ -21,12 +22,11 @@ import reactor.util.retry.Retry
 @Repository
 @Primary
 class RedisCarRepository(
-    @Qualifier("mongoCarRepository")
-    private val mongoCarRepository: CarOutputPort,
+    private val mongoCarRepository: CarRepositoryOutputPort,
     private val reactiveRedisTemplate: ReactiveRedisTemplate<String, ByteArray>,
     private val mapper: ObjectMapper,
     private val redisProperties: RedisProperties,
-) : CarOutputPort by mongoCarRepository {
+) : CarRepositoryOutputPort by mongoCarRepository {
 
     override fun findById(id: String): Mono<DomainCar> =
         reactiveRedisTemplate.opsForValue().get(idRedisKey(id))
@@ -36,11 +36,11 @@ class RedisCarRepository(
                 findByIdInMongoAndCache(id)
             }
 
-    override fun create(car: DomainCar): Mono<DomainCar> =
+    override fun create(car: CreateCar): Mono<DomainCar> =
         mongoCarRepository.create(car)
             .doOnNext { createdCar ->
                 setRedisKey(
-                    idRedisKey(createdCar.id.toString()),
+                    idRedisKey(createdCar.id),
                     mapper.writeValueAsBytes(createdCar),
                     redisProperties.ttlSeconds
                 )
@@ -65,7 +65,7 @@ class RedisCarRepository(
         findById(id)
             .flatMap { mongoCarRepository.patch(id, patch) }
             .doOnNext { car ->
-                setRedisKey(idRedisKey(car.id.toString()), mapper.writeValueAsBytes(car), redisProperties.ttlSeconds)
+                setRedisKey(idRedisKey(car.id), mapper.writeValueAsBytes(car), redisProperties.ttlSeconds)
                 setRedisKey(
                     plateRedisKey(car.plate),
                     mapper.writeValueAsBytes(car),

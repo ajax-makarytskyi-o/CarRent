@@ -9,7 +9,7 @@ import com.makarytskyi.rentcar.fixtures.UserFixture.responseUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.updateUserRequest
 import com.makarytskyi.rentcar.fixtures.UserFixture.updatedUser
 import com.makarytskyi.rentcar.fixtures.UserFixture.userPatch
-import com.makarytskyi.rentcar.user.application.port.output.UserOutputPort
+import com.makarytskyi.rentcar.user.application.port.output.UserRepositoryOutputPort
 import com.makarytskyi.rentcar.user.infrastructure.rest.mapper.toResponse
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -32,7 +32,7 @@ import reactor.kotlin.test.verifyError
 internal class UserServiceTest {
 
     @MockK
-    lateinit var userRepository: UserOutputPort
+    lateinit var userRepository: UserRepositoryOutputPort
 
     @InjectMockKs
     lateinit var userService: UserService

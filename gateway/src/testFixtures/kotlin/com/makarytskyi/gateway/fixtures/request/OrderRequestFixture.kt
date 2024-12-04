@@ -3,7 +3,7 @@ package com.makarytskyi.gateway.fixtures.request
 import com.makarytskyi.core.dto.order.CreateOrderRequestDto
 import com.makarytskyi.core.dto.order.UpdateOrderRequestDto
 import com.makarytskyi.gateway.fixtures.Utils.getDateFromNow
-import com.makarytskyi.gateway.util.Util.dateToTimestamp
+import com.makarytskyi.gateway.infrastructure.util.Util.dateToTimestamp
 import com.makarytskyi.grpcapi.input.reqreply.order.CreateOrderRequest
 import org.bson.types.ObjectId
 

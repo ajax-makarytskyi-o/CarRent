@@ -7,8 +7,9 @@ server:
     contextPath: /api/v1
 
 nats:
-  url: ${NATS_URL}
-  timeout: 2
+  spring:
+    io.nats.client:
+      servers: "nats://localhost:4222"
 
 grpc:
   server:

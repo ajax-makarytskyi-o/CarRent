@@ -51,6 +51,22 @@ services:
     profiles:
       - dev
 
+  mongo-test:
+    image: mongo:7.0.12
+    restart: always
+    container_name: test_mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: test
+      MONGO_INITDB_ROOT_PASSWORD: test
+      MONGO_INITDB_DATABASE: test
+    ports:
+      - "27018:27017"
+    volumes:
+      - test_mongo_data:/data/db
+      - test_mongo_config:/data/configdb
+    profiles:
+      - test
+
   mongo-express:
     image: mongo-express:1.0.2
     container_name: express
@@ -125,6 +141,8 @@ services:
 volumes:
   mongo_data:
   mongo_config:
+  test_mongo_data:
+  test_mongo_config:
   kafka-data:
   redis-insight-data:
   redis-data:

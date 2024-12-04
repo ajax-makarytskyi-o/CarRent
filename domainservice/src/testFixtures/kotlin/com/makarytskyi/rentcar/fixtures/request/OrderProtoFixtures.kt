@@ -1,7 +1,6 @@
 package com.makarytskyi.rentcar.fixtures.request
 
 import com.makarytskyi.commonmodels.error.Error
-import com.makarytskyi.core.dto.order.OrderResponseDto
 import com.makarytskyi.core.exception.NotFoundException
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.CreateOrderResponse
@@ -11,34 +10,37 @@ import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.GetByIdOrderResponse
 import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderRequest
 import com.makarytskyi.internalapi.input.reqreply.order.UpdateOrderResponse
+import com.makarytskyi.rentcar.car.domain.DomainCar
+import com.makarytskyi.rentcar.common.util.Utils.dateToTimestamp
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAfter
 import com.makarytskyi.rentcar.fixtures.OrderFixture.monthAndDayAfter
-import com.makarytskyi.rentcar.model.MongoCar
-import com.makarytskyi.rentcar.model.MongoUser
-import com.makarytskyi.rentcar.util.Utils.dateToTimestamp
+import com.makarytskyi.rentcar.fixtures.OrderFixture.weekAfter
+import com.makarytskyi.rentcar.fixtures.OrderFixture.weekAndDayAfter
+import com.makarytskyi.rentcar.order.domain.DomainOrder
+import com.makarytskyi.rentcar.user.domain.DomainUser
 
 object OrderProtoFixtures {
-    fun createOrderRequest(mongoCar: MongoCar, mongoUser: MongoUser): CreateOrderRequest =
+    fun createOrderRequestProto(car: DomainCar, user: DomainUser): CreateOrderRequest =
         CreateOrderRequest.newBuilder()
             .apply {
                 with(orderBuilder) {
-                    carId = mongoCar.id.toString()
-                    userId = mongoUser.id.toString()
+                    carId = car.id
+                    userId = user.id
                     from = dateToTimestamp(monthAfter)
                     to = dateToTimestamp(monthAndDayAfter)
                 }
             }
             .build()
 
-    fun successfulCreateResponse(response: CreateOrderRequest, price: Double): CreateOrderResponse = CreateOrderResponse
+    fun successfulCreateResponse(request: CreateOrderRequest, price: Double): CreateOrderResponse = CreateOrderResponse
         .newBuilder()
         .apply {
             with(successBuilder.orderBuilder) {
-                setId(response.order.id)
-                setCarId(response.order.carId)
-                setUserId(response.order.userId)
-                setFrom(response.order.from)
-                setTo(response.order.to)
+                setId(request.order.id)
+                setCarId(request.order.carId)
+                setUserId(request.order.userId)
+                setFrom(request.order.from)
+                setTo(request.order.to)
                 setPrice(price)
             }
         }
@@ -56,16 +58,16 @@ object OrderProtoFixtures {
         }
         .build()
 
-    fun successfulPatchResponse(response: OrderResponseDto): UpdateOrderResponse = UpdateOrderResponse
+    fun successfulPatchResponse(order: DomainOrder): UpdateOrderResponse = UpdateOrderResponse
         .newBuilder()
         .apply {
             with(successBuilder.orderBuilder) {
-                setId(response.id)
-                setCarId(response.carId)
-                setUserId(response.userId)
-                setFrom(dateToTimestamp(response.from))
-                setTo(dateToTimestamp(response.to))
-                setPrice(response.price.toDouble())
+                setId(order.id)
+                setCarId(order.carId)
+                setUserId(order.userId)
+                setFrom(dateToTimestamp(order.from))
+                setTo(dateToTimestamp(order.to))
+                setPrice(order.price!!.toDouble())
             }
         }
         .build()
@@ -86,8 +88,8 @@ object OrderProtoFixtures {
         UpdateOrderRequest.newBuilder()
             .apply {
                 setId(id)
-                updateBuilder.setStartDate(dateToTimestamp(monthAfter))
-                updateBuilder.setEndDate(dateToTimestamp(monthAndDayAfter))
+                updateBuilder.setStartDate(dateToTimestamp(weekAfter))
+                updateBuilder.setEndDate(dateToTimestamp(weekAndDayAfter))
             }
             .build()
 
